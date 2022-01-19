@@ -5,6 +5,7 @@ import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 
 interface IAccount {
     function deactivate() external;
+    function initialize(address accountManagerAddr) external;
     function ownerAddr() external view returns (address);
     function sweepTo(address toAddress) external;
     function addAsset(address tokenAddr) external;
