@@ -12,9 +12,8 @@ contract AccountFactory {
         implementation = _implementation;
     }
 
-    function create(address accountManagerAddr) public returns (address) {
-        address account = Clones.clone(implementation);
+    function create(address accountManagerAddr) public returns (address account) {
+        account = Clones.clone(implementation);
         IAccount(account).initialize(accountManagerAddr);
-        return account;
     }
-} 
+}
