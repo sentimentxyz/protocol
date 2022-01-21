@@ -59,7 +59,7 @@ contract AccountManager {
     function openAccount(address ownerAddr) public {
         address accountAddr;
         if(inactiveAccounts.length == 0) {
-            accountAddr = IAccountFactory(accountFactoryAddr).openAccount(address(this));
+            accountAddr = IAccountFactory(accountFactoryAddr).create(address(this));
         } else {
             accountAddr = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();

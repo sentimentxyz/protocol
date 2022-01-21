@@ -18,13 +18,14 @@ contract Account {
     address public ownerAddr;
     address public accountManagerAddr;
 
-    constructor(address _accountManagerAddr) {
-        accountManagerAddr = _accountManagerAddr;
-    }
-
     modifier accountManagerOnly() {
         require(accountManagerAddr == msg.sender, "Account/accountManagerOnly");
         _;
+    }
+
+    function initialize(address _accountManagerAddr) public {
+        require(accountManagerAddr == address(0), "Account/AlreadyInitialized");
+        accountManagerAddr = _accountManagerAddr;
     }
 
     function activateFor(address _ownerAddr) public accountManagerOnly {

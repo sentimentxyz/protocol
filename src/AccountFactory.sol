@@ -1,10 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Account.sol";
+import '@openzeppelin/contracts/proxy/Clones.sol';
+import "./interface/IAccount.sol";
 
 contract AccountFactory {
-    function openAccount(address accountManagerAddr) public returns (address) {
-        return address(new Account(accountManagerAddr));
+
+    address public implementation;
+
+    constructor (address _implementation) {
+        implementation = _implementation;
+    }
+
+    function create(address accountManagerAddr) public returns (address account) {
+        account = Clones.clone(implementation);
+        IAccount(account).initialize(accountManagerAddr);
     }
 }
