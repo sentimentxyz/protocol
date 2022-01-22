@@ -207,22 +207,6 @@ contract AccountManager {
         //     "AccMgr/execute: Liquidatable");
     }
 
-    function wrap(address accountAddr, uint amt) public onlyOwner(accountAddr) {
-        IAccount account = IAccount(accountAddr);
-        account.withdrawEth(address(this), amt);
-        account.addAsset(WETH9);
-        IWETH(WETH9).deposit{value: amt}();
-        IERC20(WETH9).safeTransfer(accountAddr, amt);
-    }
-
-    function unwrap(address accountAddr, uint amt) public onlyOwner(accountAddr) {
-        IAccount account = IAccount(accountAddr);
-        account.withdraw(address(this), WETH9, amt);
-        IWETH(WETH9).withdraw(amt);
-        accountAddr.safeTransferETH(amt);
-        account.removeAsset(WETH9);
-    }
-
     function settle(address accountAddr) public onlyOwner(accountAddr) {
         address[] memory borrows = IAccount(accountAddr).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
