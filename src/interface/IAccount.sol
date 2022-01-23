@@ -19,11 +19,8 @@ interface IAccount {
     function borrows() external view returns (address[] memory);
     function getAssets() external view returns (address[] memory);
     function getBorrows() external view returns (address[] memory);
-    function exec(address target, bytes memory data) external returns (bool);
-    function swap(ISwapRouter.ExactInputSingleParams memory params) external;
+    function exec(address target, uint amt, bytes memory data) external returns (bool);
     function withdraw(address toAddr, address tokenAddr, uint value) external;
     function repay(address LTokenAddr, address tokenAddr, uint value) external;
     function approve(address tokenAddr, address spenderAddr, uint value) external;
-    function execPayable(address target, uint amt, bytes memory data) external returns (bool);
-    function execComp(address cTokenAddr, address underlying, uint amt, bool isDeposit) external;
 }

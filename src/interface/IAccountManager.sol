@@ -9,6 +9,6 @@ interface IAccountManager {
     function borrow(address accountAddr, address tokenAddr, uint value) external;
     function deposit(address accountAddr, address tokenAddr, uint value) external;
     function withdraw(address accountAddr, address tokenAddr, uint value) external;
-    function execute(address accountAddr, address targetAddr, bytes memory data) external;
+    function exec(address accountAddr, address targetAddr, bytes memory data) external;
     function approve(address accountAddr, address tokenAddr, address spenderAddr, uint value) external;
 }

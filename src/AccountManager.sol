@@ -156,55 +156,26 @@ contract AccountManager {
         IAccount(accountAddr).approve(tokenAddr, spenderAddr, value);
     }
 
-    // function execute(
-    //     address accountAddr, 
-    //     address targetAddr,
-    //     bytes4 sig,
-    //     bytes calldata data
-    // ) public onlyOwner(accountAddr) {
-    //     bool isAllowed;
-    //     address[] memory tokensIn;
-    //     address[] memory tokensOut;
+    function exec(
+        address accountAddr, 
+        address targetAddr,
+        uint amt,
+        bytes4 sig,
+        bytes calldata data
+    ) public onlyOwner(accountAddr) {
+        bool isAllowed;
+        address[] memory tokensIn;
+        address[] memory tokensOut;
         
-    //     address controllerAddr = controllerAddrFor[targetAddr];
-    //     require(controllerAddr != address(0), "AccMgr/execute: NoController");
-    //     (isAllowed, tokensIn, tokensOut) = 
-    //         IController(controllerAddr).canCall(targetAddr, sig, data);
-    //     require(isAllowed, "AccMgr/execute: RestrictedCall");
-    //     IAccount(accountAddr).execute(targetAddr, bytes.concat(sig, data));
-    //     _updateTokens(accountAddr, tokensIn, tokensOut);
-    //     require(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr), 
-    //         "AccMgr/execute: Liquidatable");
-    // }
-
-    function swap(
-        address accountAddr,
-        ISwapRouter.ExactInputSingleParams memory params
-    ) public onlyOwner(accountAddr) {
-        require(isCollateralAllowed[params.tokenOut], "AccMgr/swap: RestrictedSwap");
-        IAccount account = IAccount(accountAddr);
-        account.addAsset(params.tokenOut);
-        account.swap(params);
-        account.removeAsset(params.tokenIn);
-        // require(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr), 
-        //     "AccMgr/execute: Liquidatable");
-    }
-
-    function execComp(
-        address accountAddr,
-        address cTokenAddr, 
-        address underlying, 
-        uint amt, 
-        bool isDeposit
-    ) public onlyOwner(accountAddr) {
-        IAccount account = IAccount(accountAddr);
-        if(isDeposit) account.addAsset(cTokenAddr);
-        else account.addAsset(underlying);
-        account.execComp(cTokenAddr, underlying, amt, isDeposit);
-        if(isDeposit) account.removeAsset(underlying);
-        else account.removeAsset(cTokenAddr);
-        // require(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr), 
-        //     "AccMgr/execute: Liquidatable");
+        address controllerAddr = controllerAddrFor[targetAddr];
+        require(controllerAddr != address(0), "AccMgr/execute: NoController");
+        (isAllowed, tokensIn, tokensOut) = 
+            IController(controllerAddr).canCall(targetAddr, sig, data);
+        require(isAllowed, "AccMgr/execute: RestrictedCall");
+        IAccount(accountAddr).exec(targetAddr, amt, bytes.concat(sig, data));
+        _updateTokens(accountAddr, tokensIn, tokensOut);
+        require(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr), 
+            "AccMgr/execute: Liquidatable");
     }
 
     function settle(address accountAddr) public onlyOwner(accountAddr) {
