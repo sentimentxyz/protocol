@@ -20,7 +20,6 @@ contract AccountManager {
     address public riskEngineAddr;
     address public userRegistryAddr;
     address public accountFactoryAddr;
-    address public constant WETH9 = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
     
     address[] public inactiveAccounts;
     
@@ -123,7 +122,7 @@ contract AccountManager {
         require(LTokenAddressFor[tokenAddr] != address(0), "AccMgr/borrow: Restricted");
         require(IRiskEngine(riskEngineAddr).isBorrowAllowed(accountAddr, tokenAddr, value),
             "AccMgr/borrow: Risky");
-        IAccount(accountAddr).addAsset(tokenAddr);
+        if(tokenAddr != address(0)) IAccount(accountAddr).addAsset(tokenAddr);
         if(ILToken(LTokenAddressFor[tokenAddr]).lendTo(accountAddr, value))
             IAccount(accountAddr).addBorrow(tokenAddr);
         emit Borrow(accountAddr, msg.sender, tokenAddr, value);
@@ -220,7 +219,10 @@ contract AccountManager {
     function _repay(address accountAddr, address tokenAddr, uint value) internal {
         ILToken LToken = ILToken(LTokenAddressFor[tokenAddr]);
         if(value == type(uint).max) value = LToken.currentBorrowBalance(accountAddr);
-        IAccount(accountAddr).repay(address(LToken), tokenAddr, value);
+
+        if(tokenAddr == address(0)) IAccount(accountAddr).withdrawEth(address(LToken), value);
+        else IAccount(accountAddr).repay(address(LToken), tokenAddr, value);
+        
         if(LToken.collectFrom(accountAddr, value)) IAccount(accountAddr).removeBorrow(tokenAddr);
         IAccount(accountAddr).removeAsset(tokenAddr);
     }

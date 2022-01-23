@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "./LToken.sol";
-import "./interface/IWETH.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LEther is LToken {
@@ -35,16 +34,37 @@ contract LEther is LToken {
     // Lender Functions
     function deposit() public payable {
         _updateState();
-        IWETH(underlyingAddr).deposit{value: msg.value}();
         _mint(msg.sender, msg.value.div(exchangeRate));
     }
 
     function withdraw(uint value) public {
         _updateState();
-        IWETH(underlyingAddr).withdraw(value);
         payable(msg.sender).transfer(value);
         _burn(msg.sender, value.div(exchangeRate));
     }
 
+    // Account Manager Functions
+    function lendTo(address accountAddr, uint value) public returns (bool) {
+        require(msg.sender == accountManagerAddr, "LToken/lendTo: AccountManagerOnly");
+        // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
+        if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
+        bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
+        payable(accountAddr).transfer(value);
+        totalBorrows += value;
+        borrowBalanceFor[accountAddr].principal += value;
+        borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
+        return isFirstBorrow;
+    }
+
+    function collectFrom(address accountAddr, uint value) public returns (bool) {
+        require(msg.sender == accountManagerAddr, "LToken/collectFrom: AccountManagerOnly");
+        // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
+        if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
+        totalBorrows -= value;
+        borrowBalanceFor[accountAddr].principal -= value;
+        borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
+        return (borrowBalanceFor[accountAddr].principal == 0);
+    }
+    
     receive() external payable {}
 }
