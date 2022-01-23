@@ -2,9 +2,7 @@
 pragma solidity ^0.8.0;
 
 import "./interface/IERC20.sol";
-import "./interface/ICToken.sol";
 import "./dependencies/SafeERC20.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
@@ -81,20 +79,11 @@ contract Account {
         return borrows.length == 0;
     }
 
-    // function exec(address target, bytes memory data) public accountManagerOnly returns (bool) {
-    //     (bool success, ) = target.call(data);
-    //     return success;
-    // }
-
-    // function execPayable(
-    //     address target,
-    //     uint amt,
-    //     bytes memory data
-    // ) public payable accountManagerOnly returns (bool) 
-    // {
-    //     (bool success, ) = target.call{value: amt}(data);
-    //     return success;
-    // }
+    function exec(address target, uint amt, bytes memory data) 
+        public payable accountManagerOnly returns (bool) {
+        (bool success, ) = target.call{value: amt}(data);
+        return success;
+    }
 
     function sweepTo(address toAddress) public accountManagerOnly {
         for(uint i = 0; i < assets.length; ++i) {
@@ -104,26 +93,6 @@ contract Account {
             );
         }
         toAddress.safeTransferETH(address(this).balance);
-    }
-
-    function swap(ISwapRouter.ExactInputSingleParams memory params) public accountManagerOnly {
-        ISwapRouter(0xE592427A0AEce92De3Edee1F18E0157C05861564).exactInputSingle(params);
-    }
-
-    function execComp(
-        address cTokenAddr, 
-        address underlying, 
-        uint amt, 
-        bool isDeposit
-    ) public accountManagerOnly {
-        if(underlying == 0xd0A1E359811322d97991E03f863a0C30C2cF029C) {
-            if(isDeposit) ICEther(cTokenAddr).mint{value: amt}();
-            else ICEther(cTokenAddr).redeemUnderlying(amt);
-        }
-        else {
-            if(isDeposit) ICERC20(cTokenAddr).mint(amt);
-            else ICERC20(cTokenAddr).redeemUnderlying(amt);
-        }
     }
 
     receive() external payable {}
