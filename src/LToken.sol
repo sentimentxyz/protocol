@@ -71,6 +71,10 @@ abstract contract LToken {
     }
 
     // Utility Functions
+    function updateState() external {
+        _updateState();
+    }
+    
     function currentBorrowBalance(address accountAddr) public returns (uint) {
         if(_borrowBalance(accountAddr) == 0) return 0;
         _updateState();
