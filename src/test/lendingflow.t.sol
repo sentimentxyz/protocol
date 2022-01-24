@@ -36,4 +36,24 @@ contract LendingFlowTest is Test {
         assertEq(token.balanceOf(address(ltoken)), 0);
         assertEq(ltoken.balanceOf(user1), 0);
     }
+
+    function testDepositEth() public {
+        cheatCode.deal(user1, 100);
+        cheatCode.startPrank(user1);
+        lEther.deposit{value: 10}();
+        assertEq(address(lEther).balance, 10);
+        assertEq(lEther.balanceOf(user1), 10);
+        assertEq(user1.balance, 90);
+    }
+
+    function testWithdrawEth() public {
+        address user3 = cheatCode.addr(10);
+        cheatCode.deal(user3, 10);
+        cheatCode.startPrank(user3);
+        lEther.deposit{value: 10}();
+        lEther.withdraw(10);
+        assertEq(user3.balance, 10);
+        assertEq(address(lEther).balance, 0);
+        assertEq(lEther.balanceOf(user3), 0);
+    }
 }

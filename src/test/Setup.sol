@@ -4,11 +4,11 @@ pragma solidity ^0.8.0;
 import "@ds-test/src/test.sol";
 import { ERC20PresetFixedSupply } from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
-import "./mocks/Token.sol";
-import "./mocks/Oracle.sol";
+import "./mocks/oracle.sol";
 import "./Cheatcode.sol";
 
 import "../LERC20.sol";
+import "../LEther.sol";
 import "../DefaultRateModel.sol";
 import "../interface/IERC20.sol";
 import "../AccountManager.sol";
@@ -24,6 +24,7 @@ contract Test is DSTest {
     CheatCode cheatCode = CheatCode(HEVM_ADDRESS);
 
     LERC20 public ltoken;
+    LEther public lEther;
     ERC20PresetFixedSupply public token;
 
     DefaultRateModel public rateModel;
@@ -50,6 +51,8 @@ contract Test is DSTest {
         
         rateModel = new DefaultRateModel();        
         ltoken = new LERC20("sentiment", "STM", 1, address(token), address(rateModel), address(accountManager), 1);
+
+        lEther = new LEther("Ether", "ETH", 1, address(0), address(rateModel), address(accountManager), 1);
 
         cheatCode.stopPrank();
     }
