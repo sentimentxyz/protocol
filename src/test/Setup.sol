@@ -21,7 +21,7 @@ contract Test is DSTest {
     address public creator;
     address public user1;
 
-    ICheatCode cheatCode = ICheatCode(HEVM_ADDRESS);
+    CheatCode cheatCode = CheatCode(HEVM_ADDRESS);
 
     LERC20 public ltoken;
     ERC20PresetFixedSupply public token;
