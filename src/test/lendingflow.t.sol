@@ -2,7 +2,6 @@
 pragma solidity ^0.8.0;
 
 import "@ds-test/src/test.sol";
-import { ERC20PresetFixedSupply } from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
 import "./Cheatcode.sol";
 
@@ -10,8 +9,20 @@ import "./Setup.sol";
 
 contract LendingFlowTest is Test {
 
+    address public user1;
+    address public creator;
+
+    function setUp() public {
+        user1 = cheatCode.addr(2);
+        creator = cheatCode.addr(1);
+        cheatCode.startPrank(creator);
+        basicSetup();
+        token.mint(user1, 100);
+        cheatCode.stopPrank();
+    }
+
     function testLtokenCreation() public {
-        string memory name = "sentiment";
+        string memory name = "LSentiment";
 
         assertEq(keccak256(abi.encodePacked((ltoken.name()))), keccak256(abi.encodePacked((name))));
         assertEq(token.balanceOf(user1), 100);
