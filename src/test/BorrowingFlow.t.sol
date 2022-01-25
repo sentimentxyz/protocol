@@ -56,4 +56,50 @@ contract BorrowingFlowTest is Test {
         assertEq(token.balanceOf(marginAccount), 10);
         assertEq(token.balanceOf(user), 90);
     }
+
+    function testBorrowEth() public {
+        address user = cheatCode.addr(2);
+        accountManager.openAccount(user);
+        
+        cheatCode.deal(user, 100);
+        token.mint(user, 100);
+        
+        address[] memory accounts = userRegistry.getMarginAccounts(user);
+        address marginAccount = accounts[0];
+        
+        cheatCode.startPrank(user);
+        
+        accountManager.depositEth{value: 10}(marginAccount);
+        
+        token.approve(address(accountManager), type(uint).max);
+        accountManager.deposit(marginAccount, address(token), 10);
+        
+        accountManager.borrow(marginAccount, address(0), 50);
+        
+        assertEq(token.balanceOf(marginAccount), 10);
+        assertEq(marginAccount.balance, 60);
+        assertEq(address(lEther).balance, 949);
+    }
+
+    function testBorrow() public {
+        address user = cheatCode.addr(2);
+        accountManager.openAccount(user);
+        
+        cheatCode.deal(user, 100);
+        token.mint(user, 100);
+        
+        address[] memory accounts = userRegistry.getMarginAccounts(user);
+        address marginAccount = accounts[0];
+        
+        cheatCode.startPrank(user);
+        
+        accountManager.depositEth{value: 10}(marginAccount);
+        
+        token.approve(address(accountManager), type(uint).max);
+        accountManager.deposit(marginAccount, address(token), 10);
+
+        accountManager.borrow(marginAccount, address(token), 50);
+
+        assertEq(token.balanceOf(marginAccount), 60);
+    }
 }
