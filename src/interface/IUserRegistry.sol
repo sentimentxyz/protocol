@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.10;
 
 interface IUserRegistry {
     function getMarginAccounts(address owner) external returns (address[] memory);
