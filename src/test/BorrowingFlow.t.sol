@@ -50,8 +50,10 @@ contract BorrowingFlowTest is Test {
         assertEq(marginAccount.balance, 10);
         assertEq(user.balance, 90);
 
-        token.approve(marginAccount, type(uint).max);
+        token.approve(address(accountManager), type(uint).max);
         accountManager.deposit(marginAccount, address(token), 10);
 
+        assertEq(token.balanceOf(marginAccount), 10);
+        assertEq(token.balanceOf(user), 90);
     }
 }
