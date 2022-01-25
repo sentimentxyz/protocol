@@ -8,23 +8,17 @@ import "./Cheatcode.sol";
 import "./Setup.sol";
 
 contract LendingFlowTest is Test {
-
-    address public user1;
-    address public creator;
+    
+    address user1 = cheatCode.addr(1);
 
     function setUp() public {
         user1 = cheatCode.addr(2);
-        creator = cheatCode.addr(1);
-        cheatCode.startPrank(creator);
         basicSetup();
         token.mint(user1, 100);
-        cheatCode.stopPrank();
     }
 
     function testLtokenCreation() public {
-        string memory name = "LSentiment";
-
-        assertEq(keccak256(abi.encodePacked((ltoken.name()))), keccak256(abi.encodePacked((name))));
+        assertEq(ltoken.name(), "LSentiment");
         assertEq(token.balanceOf(user1), 100);
         assertEq(ltoken.underlyingAddr(), address(token));
     }
@@ -58,13 +52,13 @@ contract LendingFlowTest is Test {
     }
 
     function testWithdrawEth() public {
-        address user3 = cheatCode.addr(10);
-        cheatCode.deal(user3, 10);
-        cheatCode.startPrank(user3);
+        address user2 = cheatCode.addr(10);
+        cheatCode.deal(user2, 10);
+        cheatCode.startPrank(user2);
         lEther.deposit{value: 10}();
         lEther.withdraw(10);
-        assertEq(user3.balance, 10);
+        assertEq(user2.balance, 10);
         assertEq(address(lEther).balance, 0);
-        assertEq(lEther.balanceOf(user3), 0);
+        assertEq(lEther.balanceOf(user2), 0);
     }
 }
