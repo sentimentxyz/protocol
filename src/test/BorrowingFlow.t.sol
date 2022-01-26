@@ -98,8 +98,30 @@ contract BorrowingFlowTest is Test {
         token.approve(address(accountManager), type(uint).max);
         accountManager.deposit(marginAccount, address(token), 10);
 
-        accountManager.borrow(marginAccount, address(token), 50);
+        accountManager.borrow(marginAccount, address(token), 49);
+        accountManager.borrow(marginAccount, address(0), 50);
 
-        assertEq(token.balanceOf(marginAccount), 60);
+        assertEq(token.balanceOf(marginAccount), 59);
+        assertEq(marginAccount.balance, 60);
+    }
+
+    function testFailBorrow() public {
+        address user = cheatCode.addr(2);
+        accountManager.openAccount(user);
+        
+        cheatCode.deal(user, 100);
+        token.mint(user, 100);
+        
+        address[] memory accounts = userRegistry.getMarginAccounts(user);
+        address marginAccount = accounts[0];
+        
+        cheatCode.startPrank(user);
+        
+        accountManager.depositEth{value: 10}(marginAccount);
+        
+        token.approve(address(accountManager), type(uint).max);
+        accountManager.deposit(marginAccount, address(token), 10);
+
+        accountManager.borrow(marginAccount, address(token), 100);
     }
 }
