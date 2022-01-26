@@ -12,7 +12,6 @@ contract LendingFlowTest is Test {
     address user1 = cheatCode.addr(1);
 
     function setUp() public {
-        user1 = cheatCode.addr(2);
         basicSetup();
         token.mint(user1, 100);
     }

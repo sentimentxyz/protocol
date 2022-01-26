@@ -23,12 +23,12 @@ contract UserRegistry {
     }
 
     modifier adminOnly() {
-        require(msg.sender == admin);
+        require(msg.sender == admin, "Registry/AdminOnly");
         _;
     }
 
     modifier accountManagerOnly() {
-        require(msg.sender == accountManager);
+        require(msg.sender == accountManager, "Registry/AccountManagerOnly");
         _;
     }
 
