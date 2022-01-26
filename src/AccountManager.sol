@@ -218,13 +218,14 @@ contract AccountManager {
     // Internal Functions
     function _repay(address accountAddr, address tokenAddr, uint value) internal {
         ILToken LToken = ILToken(LTokenAddressFor[tokenAddr]);
+        bool isEth = tokenAddr == address(0);
         if(value == type(uint).max) value = LToken.currentBorrowBalance(accountAddr);
 
-        if(tokenAddr == address(0)) IAccount(accountAddr).withdrawEth(address(LToken), value);
+        if(isEth) IAccount(accountAddr).withdrawEth(address(LToken), value);
         else IAccount(accountAddr).repay(address(LToken), tokenAddr, value);
         
-        if(LToken.collectFrom(accountAddr, value)) IAccount(accountAddr).removeBorrow(tokenAddr);
-        IAccount(accountAddr).removeAsset(tokenAddr);
+        if(LToken.collectFrom(accountAddr, value) && !isEth) IAccount(accountAddr).removeBorrow(tokenAddr);
+        if (!isEth) IAccount(accountAddr).removeAsset(tokenAddr);
     }
 
     function _updateTokens(address accountAddr, address[] memory tokensIn, address[] memory tokensOut) internal {

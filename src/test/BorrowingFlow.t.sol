@@ -124,4 +124,84 @@ contract BorrowingFlowTest is Test {
 
         accountManager.borrow(marginAccount, address(token), 100);
     }
+
+    function testRepay() public {
+        address user = cheatCode.addr(2);
+        accountManager.openAccount(user);
+        
+        cheatCode.deal(user, 100);
+        token.mint(user, 100);
+        
+        address[] memory accounts = userRegistry.getMarginAccounts(user);
+        address marginAccount = accounts[0];
+        
+        cheatCode.startPrank(user);
+        
+        accountManager.depositEth{value: 10}(marginAccount);
+        
+        token.approve(address(accountManager), type(uint).max);
+        accountManager.deposit(marginAccount, address(token), 10);
+
+        accountManager.borrow(marginAccount, address(token), 49);
+        accountManager.borrow(marginAccount, address(0), 50);
+
+        accountManager.repay(marginAccount, address(token), 49);
+        accountManager.repay(marginAccount, address(0), 50);
+
+        assertEq(token.balanceOf(marginAccount), 10);
+        assertEq(marginAccount.balance, 10);
+    }
+
+    function testWithdraw() public {
+        address user = cheatCode.addr(2);
+        accountManager.openAccount(user);
+        
+        cheatCode.deal(user, 100);
+        token.mint(user, 100);
+        
+        address[] memory accounts = userRegistry.getMarginAccounts(user);
+        address marginAccount = accounts[0];
+        
+        cheatCode.startPrank(user);
+        
+        accountManager.depositEth{value: 10}(marginAccount);
+        
+        token.approve(address(accountManager), type(uint).max);
+        accountManager.deposit(marginAccount, address(token), 10);
+
+        accountManager.borrow(marginAccount, address(token), 49);
+        accountManager.borrow(marginAccount, address(0), 50);
+
+        accountManager.repay(marginAccount, address(token), 49);
+        accountManager.repay(marginAccount, address(0), 50);
+
+        accountManager.withdraw(marginAccount, address(token), 10);
+        accountManager.withdrawEth(marginAccount, 10);
+
+        assertEq(user.balance, 100);
+        assertEq(token.balanceOf(user), 100);
+    }
+
+    function testFailWithdraw() public {
+        address user = cheatCode.addr(2);
+        accountManager.openAccount(user);
+        
+        cheatCode.deal(user, 100);
+        token.mint(user, 100);
+        
+        address[] memory accounts = userRegistry.getMarginAccounts(user);
+        address marginAccount = accounts[0];
+        
+        cheatCode.startPrank(user);
+        
+        accountManager.depositEth{value: 10}(marginAccount);
+        
+        token.approve(address(accountManager), type(uint).max);
+        accountManager.deposit(marginAccount, address(token), 10);
+
+        accountManager.borrow(marginAccount, address(token), 49);
+        accountManager.borrow(marginAccount, address(0), 50);
+
+        accountManager.withdraw(marginAccount, address(token), 10);
+    }
 }
