@@ -79,7 +79,8 @@ contract AccountManager {
     }
 
     function depositEth(address accountAddr) external payable onlyOwner(accountAddr) {
-        accountAddr.safeTransferETH(msg.value);
+        (bool success, ) = accountAddr.call{value: msg.value}("");
+        require(success, "AccMgr/depositEth: Transfer failed");
     }
 
     function withdrawEth(address accountAddr, uint value) public onlyOwner(accountAddr) {
