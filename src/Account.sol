@@ -40,7 +40,8 @@ contract Account {
     }
 
     function withdrawEth(address toAddr, uint value) public accountManagerOnly {
-        toAddr.safeTransferETH(value);
+        (bool success, ) = toAddr.call{value: value}("");
+        require(success, "Account/withdrawEth: Transfer failed");
     }
 
     function repay(address LTokenAddr, address tokenAddr, uint value) public accountManagerOnly {
@@ -92,7 +93,8 @@ contract Account {
                 IERC20(assets[i]).balanceOf(address(this))
             );
         }
-        toAddress.safeTransferETH(address(this).balance);
+        (bool success, ) = toAddress.call{value: address(this).balance}("");
+        require(success, "Account/sweepTo: Transfer failed");
     }
 
     receive() external payable {}

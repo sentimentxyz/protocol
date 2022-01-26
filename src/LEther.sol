@@ -39,7 +39,8 @@ contract LEther is LToken {
 
     function withdraw(uint value) public {
         _updateState();
-        payable(msg.sender).transfer(value);
+        (bool success, ) = msg.sender.call{value: value}("");
+        require(success, "LEther/withdraw: Transfer failed");
         _burn(msg.sender, value.div(exchangeRate));
     }
 
@@ -49,7 +50,8 @@ contract LEther is LToken {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
-        payable(accountAddr).transfer(value);
+        (bool success, ) = accountAddr.call{value: value}("");
+        require(success, "LEther/lendTo: Transfer failed");
         totalBorrows += value;
         borrowBalanceFor[accountAddr].principal += value;
         borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
