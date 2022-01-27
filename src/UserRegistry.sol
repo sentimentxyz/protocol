@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import "./Errors.sol";
 
-contract UserRegistry is Errors {
+contract UserRegistry {
 
     address public admin;
     address public accountManager;
@@ -25,12 +25,12 @@ contract UserRegistry is Errors {
     }
 
     modifier adminOnly() {
-        if(msg.sender != admin) revert AdminOnly();
+        if(msg.sender != admin) revert Errors.AdminOnly();
         _;
     }
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManager) revert AccountManagerOnly();
+        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
     }
 
@@ -45,7 +45,7 @@ contract UserRegistry is Errors {
     }
 
     function getMarginAccounts(address _owner) public view returns (address[] memory) {
-        if(ownerUserMapping[_owner].owner == address(0)) revert AccountNotFound();
+        if(ownerUserMapping[_owner].owner == address(0)) revert Errors.AccountNotFound();
         return ownerUserMapping[_owner].marginAccounts;
     }
 
@@ -60,7 +60,7 @@ contract UserRegistry is Errors {
     }
 
     function removeMarginAccount(address _owner, address _marginAccount) public accountManagerOnly {
-        if(ownerUserMapping[_owner].owner == address(0)) revert AccountNotFound();
+        if(ownerUserMapping[_owner].owner == address(0)) revert Errors.AccountNotFound();
         address[] storage accounts = ownerUserMapping[_owner].marginAccounts;
         for(uint i=0; i < accounts.length; i++) {
             if (accounts[i] == _marginAccount) {

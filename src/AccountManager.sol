@@ -13,7 +13,7 @@ import "./interface/IUserRegistry.sol";
 import "./interface/IAccountFactory.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
-contract AccountManager is Errors {
+contract AccountManager {
     using SafeERC20 for IERC20;
     using SafeERC20 for address;
 
@@ -47,12 +47,12 @@ contract AccountManager is Errors {
     }
 
     modifier onlyOwner(address accountAddr) {
-        if(IAccount(accountAddr).ownerAddr() != msg.sender) revert AccountOwnerOnly();
+        if(IAccount(accountAddr).ownerAddr() != msg.sender) revert Errors.AccountOwnerOnly();
         _;
     }
 
     modifier onlyAdmin() {
-        if(adminAddr != msg.sender) revert AdminOnly();
+        if(adminAddr != msg.sender) revert Errors.AdminOnly();
         _;
     }
 
@@ -70,7 +70,7 @@ contract AccountManager is Errors {
     }
 
     function closeAccount(address accountAddr) public onlyOwner(accountAddr) {
-        if(!IAccount(accountAddr).hasNoDebt()) revert PendingDebt();
+        if(!IAccount(accountAddr).hasNoDebt()) revert Errors.PendingDebt();
         IAccount account = IAccount(accountAddr);
         account.sweepTo(msg.sender);
         account.deactivate();
@@ -81,7 +81,7 @@ contract AccountManager is Errors {
 
     function depositEth(address accountAddr) external payable onlyOwner(accountAddr) {
         (bool success, ) = accountAddr.call{value: msg.value}("");
-        if(!success) revert ETHTransferFailure();
+        if(!success) revert Errors.ETHTransferFailure();
     }
 
     function withdrawEth(address accountAddr, uint value) public onlyOwner(accountAddr) {
@@ -95,7 +95,7 @@ contract AccountManager is Errors {
     ) 
         public onlyOwner(accountAddr) 
     {
-        if(!isCollateralAllowed[tokenAddr]) revert CollateralTypeRestricted();
+        if(!isCollateralAllowed[tokenAddr]) revert Errors.CollateralTypeRestricted();
         IAccount(accountAddr).addAsset(tokenAddr);
         IERC20(tokenAddr).safeTransferFrom(msg.sender, accountAddr, value);
     }
@@ -123,9 +123,9 @@ contract AccountManager is Errors {
     ) 
         public onlyOwner(accountAddr)
     { 
-        if(LTokenAddressFor[tokenAddr] == address(0)) revert LTokenUnavailable();
+        if(LTokenAddressFor[tokenAddr] == address(0)) revert Errors.LTokenUnavailable();
         if(!IRiskEngine(riskEngineAddr).isBorrowAllowed(accountAddr, tokenAddr, value)) 
-            revert RiskThresholdBreached();
+            revert Errors.RiskThresholdBreached();
         if(tokenAddr != address(0)) IAccount(accountAddr).addAsset(tokenAddr);
         if(ILToken(LTokenAddressFor[tokenAddr]).lendTo(accountAddr, value))
             IAccount(accountAddr).addBorrow(tokenAddr);
@@ -139,13 +139,13 @@ contract AccountManager is Errors {
     ) 
         public onlyOwner(accountAddr) 
     {
-        if(LTokenAddressFor[tokenAddr] == address(0)) revert LTokenUnavailable();
+        if(LTokenAddressFor[tokenAddr] == address(0)) revert Errors.LTokenUnavailable();
         _repay(accountAddr, tokenAddr, value);
         emit Repay(accountAddr, msg.sender, tokenAddr, value);
     }
 
     function liquidate(address accountAddr) public {
-        if(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert AccountNotLiquidatable();
+        if(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert Errors.AccountNotLiquidatable();
         _liquidate(accountAddr);
         emit AccountLiquidated(accountAddr, IAccount(accountAddr).ownerAddr());
     }
@@ -171,13 +171,13 @@ contract AccountManager is Errors {
         address[] memory tokensOut;
         
         address controllerAddr = controllerAddrFor[targetAddr];
-        if(controllerAddr == address(0)) revert ControllerUnavailable();
+        if(controllerAddr == address(0)) revert Errors.ControllerUnavailable();
         (isAllowed, tokensIn, tokensOut) = 
             IController(controllerAddr).canCall(targetAddr, sig, data);
-        if(!isAllowed) revert FunctionCallRestricted();
+        if(!isAllowed) revert Errors.FunctionCallRestricted();
         IAccount(accountAddr).exec(targetAddr, amt, bytes.concat(sig, data));
         _updateTokens(accountAddr, tokensIn, tokensOut);
-        if(IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert RiskThresholdBreached();
+        if(IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert Errors.RiskThresholdBreached();
     }
 
     function settle(address accountAddr) public onlyOwner(accountAddr) {

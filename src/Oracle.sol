@@ -7,7 +7,7 @@ import "@prb-math/contracts/PRBMathUD60x18.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 
-contract Oracle is Errors {
+contract Oracle {
     using PRBMathUD60x18 for uint;
 
     address public constant DAI = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
@@ -38,20 +38,20 @@ contract Oracle is Errors {
 
     /// @dev We assume that the response has 18 decimals
     function _getPrice(address tokenAddr) internal view returns (uint) {
-        if(priceFeedAddr[tokenAddr] == address(0)) revert PriceFeedUnavailable();
+        if(priceFeedAddr[tokenAddr] == address(0)) revert Errors.PriceFeedUnavailable();
         (, int price, , ,) = AggregatorV3Interface(priceFeedAddr[tokenAddr]).latestRoundData();
         return uint(price);
     }
 
     // AdminOnly
     function setFeedAddress(address tokenAddr, address feedAddr) public {
-        if(msg.sender != admin) revert AdminOnly();
+        if(msg.sender != admin) revert Errors.AdminOnly();
         priceFeedAddr[tokenAddr] = feedAddr;
         emit UpdateFeedAddress(tokenAddr, feedAddr);
     }
 
     function setAdmin(address newAdmin) public {
-        if(msg.sender != admin) revert AdminOnly();
+        if(msg.sender != admin) revert Errors.AdminOnly();
         admin = newAdmin;
         emit UpdateAdmin(newAdmin);
     }

@@ -7,7 +7,7 @@ import "./dependencies/SafeERC20.sol";
 
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
-contract Account is Errors {
+contract Account {
     using SafeERC20 for IERC20;
     using SafeERC20 for address;
 
@@ -18,12 +18,12 @@ contract Account is Errors {
     address public accountManagerAddr;
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManagerAddr) revert AccountManagerOnly();
+        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
         _;
     }
 
     function initialize(address _accountManagerAddr) public {
-        if(accountManagerAddr != address(0)) revert AccountAlreadyInitialized();
+        if(accountManagerAddr != address(0)) revert Errors.AccountAlreadyInitialized();
         accountManagerAddr = _accountManagerAddr;
     }
 
@@ -42,7 +42,7 @@ contract Account is Errors {
 
     function withdrawEth(address toAddr, uint value) public accountManagerOnly {
         (bool success, ) = toAddr.call{value: value}("");
-        if(!success) revert ETHTransferFailure();
+        if(!success) revert Errors.ETHTransferFailure();
     }
 
     function repay(address LTokenAddr, address tokenAddr, uint value) public accountManagerOnly {
@@ -95,7 +95,7 @@ contract Account is Errors {
             );
         }
         (bool success, ) = toAddress.call{value: address(this).balance}("");
-        if(!success) revert ETHTransferFailure();
+        if(!success) revert Errors.ETHTransferFailure();
     }
 
     receive() external payable {}

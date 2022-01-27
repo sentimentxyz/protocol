@@ -9,7 +9,7 @@ import "./interface/IAccount.sol";
 import "./interface/IAccountManager.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
-contract RiskEngine is Errors {
+contract RiskEngine {
     using PRBMathUD60x18 for uint;
 
     address public admin;
@@ -64,7 +64,7 @@ contract RiskEngine is Errors {
     }
 
     function setAccountManagerAddr(address _accountManagerAddr) public {
-        if(msg.sender != admin) revert AdminOnly();
+        if(msg.sender != admin) revert Errors.AdminOnly();
         accountManagerAddr = _accountManagerAddr;
         emit UpdateAccountManagerAddress(accountManagerAddr);
     }
