@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Errors.sol";
 import "./interface/IERC20.sol";
 import "./dependencies/SafeERC20.sol";
 
@@ -17,12 +18,12 @@ contract Account {
     address public accountManagerAddr;
 
     modifier accountManagerOnly() {
-        require(accountManagerAddr == msg.sender, "Account/accountManagerOnly");
+        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
         _;
     }
 
     function initialize(address _accountManagerAddr) public {
-        require(accountManagerAddr == address(0), "Account/AlreadyInitialized");
+        if(accountManagerAddr != address(0)) revert Errors.AccountAlreadyInitialized();
         accountManagerAddr = _accountManagerAddr;
     }
 
@@ -41,7 +42,7 @@ contract Account {
 
     function withdrawEth(address toAddr, uint value) public accountManagerOnly {
         (bool success, ) = toAddr.call{value: value}("");
-        require(success, "Account/withdrawEth: Transfer failed");
+        if(!success) revert Errors.ETHTransferFailure();
     }
 
     function repay(address LTokenAddr, address tokenAddr, uint value) public accountManagerOnly {
@@ -94,7 +95,7 @@ contract Account {
             );
         }
         (bool success, ) = toAddress.call{value: address(this).balance}("");
-        require(success, "Account/sweepTo: Transfer failed");
+        if(!success) revert Errors.ETHTransferFailure();
     }
 
     receive() external payable {}

@@ -40,18 +40,18 @@ contract LEther is LToken {
     function withdraw(uint value) public {
         _updateState();
         (bool success, ) = msg.sender.call{value: value}("");
-        require(success, "LEther/withdraw: Transfer failed");
+        if(!success) revert Errors.ETHTransferFailure();
         _burn(msg.sender, value.div(exchangeRate));
     }
 
     // Account Manager Functions
     function lendTo(address accountAddr, uint value) public returns (bool) {
-        require(msg.sender == accountManagerAddr, "LToken/lendTo: AccountManagerOnly");
+        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
         (bool success, ) = accountAddr.call{value: value}("");
-        require(success, "LEther/lendTo: Transfer failed");
+        if(!success) revert Errors.ETHTransferFailure();
         totalBorrows += value;
         borrowBalanceFor[accountAddr].principal += value;
         borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
@@ -59,7 +59,7 @@ contract LEther is LToken {
     }
 
     function collectFrom(address accountAddr, uint value) public returns (bool) {
-        require(msg.sender == accountManagerAddr, "LToken/collectFrom: AccountManagerOnly");
+        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         totalBorrows -= value;

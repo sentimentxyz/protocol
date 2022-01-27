@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Errors.sol";
 import "./interface/IERC20.sol";
 import "./interface/IRateModel.sol";
 import "./dependencies/SafeERC20.sol";
@@ -133,19 +134,19 @@ abstract contract LToken {
 
     // Admin-only functions
     function setAccountManagerAddress(address _accountManagerAddr) external {
-        require(msg.sender == adminAddr, "LToken/setAccountManagerAddress: AdminOnly");
+        if(msg.sender != adminAddr) revert Errors.AdminOnly();
         accountManagerAddr = _accountManagerAddr;
         emit UpdateAccountManagerAddress(accountManagerAddr);
     }
 
     function setAdmin(address _adminAddr) external {
-        require(msg.sender == adminAddr, "LToken/setAdmin: Admin-Only");
+        if(msg.sender != adminAddr) revert Errors.AdminOnly();
         adminAddr = _adminAddr;
         emit UpdateAdminAddress(adminAddr);
     }
 
     function setRateModelAddr(address _rateModelAddr) external {
-        require(msg.sender == adminAddr, "LToken/setRateModelAddr: Admin-Only");
+        if(msg.sender != adminAddr) revert Errors.AdminOnly();
         rateModelAddr = _rateModelAddr;
         emit UpdateRateModelAddress(rateModelAddr);
     }

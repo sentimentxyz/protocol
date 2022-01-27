@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Errors.sol";
 import "./interface/IERC20.sol";
 import "./interface/IOracle.sol";
 import "./interface/ILToken.sol";
@@ -63,7 +64,7 @@ contract RiskEngine {
     }
 
     function setAccountManagerAddr(address _accountManagerAddr) public {
-        require(msg.sender == admin, "RiskEngine/setAccountManagerAddr: AdminOnly");
+        if(msg.sender != admin) revert Errors.AdminOnly();
         accountManagerAddr = _accountManagerAddr;
         emit UpdateAccountManagerAddress(accountManagerAddr);
     }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Errors.sol";
 import "./interface/ICToken.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
@@ -37,20 +38,20 @@ contract Oracle {
 
     /// @dev We assume that the response has 18 decimals
     function _getPrice(address tokenAddr) internal view returns (uint) {
-        require(priceFeedAddr[tokenAddr] != address(0), "Oracle/getPrice: PriceUnavailable");
+        if(priceFeedAddr[tokenAddr] == address(0)) revert Errors.PriceFeedUnavailable();
         (, int price, , ,) = AggregatorV3Interface(priceFeedAddr[tokenAddr]).latestRoundData();
         return uint(price);
     }
 
     // AdminOnly
     function setFeedAddress(address tokenAddr, address feedAddr) public {
-        require(msg.sender == admin, "Oracle/setFeedAddress: AdminOnly");
+        if(msg.sender != admin) revert Errors.AdminOnly();
         priceFeedAddr[tokenAddr] = feedAddr;
         emit UpdateFeedAddress(tokenAddr, feedAddr);
     }
 
     function setAdmin(address newAdmin) public {
-        require(msg.sender == admin, "Oracle/setAdmin: AdminOnly");
+        if(msg.sender != admin) revert Errors.AdminOnly();
         admin = newAdmin;
         emit UpdateAdmin(newAdmin);
     }
