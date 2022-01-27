@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Errors.sol";
 import "./interface/IERC20.sol";
 import "./interface/IOracle.sol";
 import "./interface/ILToken.sol";
@@ -8,7 +9,7 @@ import "./interface/IAccount.sol";
 import "./interface/IAccountManager.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
-contract RiskEngine {
+contract RiskEngine is Errors {
     using PRBMathUD60x18 for uint;
 
     address public admin;
@@ -63,7 +64,7 @@ contract RiskEngine {
     }
 
     function setAccountManagerAddr(address _accountManagerAddr) public {
-        require(msg.sender == admin, "RiskEngine/setAccountManagerAddr: AdminOnly");
+        if(msg.sender != admin) revert AdminOnly();
         accountManagerAddr = _accountManagerAddr;
         emit UpdateAccountManagerAddress(accountManagerAddr);
     }

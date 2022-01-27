@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Errors.sol";
 import "./interface/IWETH.sol";
 import "./interface/IERC20.sol";
 import "./interface/ILToken.sol";
@@ -12,7 +13,7 @@ import "./interface/IUserRegistry.sol";
 import "./interface/IAccountFactory.sol";
 import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
-contract AccountManager {
+contract AccountManager is Errors {
     using SafeERC20 for IERC20;
     using SafeERC20 for address;
 
@@ -46,12 +47,12 @@ contract AccountManager {
     }
 
     modifier onlyOwner(address accountAddr) {
-        require(IAccount(accountAddr).ownerAddr() == msg.sender, "AccMgr/onlyOwner");
+        if(IAccount(accountAddr).ownerAddr() != msg.sender) revert AccountOwnerOnly();
         _;
     }
 
     modifier onlyAdmin() {
-        require(adminAddr == msg.sender, "AccMgr/onlyAdmin");
+        if(adminAddr != msg.sender) revert AdminOnly();
         _;
     }
 
@@ -69,7 +70,7 @@ contract AccountManager {
     }
 
     function closeAccount(address accountAddr) public onlyOwner(accountAddr) {
-        require(IAccount(accountAddr).hasNoDebt(), "AccMgr/closeAccount: PendingDebt");
+        if(!IAccount(accountAddr).hasNoDebt()) revert PendingDebt();
         IAccount account = IAccount(accountAddr);
         account.sweepTo(msg.sender);
         account.deactivate();
@@ -80,7 +81,7 @@ contract AccountManager {
 
     function depositEth(address accountAddr) external payable onlyOwner(accountAddr) {
         (bool success, ) = accountAddr.call{value: msg.value}("");
-        require(success, "AccMgr/depositEth: Transfer failed");
+        if(!success) revert ETHTransferFailure();
     }
 
     function withdrawEth(address accountAddr, uint value) public onlyOwner(accountAddr) {
@@ -94,7 +95,7 @@ contract AccountManager {
     ) 
         public onlyOwner(accountAddr) 
     {
-        require(isCollateralAllowed[tokenAddr], "AccMgr/deposit: Restricted");
+        if(!isCollateralAllowed[tokenAddr]) revert CollateralTypeRestricted();
         IAccount(accountAddr).addAsset(tokenAddr);
         IERC20(tokenAddr).safeTransferFrom(msg.sender, accountAddr, value);
     }
@@ -106,6 +107,8 @@ contract AccountManager {
     ) 
         public onlyOwner(accountAddr) 
     {
+        // TODO Add custom error after changing behavior of hasNoDebt() so that 
+        // there is a way to execute this without always running isWithdrawAllowed
         require(IAccount(accountAddr).hasNoDebt() ||
             IRiskEngine(riskEngineAddr).isWithdrawAllowed(accountAddr, tokenAddr, value),
             "AccMgr/withdraw: Risky");
@@ -120,9 +123,9 @@ contract AccountManager {
     ) 
         public onlyOwner(accountAddr)
     { 
-        require(LTokenAddressFor[tokenAddr] != address(0), "AccMgr/borrow: Restricted");
-        require(IRiskEngine(riskEngineAddr).isBorrowAllowed(accountAddr, tokenAddr, value),
-            "AccMgr/borrow: Risky");
+        if(LTokenAddressFor[tokenAddr] == address(0)) revert LTokenUnavailable();
+        if(!IRiskEngine(riskEngineAddr).isBorrowAllowed(accountAddr, tokenAddr, value)) 
+            revert RiskThresholdBreached();
         if(tokenAddr != address(0)) IAccount(accountAddr).addAsset(tokenAddr);
         if(ILToken(LTokenAddressFor[tokenAddr]).lendTo(accountAddr, value))
             IAccount(accountAddr).addBorrow(tokenAddr);
@@ -136,13 +139,13 @@ contract AccountManager {
     ) 
         public onlyOwner(accountAddr) 
     {
-        require(LTokenAddressFor[tokenAddr] != address(0), "AccMgr/repay: NoLToken");
+        if(LTokenAddressFor[tokenAddr] == address(0)) revert LTokenUnavailable();
         _repay(accountAddr, tokenAddr, value);
         emit Repay(accountAddr, msg.sender, tokenAddr, value);
     }
 
     function liquidate(address accountAddr) public {
-        require(IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr));
+        if(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert AccountNotLiquidatable();
         _liquidate(accountAddr);
         emit AccountLiquidated(accountAddr, IAccount(accountAddr).ownerAddr());
     }
@@ -168,14 +171,13 @@ contract AccountManager {
         address[] memory tokensOut;
         
         address controllerAddr = controllerAddrFor[targetAddr];
-        require(controllerAddr != address(0), "AccMgr/execute: NoController");
+        if(controllerAddr == address(0)) revert ControllerUnavailable();
         (isAllowed, tokensIn, tokensOut) = 
             IController(controllerAddr).canCall(targetAddr, sig, data);
-        require(isAllowed, "AccMgr/execute: RestrictedCall");
+        if(!isAllowed) revert FunctionCallRestricted();
         IAccount(accountAddr).exec(targetAddr, amt, bytes.concat(sig, data));
         _updateTokens(accountAddr, tokensIn, tokensOut);
-        require(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr), 
-            "AccMgr/execute: Liquidatable");
+        if(IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert RiskThresholdBreached();
     }
 
     function settle(address accountAddr) public onlyOwner(accountAddr) {

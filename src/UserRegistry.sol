@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-contract UserRegistry {
+import "./Errors.sol";
+
+contract UserRegistry is Errors {
 
     address public admin;
     address public accountManager;
@@ -23,12 +25,12 @@ contract UserRegistry {
     }
 
     modifier adminOnly() {
-        require(msg.sender == admin, "Registry/AdminOnly");
+        if(msg.sender != admin) revert AdminOnly();
         _;
     }
 
     modifier accountManagerOnly() {
-        require(msg.sender == accountManager, "Registry/AccountManagerOnly");
+        if(msg.sender != accountManager) revert AccountManagerOnly();
         _;
     }
 
@@ -43,7 +45,7 @@ contract UserRegistry {
     }
 
     function getMarginAccounts(address _owner) public view returns (address[] memory) {
-        require(ownerUserMapping[_owner].owner != address(0), "Registry/GetAccounts: Not found");
+        if(ownerUserMapping[_owner].owner == address(0)) revert AccountNotFound();
         return ownerUserMapping[_owner].marginAccounts;
     }
 
@@ -58,7 +60,7 @@ contract UserRegistry {
     }
 
     function removeMarginAccount(address _owner, address _marginAccount) public accountManagerOnly {
-        require(ownerUserMapping[_owner].owner != address(0), "Registry/RemAccount: Not found");
+        if(ownerUserMapping[_owner].owner == address(0)) revert AccountNotFound();
         address[] storage accounts = ownerUserMapping[_owner].marginAccounts;
         for(uint i=0; i < accounts.length; i++) {
             if (accounts[i] == _marginAccount) {
