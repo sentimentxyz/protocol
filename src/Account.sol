@@ -36,44 +36,27 @@ contract Account {
         ownerAddr = address(0);
     }
 
-    function withdraw(address toAddr, address tokenAddr, uint value) public accountManagerOnly {
-        IERC20(tokenAddr).safeTransfer(toAddr, value);
-    }
-
-    function withdrawEth(address toAddr, uint value) public accountManagerOnly {
-        (bool success, ) = toAddr.call{value: value}("");
-        if(!success) revert Errors.ETHTransferFailure();
-    }
-
-    function repay(address LTokenAddr, address tokenAddr, uint value) public accountManagerOnly {
-        IERC20(tokenAddr).safeTransfer(LTokenAddr, value);
-    }
-
-    function approve(address tokenAddr, address spenderAddr, uint value) public accountManagerOnly {
-        IERC20(tokenAddr).safeApprove(spenderAddr, value);
-    }
-
-    function getAssets() public view returns (address[] memory) {
+    function getAssets() external view returns (address[] memory) {
         return assets;
     }
 
-    function getBorrows() public view returns (address[] memory) {
+    function getBorrows() external view returns (address[] memory) {
         return borrows;
     }
 
-    function addAsset(address tokenAddr) public accountManagerOnly {
-        if(_balanceOf(tokenAddr) == 0) assets.push(tokenAddr);
+    function addAsset(address tokenAddr) external accountManagerOnly {
+        assets.push(tokenAddr);
     }
 
-    function addBorrow(address tokenAddr) public accountManagerOnly {
+    function addBorrow(address tokenAddr) external accountManagerOnly {
         borrows.push(tokenAddr);
     }
 
-    function removeAsset(address tokenAddr) public accountManagerOnly {
-        if(_balanceOf(tokenAddr) == 0) _remove(assets, tokenAddr);
+    function removeAsset(address tokenAddr) external accountManagerOnly {
+        _remove(assets, tokenAddr);
     }
 
-    function removeBorrow(address tokenAddr) public accountManagerOnly {
+    function removeBorrow(address tokenAddr) external accountManagerOnly {
         _remove(borrows, tokenAddr);
     }
 
@@ -82,9 +65,9 @@ contract Account {
     }
 
     function exec(address target, uint amt, bytes memory data) 
-        public payable accountManagerOnly returns (bool) {
-        (bool success, ) = target.call{value: amt}(data);
-        return success;
+        public payable accountManagerOnly returns (bool, bytes memory) {
+        (bool success, bytes memory retData) = target.call{value: amt}(data);
+        return (success, retData);
     }
 
     function sweepTo(address toAddress) public accountManagerOnly {
@@ -98,15 +81,8 @@ contract Account {
         if(!success) revert Errors.ETHTransferFailure();
     }
 
-    receive() external payable {}
-
-    // Internal Functions
-    function _balanceOf(address tokenAddr) internal view returns (uint) {
-        return IERC20(tokenAddr).balanceOf(address(this));
-    }
-
-    function _remove(address[] storage arr, address tokenAddr) internal {
-        uint len = arr.length;
+     function _remove(address[] storage arr, address tokenAddr) internal {
+         uint len = arr.length;
         // Copy the last element in place of tokenAddr and pop
         for(uint i = 0; i < len; ++i) {
             if(arr[i] == tokenAddr) {
@@ -116,4 +92,6 @@ contract Account {
             }
         }
     }
+
+    receive() external payable {}
 }
