@@ -72,7 +72,7 @@ contract RiskEngine {
     // Internal Functions
     function _currentAccountBalance(address accountAddr) internal view returns (uint) {
         IAccount account = IAccount(accountAddr);
-        address[] memory assets = account.getArray(false);
+        address[] memory assets = account.getAssets();
         uint assetsLen = assets.length;
         uint totalBalance = 0;
         for(uint i = 0; i < assetsLen; ++i) {
@@ -87,7 +87,7 @@ contract RiskEngine {
     function _currentAccountBorrows(address accountAddr) internal returns (uint) {
         IAccount account = IAccount(accountAddr);
         if(account.hasNoDebt()) return 0;
-        address[] memory borrows = account.getArray(true);
+        address[] memory borrows = account.getBorrows();
         uint borrowsLen = borrows.length;
         uint totalBorrows = 0;
         for(uint i = 0; i < borrowsLen; ++i) {

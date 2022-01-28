@@ -95,7 +95,7 @@ contract AccountManager {
         public onlyOwner(accountAddr) 
     {
         if(!isCollateralAllowed[tokenAddr]) revert Errors.CollateralTypeRestricted();
-        if(IERC20(tokenAddr).balanceOf(accountAddr) == 0) IAccount(accountAddr).addToArray(false, tokenAddr);
+        if(IERC20(tokenAddr).balanceOf(accountAddr) == 0) IAccount(accountAddr).addAsset(tokenAddr);
         IERC20(tokenAddr).safeTransferFrom(msg.sender, accountAddr, value);
     }
 
@@ -117,7 +117,7 @@ contract AccountManager {
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED"); // TODO Refactor using custom errors
         
         if(IERC20(tokenAddr).balanceOf(accountAddr) == 0)
-            IAccount(accountAddr).removeFromArray(false, tokenAddr);
+            IAccount(accountAddr).removeAsset(tokenAddr);
     }
 
     function borrow(
@@ -131,9 +131,9 @@ contract AccountManager {
         if(!IRiskEngine(riskEngineAddr).isBorrowAllowed(accountAddr, tokenAddr, value)) 
             revert Errors.RiskThresholdBreached();
         if(tokenAddr != address(0) && IERC20(tokenAddr).balanceOf(accountAddr) == 0) 
-            IAccount(accountAddr).addToArray(false, tokenAddr);
+            IAccount(accountAddr).addAsset(tokenAddr);
         if(ILToken(LTokenAddressFor[tokenAddr]).lendTo(accountAddr, value))
-            IAccount(accountAddr).addToArray(true, tokenAddr);
+            IAccount(accountAddr).addBorrow(tokenAddr);
         emit Borrow(accountAddr, msg.sender, tokenAddr, value);
     }
 
@@ -188,7 +188,7 @@ contract AccountManager {
     }
 
     function settle(address accountAddr) public onlyOwner(accountAddr) {
-        address[] memory borrows = IAccount(accountAddr).getArray(true);
+        address[] memory borrows = IAccount(accountAddr).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
             uint balance = IERC20(borrows[i]).balanceOf(accountAddr);
             if ( balance > 0 ) repay(accountAddr, borrows[i], balance);
@@ -241,8 +241,8 @@ contract AccountManager {
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED"); // TODO Refactor using custom errors
         }
         
-        if(LToken.collectFrom(accountAddr, value) && !isEth) IAccount(accountAddr).removeFromArray(true, tokenAddr);
-        if (!isEth && IERC20(tokenAddr).balanceOf(accountAddr) == 0) IAccount(accountAddr).removeFromArray(false, tokenAddr);
+        if(LToken.collectFrom(accountAddr, value) && !isEth) IAccount(accountAddr).removeBorrow(tokenAddr);
+        if (!isEth && IERC20(tokenAddr).balanceOf(accountAddr) == 0) IAccount(accountAddr).removeAsset(tokenAddr);
     }
 
     function _updateTokens(address accountAddr, address[] memory tokensIn, address[] memory tokensOut) internal {
@@ -250,19 +250,19 @@ contract AccountManager {
         uint tokensInLen = tokensIn.length;
         for(uint i = 0; i < tokensInLen; ++i) {
             if(IERC20(tokensIn[i]).balanceOf(accountAddr) == 0)
-                IAccount(accountAddr).addToArray(false, tokensIn[i]);
+                IAccount(accountAddr).addAsset(tokensIn[i]);
         }
         
         uint tokensOutLen = tokensOut.length;
         for(uint i = 0; i < tokensOutLen; ++i) {
             if(IERC20(tokensOut[i]).balanceOf(accountAddr) == 0) 
-                account.removeFromArray(false, tokensOut[i]);
+                account.removeAsset(tokensOut[i]);
         }
     }
 
     function _liquidate(address accountAddr) internal {
         IAccount account = IAccount(accountAddr);
-        address[] memory accountBorrows = account.getArray(true);
+        address[] memory accountBorrows = account.getBorrows();
         uint borrowLen = accountBorrows.length;
 
         for(uint i = 0; i < borrowLen; ++i) {

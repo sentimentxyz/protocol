@@ -10,8 +10,11 @@ interface IAccount {
     function hasNoDebt() external view returns (bool);
     function ownerAddr() external view returns (address);
     function initialize(address accountManagerAddr) external;
-    function addToArray(bool flag, address tokenAddr) external;
-    function removeFromArray(bool flag, address tokenAddr) external;
-    function getArray(bool flag) external view returns (address[] memory);
+    function getAssets() external view returns (address[] memory);
+    function getBorrows() external view returns (address[] memory);
+    function addAsset(address tokenAddr) external;
+    function addBorrow(address tokenAddr) external;
+    function removeAsset(address tokenAddr) external;
+    function removeBorrow(address tokenAddr) external;
     function exec(address target, uint amt, bytes memory data) external returns (bool, bytes memory);
 }

@@ -36,27 +36,28 @@ contract Account {
         ownerAddr = address(0);
     }
 
-    function getArray(bool flag) external view returns (address[] memory) {
-        if(!flag) return assets;
-        else return borrows;
+    function getAssets() external view returns (address[] memory) {
+        return assets;
     }
 
-    function addToArray(bool flag, address tokenAddr) external accountManagerOnly {
-        if(!flag) assets.push(tokenAddr);
-        else borrows.push(tokenAddr);
+    function getBorrows() external view returns (address[] memory) {
+        return borrows;
     }
 
-     function removeFromArray(bool flag, address tokenAddr) external accountManagerOnly {
-         address[] storage arr = (flag) ? borrows : assets;
-         uint len = arr.length;
-        // Copy the last element in place of tokenAddr and pop
-        for(uint i = 0; i < len; ++i) {
-            if(arr[i] == tokenAddr) {
-                arr[i] = arr[arr.length - 1];
-                arr.pop();
-                break;
-            }
-        }
+    function addAsset(address tokenAddr) external accountManagerOnly {
+        assets.push(tokenAddr);
+    }
+
+    function addBorrow(address tokenAddr) external accountManagerOnly {
+        borrows.push(tokenAddr);
+    }
+
+    function removeAsset(address tokenAddr) external accountManagerOnly {
+        _remove(assets, tokenAddr);
+    }
+
+    function removeBorrow(address tokenAddr) external accountManagerOnly {
+        _remove(borrows, tokenAddr);
     }
 
     function hasNoDebt() public view returns (bool) {
@@ -78,6 +79,18 @@ contract Account {
         }
         (bool success, ) = toAddress.call{value: address(this).balance}("");
         if(!success) revert Errors.ETHTransferFailure();
+    }
+
+     function _remove(address[] storage arr, address tokenAddr) internal {
+         uint len = arr.length;
+        // Copy the last element in place of tokenAddr and pop
+        for(uint i = 0; i < len; ++i) {
+            if(arr[i] == tokenAddr) {
+                arr[i] = arr[arr.length - 1];
+                arr.pop();
+                break;
+            }
+        }
     }
 
     receive() external payable {}
