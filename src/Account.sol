@@ -11,6 +11,8 @@ contract Account {
     using SafeERC20 for IERC20;
     using SafeERC20 for address;
 
+    uint public activationBlock;
+
     address[] public assets;
     address[] public borrows;
 
@@ -29,9 +31,11 @@ contract Account {
 
     function activateFor(address _ownerAddr) public accountManagerOnly {
         ownerAddr = _ownerAddr;
+        activationBlock = block.number;
     }
 
     function deactivate() public accountManagerOnly {
+        if (activationBlock == block.number) revert Errors.AccountDeactivationFailure();
         delete assets;
         ownerAddr = address(0);
     }

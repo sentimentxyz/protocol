@@ -16,4 +16,5 @@ library Errors {
     error AccountNotLiquidatable();
     error CollateralTypeRestricted();
     error AccountAlreadyInitialized();
+    error AccountDeactivationFailure();
 }
