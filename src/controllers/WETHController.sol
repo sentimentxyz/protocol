@@ -9,7 +9,7 @@ contract WETHController is IController {
     address constant WETH_ADDR = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     function canCall(
-        address targetAddr,
+        address target,
         bytes4 sig,
         bytes calldata data
     ) external view returns (bool, address[] memory, address[] memory)

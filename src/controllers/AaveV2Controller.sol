@@ -8,7 +8,7 @@ contract AaveV2Controller {
     mapping(address => address) public aTokenAddrFor; // TODO Query from Aave contracts instead
 
     function canCall(
-        address targetAddr,
+        address target,
         bytes4 sig,
         bytes calldata data
     ) external view returns (bool, address[] memory, address[] memory)  
