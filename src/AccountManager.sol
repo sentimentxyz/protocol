@@ -10,7 +10,6 @@ import "./interface/IController.sol";
 import "./dependencies/SafeERC20.sol";
 import "./interface/IUserRegistry.sol";
 import "./interface/IAccountFactory.sol";
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 
 contract AccountManager {
     using SafeERC20 for IERC20;
