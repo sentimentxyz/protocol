@@ -15,10 +15,10 @@ import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
 contract AccountManager {
     using SafeERC20 for IERC20;
 
-    address public adminAddr;
-    address public riskEngineAddr;
-    address public userRegistryAddr;
-    address public accountFactoryAddr;
+    address public admin;
+    IRiskEngine public riskEngine;
+    IUserRegistry public userRegistry;
+    IAccountFactory public accountFactory;
     
     address[] public inactiveAccounts;
     
@@ -37,237 +37,236 @@ contract AccountManager {
     event UpdateAccountFactoryAddress(address indexed accountFactoryAddr);
     event UpdateLTokenAddress(address indexed tokenAddr, address indexed LTokenAddr);
 
-    constructor(address _riskEngineAddr, address _accountFactoryAddr, address _userRegistryAddr) {
-        adminAddr = msg.sender;
-        riskEngineAddr = _riskEngineAddr;
-        accountFactoryAddr = _accountFactoryAddr;
-        userRegistryAddr = _userRegistryAddr;
+    constructor(address _riskEngine, address _accountFactory, address _userRegistry) {
+        admin = msg.sender;
+        riskEngine = IRiskEngine(_riskEngine);
+        accountFactory = IAccountFactory(_accountFactory);
+        userRegistry = IUserRegistry(_userRegistry);
     }
 
-    modifier onlyOwner(address accountAddr) {
-        if(IAccount(accountAddr).owner() != msg.sender) revert Errors.AccountOwnerOnly();
+    modifier onlyOwner(address account) {
+        if(IAccount(account).owner() != msg.sender) revert Errors.AccountOwnerOnly();
         _;
     }
 
     modifier onlyAdmin() {
-        if(adminAddr != msg.sender) revert Errors.AdminOnly();
+        if(admin != msg.sender) revert Errors.AdminOnly();
         _;
     }
 
-    function openAccount(address ownerAddr) public {
-        address accountAddr;
+    function openAccount(address owner) public {
+        address account;
         if(inactiveAccounts.length == 0) {
-            accountAddr = IAccountFactory(accountFactoryAddr).create(address(this));
+            account = accountFactory.create(address(this));
         } else {
-            accountAddr = inactiveAccounts[inactiveAccounts.length - 1];
+            account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
         }
-        IAccount(accountAddr).activateFor(ownerAddr);
-        IUserRegistry(userRegistryAddr).addMarginAccount(ownerAddr, accountAddr);
-        emit AccountAssigned(accountAddr, ownerAddr);
+        IAccount(account).activateFor(owner);
+        userRegistry.addMarginAccount(owner, account);
+        emit AccountAssigned(account, owner);
     }
 
-    function closeAccount(address accountAddr) public onlyOwner(accountAddr) {
-        if(!IAccount(accountAddr).hasNoDebt()) revert Errors.PendingDebt();
-        IAccount account = IAccount(accountAddr);
+    function closeAccount(address _account) public onlyOwner(_account) {
+        IAccount account = IAccount(_account);
+        if(account.hasNoDebt()) revert Errors.PendingDebt();
         account.sweepTo(msg.sender);
         account.deactivate();
-        IUserRegistry(userRegistryAddr).removeMarginAccount(msg.sender, accountAddr);
-        inactiveAccounts.push(accountAddr);
-        emit AccountClosed(accountAddr, msg.sender);
+        userRegistry.removeMarginAccount(msg.sender, address(account));
+        inactiveAccounts.push(address(account));
+        emit AccountClosed(address(account), msg.sender);
     }
 
-    function depositEth(address accountAddr) external payable onlyOwner(accountAddr) {
-        (bool success, ) = accountAddr.call{value: msg.value}("");
+    function depositEth(address account) external payable onlyOwner(account) {
+        (bool success, ) = account.call{value: msg.value}("");
         if(!success) revert Errors.ETHTransferFailure();
     }
 
-    function withdrawEth(address accountAddr, uint value) public onlyOwner(accountAddr) {
-        (bool success, ) = IAccount(accountAddr).exec(msg.sender, value, new bytes(0));
+    function withdrawEth(address account, uint value) public onlyOwner(account) {
+        (bool success, ) = IAccount(account).exec(msg.sender, value, new bytes(0));
         if(!success) revert Errors.ETHTransferFailure();
     }
 
     function deposit(
-        address accountAddr, 
-        address tokenAddr,
+        address account, 
+        address token,
         uint value
     ) 
-        public onlyOwner(accountAddr) 
+        public onlyOwner(account) 
     {
-        if(!isCollateralAllowed[tokenAddr]) revert Errors.CollateralTypeRestricted();
-        if(IERC20(tokenAddr).balanceOf(accountAddr) == 0) IAccount(accountAddr).addAsset(tokenAddr);
-        IERC20(tokenAddr).safeTransferFrom(msg.sender, accountAddr, value);
+        if(!isCollateralAllowed[token]) revert Errors.CollateralTypeRestricted();
+        if(IERC20(token).balanceOf(account) == 0) IAccount(account).addAsset(address(token));
+        IERC20(token).safeTransferFrom(msg.sender, account, value);
     }
 
     function withdraw(
-        address accountAddr, 
-        address tokenAddr, 
+        address account, 
+        address token, 
         uint value
     ) 
-        public onlyOwner(accountAddr) 
+        public onlyOwner(account) 
     {
         // TODO Add custom error after changing behavior of hasNoDebt() so that 
         // there is a way to execute this without always running isWithdrawAllowed
-        require(IAccount(accountAddr).hasNoDebt() ||
-            IRiskEngine(riskEngineAddr).isWithdrawAllowed(accountAddr, tokenAddr, value),
+        require(IAccount(account).hasNoDebt() ||
+            riskEngine.isWithdrawAllowed(account, token, value),
             "AccMgr/withdraw: Risky");
         
-        (bool success, bytes memory data) = IAccount(accountAddr).exec(tokenAddr, 0, 
+        (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
                 abi.encodeWithSelector(IERC20.transfer.selector, msg.sender, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED"); // TODO Refactor using custom errors
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
         
-        if(IERC20(tokenAddr).balanceOf(accountAddr) == 0)
-            IAccount(accountAddr).removeAsset(tokenAddr);
+        if(IERC20(token).balanceOf(account) == 0)
+            IAccount(account).removeAsset(token);
     }
 
     function borrow(
-        address accountAddr, 
-        address tokenAddr, 
+        address account, 
+        address token, 
         uint value
     ) 
-        public onlyOwner(accountAddr)
+        public onlyOwner(account)
     { 
-        if(LTokenAddressFor[tokenAddr] == address(0)) revert Errors.LTokenUnavailable();
-        if(!IRiskEngine(riskEngineAddr).isBorrowAllowed(accountAddr, tokenAddr, value)) 
+        if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
+        if(!riskEngine.isBorrowAllowed(account, token, value)) 
             revert Errors.RiskThresholdBreached();
-        if(tokenAddr != address(0) && IERC20(tokenAddr).balanceOf(accountAddr) == 0) 
-            IAccount(accountAddr).addAsset(tokenAddr);
-        if(ILToken(LTokenAddressFor[tokenAddr]).lendTo(accountAddr, value))
-            IAccount(accountAddr).addBorrow(tokenAddr);
-        emit Borrow(accountAddr, msg.sender, tokenAddr, value);
+        if(token != address(0) && IERC20(token).balanceOf(account) == 0) 
+            IAccount(account).addAsset(token);
+        if(ILToken(LTokenAddressFor[token]).lendTo(account, value))
+            IAccount(account).addBorrow(token);
+        emit Borrow(account, msg.sender, token, value);
     }
 
     function repay(
-        address accountAddr, 
-        address tokenAddr, 
+        address account, 
+        address token, 
         uint value
     ) 
-        public onlyOwner(accountAddr) 
+        public onlyOwner(account) 
     {
-        if(LTokenAddressFor[tokenAddr] == address(0)) revert Errors.LTokenUnavailable();
-        _repay(accountAddr, tokenAddr, value);
-        emit Repay(accountAddr, msg.sender, tokenAddr, value);
+        if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
+        _repay(account, token, value);
+        emit Repay(account, msg.sender, token, value);
     }
 
-    function liquidate(address accountAddr) public {
-        if(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert Errors.AccountNotLiquidatable();
-        _liquidate(accountAddr);
-        emit AccountLiquidated(accountAddr, IAccount(accountAddr).owner());
+    function liquidate(address account) public {
+        if(!riskEngine.isLiquidatable(account)) revert Errors.AccountNotLiquidatable();
+        _liquidate(account);
+        emit AccountLiquidated(account, IAccount(account).owner());
     }
 
     function approve(
-        address accountAddr, 
-        address tokenAddr,
-        address spenderAddr, 
+        address account, 
+        address token,
+        address spender, 
         uint value
-    ) public onlyOwner(accountAddr) {
-        (bool success, bytes memory data) = IAccount(accountAddr).exec(tokenAddr, 0, 
-            abi.encodeWithSelector(IERC20.approve.selector, spenderAddr, value));
+    ) public onlyOwner(account) {
+        (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
+            abi.encodeWithSelector(IERC20.approve.selector, spender, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED"); // TODO Refactor using custom errors
     }
 
     function exec(
-        address accountAddr, 
-        address targetAddr,
+        address account, 
+        address target,
         uint amt,
         bytes4 sig,
         bytes calldata data
-    ) public onlyOwner(accountAddr) {
+    ) public onlyOwner(account) {
         bool isAllowed;
         address[] memory tokensIn;
         address[] memory tokensOut;
         
-        address controllerAddr = controllerAddrFor[targetAddr];
-        if(controllerAddr == address(0)) revert Errors.ControllerUnavailable();
+        address controller = controllerAddrFor[target];
+        if(controller == address(0)) revert Errors.ControllerUnavailable();
         (isAllowed, tokensIn, tokensOut) = 
-            IController(controllerAddr).canCall(targetAddr, sig, data);
+            IController(controller).canCall(target, sig, data);
         if(!isAllowed) revert Errors.FunctionCallRestricted();
-        IAccount(accountAddr).exec(targetAddr, amt, bytes.concat(sig, data));
-        _updateTokens(accountAddr, tokensIn, tokensOut);
-        if(IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert Errors.RiskThresholdBreached();
+        IAccount(account).exec(target, amt, bytes.concat(sig, data));
+        _updateTokens(account, tokensIn, tokensOut);
+        if(riskEngine.isLiquidatable(account)) revert Errors.RiskThresholdBreached();
     }
 
-    function settle(address accountAddr) public onlyOwner(accountAddr) {
-        address[] memory borrows = IAccount(accountAddr).getBorrows();
+    function settle(address account) public onlyOwner(account) {
+        address[] memory borrows = IAccount(account).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
-            uint balance = IERC20(borrows[i]).balanceOf(accountAddr);
-            if ( balance > 0 ) repay(accountAddr, borrows[i], balance);
+            uint balance = IERC20(borrows[i]).balanceOf(account);
+            if ( balance > 0 ) repay(account, borrows[i], balance);
         }
     }
 
     // Admin-Only
-    function toggleCollateralState(address tokenAddr) public onlyAdmin {
-        isCollateralAllowed[tokenAddr] = !isCollateralAllowed[tokenAddr];
+    function toggleCollateralState(address token) public onlyAdmin {
+        isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
 
-    function setLTokenAddress(address tokenAddr, address LTokenAddr) public onlyAdmin {
-        LTokenAddressFor[tokenAddr] = LTokenAddr;
-        emit UpdateLTokenAddress(tokenAddr, LTokenAddr);
+    function setLTokenAddress(address token, address LToken) public onlyAdmin {
+        LTokenAddressFor[token] = LToken;
+        emit UpdateLTokenAddress(token, LToken);
     }
 
-    function setRiskEngineAddress(address _riskEngineAddr) public onlyAdmin {
-        riskEngineAddr = _riskEngineAddr;
-        emit UpdateRiskEngineAddress(riskEngineAddr);
+    function setRiskEngineAddress(address _riskEngine) public onlyAdmin {
+        riskEngine = IRiskEngine(_riskEngine);
+        emit UpdateRiskEngineAddress(address(riskEngine));
     }
 
-    function setUserRegistryAddress(address _userRegistryAddr) public onlyAdmin {
-        userRegistryAddr = _userRegistryAddr;
-        emit UpdateUserRegistryAddress(userRegistryAddr);
+    function setUserRegistryAddress(address _userRegistry) public onlyAdmin {
+        userRegistry = IUserRegistry(_userRegistry);
+        emit UpdateUserRegistryAddress(address(userRegistry));
     }
 
-    function setControllerAddress(address contractAddr, address controllerAddr) public onlyAdmin {
-        controllerAddrFor[contractAddr] = controllerAddr;
-        emit UpdateControllerAddress(contractAddr, controllerAddr);
+    function setControllerAddress(address target, address controller) public onlyAdmin {
+        controllerAddrFor[target] = controller;
+        emit UpdateControllerAddress(target, controller);
     }
 
-    function setAccountFactoryAddress(address _accountFactoryAddr) public onlyAdmin {
-        accountFactoryAddr = _accountFactoryAddr;
-        emit UpdateAccountFactoryAddress(accountFactoryAddr);
+    function setAccountFactoryAddress(address _accountFactory) public onlyAdmin {
+        accountFactory = IAccountFactory(_accountFactory);
+        emit UpdateAccountFactoryAddress(address(accountFactory));
     }
 
     // Internal Functions
-    function _repay(address accountAddr, address tokenAddr, uint value) internal {
-        ILToken LToken = ILToken(LTokenAddressFor[tokenAddr]);
-        bool isEth = tokenAddr == address(0);
-        if(value == type(uint).max) value = LToken.currentBorrowBalance(accountAddr);
+    function _repay(address account, address token, uint value) internal {
+        ILToken LToken = ILToken(LTokenAddressFor[token]);
+        bool isEth = token == address(0);
+        if(value == type(uint).max) value = LToken.currentBorrowBalance(account);
 
         if(isEth) {
-            (bool success, ) = IAccount(accountAddr).exec(address(LToken), value, new bytes(0));
+            (bool success, ) = IAccount(account).exec(address(LToken), value, new bytes(0));
             if(!success) revert Errors.ETHTransferFailure();
         }
         else {
-             (bool success, bytes memory data) = IAccount(accountAddr).exec(tokenAddr, 0, 
+             (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
                 abi.encodeWithSelector(IERC20.transfer.selector, address(LToken), value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED"); // TODO Refactor using custom errors
         }
         
-        if(LToken.collectFrom(accountAddr, value) && !isEth) IAccount(accountAddr).removeBorrow(tokenAddr);
-        if (!isEth && IERC20(tokenAddr).balanceOf(accountAddr) == 0) IAccount(accountAddr).removeAsset(tokenAddr);
+        if(LToken.collectFrom(account, value) && !isEth) IAccount(account).removeBorrow(token);
+        if (!isEth && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
     }
 
-    function _updateTokens(address accountAddr, address[] memory tokensIn, address[] memory tokensOut) internal {
-        IAccount account = IAccount(accountAddr);
+    function _updateTokens(address account, address[] memory tokensIn, address[] memory tokensOut) internal {
         uint tokensInLen = tokensIn.length;
         for(uint i = 0; i < tokensInLen; ++i) {
-            if(IERC20(tokensIn[i]).balanceOf(accountAddr) == 0)
-                IAccount(accountAddr).addAsset(tokensIn[i]);
+            if(IERC20(tokensIn[i]).balanceOf(account) == 0)
+                IAccount(account).addAsset(tokensIn[i]);
         }
         
         uint tokensOutLen = tokensOut.length;
         for(uint i = 0; i < tokensOutLen; ++i) {
-            if(IERC20(tokensOut[i]).balanceOf(accountAddr) == 0) 
-                account.removeAsset(tokensOut[i]);
+            if(IERC20(tokensOut[i]).balanceOf(account) == 0) 
+                IAccount(account).removeAsset(tokensOut[i]);
         }
     }
 
-    function _liquidate(address accountAddr) internal {
-        IAccount account = IAccount(accountAddr);
+    function _liquidate(address _account) internal {
+        IAccount account = IAccount(_account);
         address[] memory accountBorrows = account.getBorrows();
         uint borrowLen = accountBorrows.length;
 
         for(uint i = 0; i < borrowLen; ++i) {
             // TODO Gas optimization by skipping removeAsset in repay
-            _repay(accountAddr, accountBorrows[i], type(uint).max);
+            _repay(_account, accountBorrows[i], type(uint).max);
         }
         account.sweepTo(msg.sender);
     }
