@@ -13,15 +13,15 @@ contract RiskEngine {
     using PRBMathUD60x18 for uint;
 
     address public admin;
-    address public oracleAddr;
-    address public accountManagerAddr;
+    IOracle public oracle;
+    IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
     event UpdateAccountManagerAddress(address indexed accountManagerAddr);
 
-    constructor(address _oracleAddr) {
+    constructor(address _oracle) {
         admin = msg.sender;
-        oracleAddr = _oracleAddr;
+        oracle = IOracle(_oracle);
     }
 
     function isBorrowAllowed(
@@ -48,60 +48,58 @@ contract RiskEngine {
         return _isAccountHealthy(newAccountBalance, _currentAccountBorrows(accountAddr));
     }
 
-    function isLiquidatable(address accountAddr) public returns (bool) {
+    function isLiquidatable(address account) public returns (bool) {
         return false;
-        // return _isAccountHealthy(_currentAccountBalance(accountAddr), _currentAccountBorrows(accountAddr));
+        // return _isAccountHealthy(_currentAccountBalance(account), _currentAccountBorrows(account));
     }
 
     // TODO Implement storedAccountBalance view func
 
-    function currentAccountBalance(address accountAddr) public view returns (uint) {
-        return _currentAccountBalance(accountAddr);
+    function currentAccountBalance(address account) public view returns (uint) {
+        return _currentAccountBalance(account);
     }
 
-    function currentAccountBorrows(address accountAddr) public returns (uint) {
-        return _currentAccountBorrows(accountAddr);
+    function currentAccountBorrows(address account) public returns (uint) {
+        return _currentAccountBorrows(account);
     }
 
-    function setAccountManagerAddr(address _accountManagerAddr) public {
+    function setAccountManagerAddr(address _accountManager) public {
         if(msg.sender != admin) revert Errors.AdminOnly();
-        accountManagerAddr = _accountManagerAddr;
-        emit UpdateAccountManagerAddress(accountManagerAddr);
+        accountManager = IAccountManager(_accountManager);
+        emit UpdateAccountManagerAddress(address(accountManager));
     }
 
     // Internal Functions
-    function _currentAccountBalance(address accountAddr) internal view returns (uint) {
-        IAccount account = IAccount(accountAddr);
-        address[] memory assets = account.getAssets();
+    function _currentAccountBalance(address account) internal view returns (uint) {
+        address[] memory assets = IAccount(account).getAssets();
         uint assetsLen = assets.length;
         uint totalBalance = 0;
         for(uint i = 0; i < assetsLen; ++i) {
             totalBalance += _valueInWei(
                 assets[i], 
-                IERC20(assets[i]).balanceOf(accountAddr)
+                IERC20(assets[i]).balanceOf(account)
                 );
         }
-        return totalBalance + accountAddr.balance;
+        return totalBalance + account.balance;
     }
 
-    function _currentAccountBorrows(address accountAddr) internal returns (uint) {
-        IAccount account = IAccount(accountAddr);
-        if(account.hasNoDebt()) return 0;
-        address[] memory borrows = account.getBorrows();
+    function _currentAccountBorrows(address account) internal returns (uint) {
+        if(IAccount(account).hasNoDebt()) return 0;
+        address[] memory borrows = IAccount(account).getBorrows();
         uint borrowsLen = borrows.length;
         uint totalBorrows = 0;
         for(uint i = 0; i < borrowsLen; ++i) {
             address LTokenAddr = _LTokenAddressFor(borrows[i]);
             totalBorrows += _valueInWei(
                 borrows[i],
-                ILToken(LTokenAddr).currentBorrowBalance(accountAddr)
+                ILToken(LTokenAddr).currentBorrowBalance(account)
             );
         }
         return totalBorrows;
     }
 
-    function _valueInWei(address tokenAddr, uint value) internal view returns (uint) {
-        return IOracle(oracleAddr).getPrice(tokenAddr).mul(value);
+    function _valueInWei(address token, uint value) internal view returns (uint) {
+        return oracle.getPrice(token).mul(value);
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows) internal pure returns (bool) {
@@ -109,7 +107,7 @@ contract RiskEngine {
             (accountBalance.div(accountBorrows) > balanceToBorrowThreshold);
     }
 
-    function _LTokenAddressFor(address tokenAddr) internal view returns (address) {
-        return IAccountManager(accountManagerAddr).LTokenAddressFor(tokenAddr);
+    function _LTokenAddressFor(address token) internal view returns (address) {
+        return accountManager.LTokenAddressFor(token);
     }
 }
