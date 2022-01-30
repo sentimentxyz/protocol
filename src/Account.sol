@@ -16,28 +16,28 @@ contract Account {
     address[] public assets;
     address[] public borrows;
 
-    address public ownerAddr;
-    address public accountManagerAddr;
+    address public owner;
+    address public accountManager;
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
+        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
     }
 
-    function initialize(address _accountManagerAddr) public {
-        if(accountManagerAddr != address(0)) revert Errors.AccountAlreadyInitialized();
-        accountManagerAddr = _accountManagerAddr;
+    function initialize(address _accountManager) public {
+        if(accountManager != address(0)) revert Errors.AccountAlreadyInitialized();
+        accountManager = _accountManager;
     }
 
-    function activateFor(address _ownerAddr) public accountManagerOnly {
-        ownerAddr = _ownerAddr;
+    function activateFor(address _owner) public accountManagerOnly {
+        owner = _owner;
         activationBlock = block.number;
     }
 
     function deactivate() public accountManagerOnly {
         if (activationBlock == block.number) revert Errors.AccountDeactivationFailure();
         delete assets;
-        ownerAddr = address(0);
+        owner = address(0);
     }
 
     function getAssets() external view returns (address[] memory) {

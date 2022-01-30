@@ -45,7 +45,7 @@ contract AccountManager {
     }
 
     modifier onlyOwner(address accountAddr) {
-        if(IAccount(accountAddr).ownerAddr() != msg.sender) revert Errors.AccountOwnerOnly();
+        if(IAccount(accountAddr).owner() != msg.sender) revert Errors.AccountOwnerOnly();
         _;
     }
 
@@ -152,7 +152,7 @@ contract AccountManager {
     function liquidate(address accountAddr) public {
         if(!IRiskEngine(riskEngineAddr).isLiquidatable(accountAddr)) revert Errors.AccountNotLiquidatable();
         _liquidate(accountAddr);
-        emit AccountLiquidated(accountAddr, IAccount(accountAddr).ownerAddr());
+        emit AccountLiquidated(accountAddr, IAccount(accountAddr).owner());
     }
 
     function approve(
