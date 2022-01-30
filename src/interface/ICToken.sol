@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+// TODO Can this interface be removed?
+
 interface ICERC20 {
     function mint(uint mintAmount) external returns (uint);
     function exchangeRateStored() external view returns (uint);

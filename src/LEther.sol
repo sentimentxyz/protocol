@@ -11,9 +11,9 @@ contract LEther is LToken {
         string memory _name, 
         string memory _symbol, 
         uint8 _decimals,
-        address _underlyingAddr,
-        address _rateModelAddr,
-        address _accountManagerAddr,
+        address _underlying,
+        address _rateModel,
+        address _accountManager,
         uint _initialExchangeRate
     )
     {
@@ -21,14 +21,14 @@ contract LEther is LToken {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
-        underlyingAddr = _underlyingAddr;
+        underlying = IERC20(_underlying);
         // Market State Variables
         exchangeRate = _initialExchangeRate * 1e18;
         borrowIndex = 1e18;
         // Privileged Addresses
-        adminAddr = msg.sender;
-        rateModelAddr = _rateModelAddr;
-        accountManagerAddr = _accountManagerAddr;
+        admin = msg.sender;
+        rateModel = IRateModel(_rateModel);
+        accountManager = _accountManager;
     }
 
     // Lender Functions
@@ -45,27 +45,26 @@ contract LEther is LToken {
     }
 
     // Account Manager Functions
-    function lendTo(address accountAddr, uint value) public returns (bool) {
-        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
+    function lendTo(address account, uint value) public accountManagerOnly returns (bool) {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
-        bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
-        (bool success, ) = accountAddr.call{value: value}("");
+        bool isFirstBorrow = (borrowBalanceFor[account].principal == 0);
+        (bool success, ) = account.call{value: value}("");
         if(!success) revert Errors.ETHTransferFailure();
         totalBorrows += value;
-        borrowBalanceFor[accountAddr].principal += value;
-        borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
+        borrowBalanceFor[account].principal += value;
+        borrowBalanceFor[account].interestIndex = borrowIndex;
         return isFirstBorrow;
     }
 
-    function collectFrom(address accountAddr, uint value) public returns (bool) {
-        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
+    function collectFrom(address account, uint value) public accountManagerOnly returns (bool) {
+        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         totalBorrows -= value;
-        borrowBalanceFor[accountAddr].principal -= value;
-        borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
-        return (borrowBalanceFor[accountAddr].principal == 0);
+        borrowBalanceFor[account].principal -= value;
+        borrowBalanceFor[account].interestIndex = borrowIndex;
+        return (borrowBalanceFor[account].principal == 0);
     }
     
     receive() external payable {}

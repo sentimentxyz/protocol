@@ -12,9 +12,9 @@ contract LERC20 is LToken {
         string memory _name, 
         string memory _symbol, 
         uint8 _decimals,
-        address _underlyingAddr,
-        address _rateModelAddr,
-        address _accountManagerAddr,
+        address _underlying,
+        address _rateModel,
+        address _accountManager,
         uint _initialExchangeRate
     )
     {
@@ -22,44 +22,42 @@ contract LERC20 is LToken {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
-        underlyingAddr = _underlyingAddr;
+        underlying = IERC20(_underlying);
         // Market State Variables
         exchangeRate = _initialExchangeRate * 1e18;
         borrowIndex = 1e18;
         // Privileged Addresses
-        adminAddr = msg.sender;
-        rateModelAddr = _rateModelAddr;
-        accountManagerAddr = _accountManagerAddr;
+        admin = msg.sender;
+        rateModel = IRateModel(_rateModel);
+        accountManager = _accountManager;
     }
 
     // Lender Functions
     function deposit(uint value) public {
         _updateState();
-        IERC20(underlyingAddr).safeTransferFrom(msg.sender, address(this), value);
+        underlying.safeTransferFrom(msg.sender, address(this), value);
         _mint(msg.sender, value.div(exchangeRate));
     }
 
     function withdraw(uint value) public {
         _updateState();
-        IERC20(underlyingAddr).safeTransfer(msg.sender, value);
+        underlying.safeTransfer(msg.sender, value);
         _burn(msg.sender, value.div(exchangeRate));
     }
 
     // Account Manager Functions
-    function lendTo(address accountAddr, uint value) public returns (bool) {
-        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
+    function lendTo(address accountAddr, uint value) public accountManagerOnly returns (bool) {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
-        IERC20(underlyingAddr).safeTransfer(accountAddr, value);
+        underlying.safeTransfer(accountAddr, value);
         totalBorrows += value;
         borrowBalanceFor[accountAddr].principal += value;
         borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
         return isFirstBorrow;
     }
 
-    function collectFrom(address accountAddr, uint value) public returns (bool) {
-        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
+    function collectFrom(address accountAddr, uint value) public accountManagerOnly returns (bool) {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         totalBorrows -= value;
