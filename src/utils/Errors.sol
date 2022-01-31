@@ -3,8 +3,8 @@ pragma solidity ^0.8.10;
 
 library Errors {
     error AdminOnly();
-    error AccountNotFound();
     error PendingDebt();
+    error AccountNotFound();
     error AccountOwnerOnly();
     error LTokenUnavailable();
     error ETHTransferFailure();

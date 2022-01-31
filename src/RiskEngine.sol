@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Errors.sol";
+import "./utils/Errors.sol";
 import "./interface/IERC20.sol";
 import "./interface/IOracle.sol";
 import "./interface/ILToken.sol";

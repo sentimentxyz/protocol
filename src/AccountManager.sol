@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Errors.sol";
+import "./utils/Errors.sol";
 import "./interface/IERC20.sol";
 import "./interface/ILToken.sol";
 import "./interface/IAccount.sol";
 import "./interface/IRiskEngine.sol";
 import "./interface/IController.sol";
-import "./dependencies/SafeERC20.sol";
+import "./utils/SafeERC20.sol";
 import "./interface/IUserRegistry.sol";
 import "./interface/IAccountFactory.sol";
 

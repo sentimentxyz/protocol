@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Errors.sol";
+import "./utils/Errors.sol";
 import "./interface/IERC20.sol";
 import "./interface/IRateModel.sol";
-import "./dependencies/SafeERC20.sol";
+import "./utils/SafeERC20.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
 abstract contract LToken {

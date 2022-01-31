@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Errors.sol";
+import "./utils/Errors.sol";
 import "./interface/IERC20.sol";
-import "./dependencies/SafeERC20.sol";
+import "./utils/SafeERC20.sol";
 
 
 // TODO Reduce total number of functions in this contract to minimize bytecode

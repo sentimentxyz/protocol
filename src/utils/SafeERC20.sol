@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.10;
 
-import { IERC20 } from "../interface/IERC20.sol";
+import "../interface/IERC20.sol";
 
 /// @author Modified from Rari-Capital/Solmate
 library SafeERC20 {
