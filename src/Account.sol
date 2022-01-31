@@ -22,7 +22,7 @@ contract Account {
     }
 
     function initialize(address _accountManager) public {
-        if(accountManager != address(0)) revert Errors.AccountAlreadyInitialized();
+        if(accountManager != address(0)) revert Errors.ContractAlreadyInitialized();
         accountManager = _accountManager;
     }
 
