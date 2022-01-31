@@ -2,11 +2,11 @@
 pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
-import "./utils/SafeERC20.sol";
+import "./utils/Helpers.sol";
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
 contract Account {
-    using SafeERC20 for address;
+    using Helpers for address;
 
     uint public activationBlock;
 

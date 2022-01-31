@@ -2,11 +2,9 @@
 pragma solidity ^0.8.10;
 
 import "./LToken.sol";
-import "./interface/IERC20.sol";
-import "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LERC20 is LToken {
-    using SafeERC20 for address;
+    using Helpers for address;
     using PRBMathUD60x18 for uint;
     
     constructor(

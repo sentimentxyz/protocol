@@ -2,12 +2,12 @@
 pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
-import "./utils/SafeERC20.sol";
+import "./utils/Helpers.sol";
 import "./interface/IRateModel.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
 abstract contract LToken {
-    using SafeERC20 for address;
+    using Helpers for address;
     using PRBMathUD60x18 for uint;
 
     // Token Metadata

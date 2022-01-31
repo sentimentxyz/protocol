@@ -2,7 +2,6 @@
 pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
-import "./interface/IERC20.sol";
 import "./interface/IOracle.sol";
 import "./interface/ILToken.sol";
 import "./interface/IAccount.sol";
