@@ -9,7 +9,7 @@ contract UserRegistry {
     address public accountManager;
 
     struct User {
-        address owner;
+        address owner; // TODO do we really need this? Consider refactoring to address => address[]
         address[] marginAccounts;
     }
     

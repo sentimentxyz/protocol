@@ -16,28 +16,28 @@ contract Account {
     address[] public assets;
     address[] public borrows;
 
-    address public ownerAddr;
-    address public accountManagerAddr;
+    address public owner;
+    address public accountManager;
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManagerAddr) revert Errors.AccountManagerOnly();
+        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
     }
 
-    function initialize(address _accountManagerAddr) public {
-        if(accountManagerAddr != address(0)) revert Errors.AccountAlreadyInitialized();
-        accountManagerAddr = _accountManagerAddr;
+    function initialize(address _accountManager) public {
+        if(accountManager != address(0)) revert Errors.AccountAlreadyInitialized();
+        accountManager = _accountManager;
     }
 
-    function activateFor(address _ownerAddr) public accountManagerOnly {
-        ownerAddr = _ownerAddr;
+    function activateFor(address _owner) public accountManagerOnly {
+        owner = _owner;
         activationBlock = block.number;
     }
 
     function deactivate() public accountManagerOnly {
         if (activationBlock == block.number) revert Errors.AccountDeactivationFailure();
         delete assets;
-        ownerAddr = address(0);
+        owner = address(0);
     }
 
     function getAssets() external view returns (address[] memory) {
@@ -48,20 +48,20 @@ contract Account {
         return borrows;
     }
 
-    function addAsset(address tokenAddr) external accountManagerOnly {
-        assets.push(tokenAddr);
+    function addAsset(address token) external accountManagerOnly {
+        assets.push(token);
     }
 
-    function addBorrow(address tokenAddr) external accountManagerOnly {
-        borrows.push(tokenAddr);
+    function addBorrow(address token) external accountManagerOnly {
+        borrows.push(token);
     }
 
-    function removeAsset(address tokenAddr) external accountManagerOnly {
-        _remove(assets, tokenAddr);
+    function removeAsset(address token) external accountManagerOnly {
+        _remove(assets, token);
     }
 
-    function removeBorrow(address tokenAddr) external accountManagerOnly {
-        _remove(borrows, tokenAddr);
+    function removeBorrow(address token) external accountManagerOnly {
+        _remove(borrows, token);
     }
 
     function hasNoDebt() public view returns (bool) {
@@ -77,7 +77,7 @@ contract Account {
     function sweepTo(address toAddress) public accountManagerOnly {
         for(uint i = 0; i < assets.length; ++i) {
             IERC20(assets[i]).transfer(
-                toAddress, 
+                toAddress,
                 IERC20(assets[i]).balanceOf(address(this))
             );
         }
@@ -85,11 +85,11 @@ contract Account {
         if(!success) revert Errors.ETHTransferFailure();
     }
 
-     function _remove(address[] storage arr, address tokenAddr) internal {
+     function _remove(address[] storage arr, address token) internal {
          uint len = arr.length;
         // Copy the last element in place of tokenAddr and pop
         for(uint i = 0; i < len; ++i) {
-            if(arr[i] == tokenAddr) {
+            if(arr[i] == token) {
                 arr[i] = arr[arr.length - 1];
                 arr.pop();
                 break;

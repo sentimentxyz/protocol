@@ -15,7 +15,7 @@ abstract contract LToken {
     string public name;
     string public symbol;
     uint8 public decimals;
-    address public underlyingAddr;
+    address public underlying;
 
     // Market State Variables
     uint public exchangeRate;
@@ -33,9 +33,9 @@ abstract contract LToken {
     mapping(address => BorrowSnapshot) public borrowBalanceFor;
 
     // Privileged addresses
-    address public adminAddr;
-    address public rateModelAddr;
-    address public accountManagerAddr;
+    address public admin;
+    IRateModel public rateModel;
+    address public accountManager;
 
     // ERC20 accounting
     uint256 public totalSupply;
@@ -71,19 +71,24 @@ abstract contract LToken {
         return true;
     }
 
+    modifier accountManagerOnly() {
+        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
+        _;
+    }
+
     // Utility Functions
     function updateState() external {
         _updateState();
     }
     
-    function currentBorrowBalance(address accountAddr) public returns (uint) {
-        if(_borrowBalance(accountAddr) == 0) return 0;
+    function currentBorrowBalance(address account) public returns (uint) {
+        if(_borrowBalance(account) == 0) return 0;
         _updateState();
-        return _borrowBalance(accountAddr);
+        return _borrowBalance(account);
     }
 
-    function storedBorrowBalance(address accountAddr) public view returns (uint) {
-        return _borrowBalance(accountAddr);
+    function storedBorrowBalance(address account) public view returns (uint) {
+        return _borrowBalance(account);
     }
 
     // Internal Functions
@@ -99,21 +104,19 @@ abstract contract LToken {
         emit Transfer(from, address(0), value);
     }
 
-    function _borrowBalance(address accountAddr) internal view returns (uint) {
-        if(borrowBalanceFor[accountAddr].principal == 0) return 0;
-        return (borrowBalanceFor[accountAddr].principal * borrowIndex
-                / borrowBalanceFor[accountAddr].interestIndex);
+    function _borrowBalance(address account) internal view returns (uint) {
+        if(borrowBalanceFor[account].principal == 0) return 0;
+        return (borrowBalanceFor[account].principal * borrowIndex
+                / borrowBalanceFor[account].interestIndex);
     }
 
     function _updateState() internal {
         if(lastUpdated == block.number) return;
 
-        IERC20 underlying = IERC20(underlyingAddr); 
-
         // Retrieve Data
-        uint totalDeposits = underlying.balanceOf(address(this));
+        uint totalDeposits = IERC20(underlying).balanceOf(address(this));
         uint currentPerBlockBorrowRate =
-            IRateModel(rateModelAddr).getBorrowRate(totalDeposits, totalBorrows, totalReserves);
+            rateModel.getBorrowRate(totalDeposits, totalBorrows, totalReserves);
 
         // Compute Results
         uint rateFactor = ((block.number - lastUpdated).fromUint()).mul(currentPerBlockBorrowRate);
@@ -133,21 +136,21 @@ abstract contract LToken {
     }
 
     // Admin-only functions
-    function setAccountManagerAddress(address _accountManagerAddr) external {
-        if(msg.sender != adminAddr) revert Errors.AdminOnly();
-        accountManagerAddr = _accountManagerAddr;
-        emit UpdateAccountManagerAddress(accountManagerAddr);
+    function setAccountManager(address _accountManager) external {
+        if(msg.sender != admin) revert Errors.AdminOnly();
+        accountManager = _accountManager;
+        emit UpdateAccountManagerAddress(accountManager);
     }
 
-    function setAdmin(address _adminAddr) external {
-        if(msg.sender != adminAddr) revert Errors.AdminOnly();
-        adminAddr = _adminAddr;
-        emit UpdateAdminAddress(adminAddr);
+    function setAdmin(address _admin) external {
+        if(msg.sender != admin) revert Errors.AdminOnly();
+        admin = _admin;
+        emit UpdateAdminAddress(admin);
     }
 
-    function setRateModelAddr(address _rateModelAddr) external {
-        if(msg.sender != adminAddr) revert Errors.AdminOnly();
-        rateModelAddr = _rateModelAddr;
-        emit UpdateRateModelAddress(rateModelAddr);
+    function setRateModel(address _rateModel) external {
+        if(msg.sender != admin) revert Errors.AdminOnly();
+        rateModel = IRateModel(_rateModel);
+        emit UpdateRateModelAddress(address(rateModel));
     }
 }

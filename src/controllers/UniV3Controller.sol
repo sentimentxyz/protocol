@@ -10,7 +10,7 @@ contract UniV3Controller {
     mapping(address => bool) public isSwapAllowed;
 
     function canCall(
-        address targetAddr,
+        address target,
         bytes4 sig,
         bytes calldata data
     ) external view returns (bool, address[] memory, address[] memory)  

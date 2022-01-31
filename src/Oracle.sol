@@ -26,28 +26,28 @@ contract Oracle {
     }
 
     /// @dev We assume that the response has 18 decimals
-    function getPrice(address tokenAddr) public view returns (uint) {
+    function getPrice(address token) public view returns (uint) {
         // TODO Get rid of this if-else pattern
-        if(tokenAddr == WETH9) return 1e18; // WETH
-        if(tokenAddr == CETH) return ICEther(CETH).exchangeRateStored() / 1e10; // cETH
-        if(tokenAddr == CDAI)
+        if(token == WETH9) return 1e18; // WETH
+        if(token == CETH) return ICEther(CETH).exchangeRateStored() / 1e10; // cETH
+        if(token == CDAI)
             return (ICERC20(CDAI).exchangeRateStored() / 1e10).mul(_getPrice(DAI)); // cDAI;
         
-        return _getPrice(tokenAddr);
+        return _getPrice(token);
     }
 
     /// @dev We assume that the response has 18 decimals
-    function _getPrice(address tokenAddr) internal view returns (uint) {
-        if(priceFeedAddr[tokenAddr] == address(0)) revert Errors.PriceFeedUnavailable();
-        (, int price, , ,) = AggregatorV3Interface(priceFeedAddr[tokenAddr]).latestRoundData();
+    function _getPrice(address token) internal view returns (uint) {
+        if(priceFeedAddr[token] == address(0)) revert Errors.PriceFeedUnavailable();
+        (, int price, , ,) = AggregatorV3Interface(priceFeedAddr[token]).latestRoundData();
         return uint(price);
     }
 
     // AdminOnly
-    function setFeedAddress(address tokenAddr, address feedAddr) public {
+    function setFeedAddress(address token, address priceFeed) public {
         if(msg.sender != admin) revert Errors.AdminOnly();
-        priceFeedAddr[tokenAddr] = feedAddr;
-        emit UpdateFeedAddress(tokenAddr, feedAddr);
+        priceFeedAddr[token] = priceFeed;
+        emit UpdateFeedAddress(token, priceFeed);
     }
 
     function setAdmin(address newAdmin) public {

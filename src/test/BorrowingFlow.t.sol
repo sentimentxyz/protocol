@@ -31,7 +31,7 @@ contract BorrowingFlowTest is Test {
         address user = cheatCode.addr(2);
         accountManager.openAccount(user);
         address[] memory accounts = userRegistry.getMarginAccounts(user);
-        assertEq(IAccount(accounts[0]).ownerAddr(), user);
+        assertEq(IAccount(accounts[0]).owner(), user);
     }
 
     function testDepost() public {

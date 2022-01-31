@@ -19,7 +19,7 @@ contract LendingFlowTest is Test {
     function testLtokenCreation() public {
         assertEq(ltoken.name(), "LSentiment");
         assertEq(token.balanceOf(user1), 100);
-        assertEq(ltoken.underlyingAddr(), address(token));
+        assertEq(address(ltoken.underlying()), address(token));
     }
 
     function testDeposit() public {
