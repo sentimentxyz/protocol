@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Errors.sol";
+import "./utils/Errors.sol";
 import "./interface/ICToken.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";

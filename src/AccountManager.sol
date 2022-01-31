@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Errors.sol";
-import "./interface/IERC20.sol";
+import "./utils/Errors.sol";
+import "./utils/Helpers.sol";
 import "./interface/ILToken.sol";
 import "./interface/IAccount.sol";
 import "./interface/IRiskEngine.sol";
 import "./interface/IController.sol";
-import "./dependencies/SafeERC20.sol";
 import "./interface/IUserRegistry.sol";
 import "./interface/IAccountFactory.sol";
 
 contract AccountManager {
-    using SafeERC20 for IERC20;
+    using Helpers for address;
 
     address public admin;
     IRiskEngine public riskEngine;
@@ -77,13 +76,11 @@ contract AccountManager {
     }
 
     function depositEth(address account) external payable onlyOwner(account) {
-        (bool success, ) = account.call{value: msg.value}("");
-        if(!success) revert Errors.ETHTransferFailure();
+        account.safeTransferETH(msg.value);
     }
 
     function withdrawEth(address account, uint value) public onlyOwner(account) {
-        (bool success, ) = IAccount(account).exec(msg.sender, value, new bytes(0));
-        if(!success) revert Errors.ETHTransferFailure();
+        account.withdrawEthFromAcc(msg.sender, value);
     }
 
     function deposit(
@@ -94,8 +91,8 @@ contract AccountManager {
         public onlyOwner(account) 
     {
         if(!isCollateralAllowed[token]) revert Errors.CollateralTypeRestricted();
-        if(IERC20(token).balanceOf(account) == 0) IAccount(account).addAsset(address(token));
-        IERC20(token).safeTransferFrom(msg.sender, account, value);
+        if(token.balanceOf(account) == 0) IAccount(account).addAsset(address(token));
+        token.safeTransferFrom(msg.sender, account, value);
     }
 
     function withdraw(
@@ -110,12 +107,8 @@ contract AccountManager {
         require(IAccount(account).hasNoDebt() ||
             riskEngine.isWithdrawAllowed(account, token, value),
             "AccMgr/withdraw: Risky");
-        
-        (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
-                abi.encodeWithSelector(IERC20.transfer.selector, msg.sender, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
-        
-        if(IERC20(token).balanceOf(account) == 0)
+        account.withdrawERC20FromAcc(msg.sender, token, value);
+        if(token.balanceOf(account) == 0)
             IAccount(account).removeAsset(token);
     }
 
@@ -129,7 +122,7 @@ contract AccountManager {
         if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
         if(!riskEngine.isBorrowAllowed(account, token, value)) 
             revert Errors.RiskThresholdBreached();
-        if(token != address(0) && IERC20(token).balanceOf(account) == 0) 
+        if(token != address(0) && token.balanceOf(account) == 0) 
             IAccount(account).addAsset(token);
         if(ILToken(LTokenAddressFor[token]).lendTo(account, value))
             IAccount(account).addBorrow(token);
@@ -160,9 +153,7 @@ contract AccountManager {
         address spender, 
         uint value
     ) public onlyOwner(account) {
-        (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
-            abi.encodeWithSelector(IERC20.approve.selector, spender, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED"); // TODO Refactor using custom errors
+        account.approveForAcc(token, spender, value);
     }
 
     function exec(
@@ -189,7 +180,7 @@ contract AccountManager {
     function settle(address account) public onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
-            uint balance = IERC20(borrows[i]).balanceOf(account);
+            uint balance = borrows[i].balanceOf(account);
             if ( balance > 0 ) repay(account, borrows[i], balance);
         }
     }
@@ -230,15 +221,8 @@ contract AccountManager {
         bool isEth = token == address(0);
         if(value == type(uint).max) value = LToken.currentBorrowBalance(account);
 
-        if(isEth) {
-            (bool success, ) = IAccount(account).exec(address(LToken), value, new bytes(0));
-            if(!success) revert Errors.ETHTransferFailure();
-        }
-        else {
-             (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
-                abi.encodeWithSelector(IERC20.transfer.selector, address(LToken), value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED"); // TODO Refactor using custom errors
-        }
+        if(isEth) account.withdrawEthFromAcc(address(LToken), value);
+        else account.withdrawERC20FromAcc(address(LToken), token, value);
         
         if(LToken.collectFrom(account, value) && !isEth) IAccount(account).removeBorrow(token);
         if (!isEth && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
@@ -247,13 +231,13 @@ contract AccountManager {
     function _updateTokens(address account, address[] memory tokensIn, address[] memory tokensOut) internal {
         uint tokensInLen = tokensIn.length;
         for(uint i = 0; i < tokensInLen; ++i) {
-            if(IERC20(tokensIn[i]).balanceOf(account) == 0)
+            if(tokensIn[i].balanceOf(account) == 0)
                 IAccount(account).addAsset(tokensIn[i]);
         }
         
         uint tokensOutLen = tokensOut.length;
         for(uint i = 0; i < tokensOutLen; ++i) {
-            if(IERC20(tokensOut[i]).balanceOf(account) == 0) 
+            if(tokensOut[i].balanceOf(account) == 0) 
                 IAccount(account).removeAsset(tokensOut[i]);
         }
     }

@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Errors.sol";
-import "./interface/IERC20.sol";
+import "./utils/Errors.sol";
+import "./utils/Helpers.sol";
 import "./interface/IRateModel.sol";
-import "./dependencies/SafeERC20.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
 abstract contract LToken {
-    using SafeERC20 for IERC20;
+    using Helpers for address;
     using PRBMathUD60x18 for uint;
 
     // Token Metadata
@@ -114,7 +113,7 @@ abstract contract LToken {
         if(lastUpdated == block.number) return;
 
         // Retrieve Data
-        uint totalDeposits = IERC20(underlying).balanceOf(address(this));
+        uint totalDeposits = underlying.balanceOf(address(this));
         uint currentPerBlockBorrowRate =
             rateModel.getBorrowRate(totalDeposits, totalBorrows, totalReserves);
 
