@@ -16,6 +16,6 @@ library Errors {
     error FunctionCallRestricted();
     error AccountNotLiquidatable();
     error CollateralTypeRestricted();
-    error AccountAlreadyInitialized();
+    error ContractAlreadyInitialized();
     error AccountDeactivationFailure();
 }

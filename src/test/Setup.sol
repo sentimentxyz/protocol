@@ -17,6 +17,9 @@ import "../UserRegistry.sol";
 import "../AccountFactory.sol";
 import "../Account.sol";
 
+import "../proxy/BeaconProxy.sol";
+import "../proxy/Beacon.sol";
+
 contract Test is DSTest {
     CheatCode cheatCode = CheatCode(HEVM_ADDRESS);
 
@@ -32,6 +35,9 @@ contract Test is DSTest {
     AccountFactory public factory;
     Account public marginAccount;
 
+    Beacon public beacon;
+    BeaconProxy public beaconProxy;
+
     function setUpLEther() public {
         lEther = new LEther("LEther", "LETH", 1, address(0), address(rateModel), address(accountManager), 1);
         accountManager.setLTokenAddress(address(0), address(lEther));
@@ -46,9 +52,9 @@ contract Test is DSTest {
     }
 
     function setUpAccountManager() public {
+        setUpBeaconProxy();
         riskEngine = setUpRiskEngine();
-        marginAccount = new Account();
-        factory = new AccountFactory(address(marginAccount));
+        factory = new AccountFactory(address(beacon), address(beaconProxy));
         userRegistry = new UserRegistry();
         accountManager = new AccountManager(address(riskEngine), address(factory), address(userRegistry));
         riskEngine.setAccountManagerAddr(address(accountManager));
@@ -58,6 +64,12 @@ contract Test is DSTest {
     function setUpRiskEngine() public returns (RiskEngine engine) {
         Oracle oracle = new Oracle();
         engine = new RiskEngine(address(oracle));
+    }
+
+    function setUpBeaconProxy() public {
+        marginAccount = new Account();
+        beacon = new Beacon(address(marginAccount));
+        beaconProxy = new BeaconProxy();
     }
 
     function basicSetup() public {
