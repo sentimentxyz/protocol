@@ -2,13 +2,10 @@
 pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
-import "./interface/IERC20.sol";
 import "./utils/SafeERC20.sol";
-
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
 contract Account {
-    using SafeERC20 for IERC20;
     using SafeERC20 for address;
 
     uint public activationBlock;
@@ -75,14 +72,14 @@ contract Account {
     }
 
     function sweepTo(address toAddress) public accountManagerOnly {
-        for(uint i = 0; i < assets.length; ++i) {
-            IERC20(assets[i]).transfer(
+        uint assetsLen = assets.length;
+        for(uint i = 0; i < assetsLen; ++i) {
+            assets[i].safeTransfer(
                 toAddress,
-                IERC20(assets[i]).balanceOf(address(this))
+                assets[i].balanceOf(address(this))
             );
         }
-        (bool success, ) = toAddress.call{value: address(this).balance}("");
-        if(!success) revert Errors.ETHTransferFailure();
+        toAddress.safeTransferETH(address(this).balance);
     }
 
      function _remove(address[] storage arr, address token) internal {

@@ -2,10 +2,11 @@
 pragma solidity ^0.8.10;
 
 import "./LToken.sol";
+import "./interface/IERC20.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LERC20 is LToken {
-    using SafeERC20 for IERC20;
+    using SafeERC20 for address;
     using PRBMathUD60x18 for uint;
     
     constructor(
@@ -35,13 +36,13 @@ contract LERC20 is LToken {
     // Lender Functions
     function deposit(uint value) public {
         _updateState();
-        IERC20(underlying).safeTransferFrom(msg.sender, address(this), value);
+        underlying.safeTransferFrom(msg.sender, address(this), value);
         _mint(msg.sender, value.div(exchangeRate));
     }
 
     function withdraw(uint value) public {
         _updateState();
-        IERC20(underlying).safeTransfer(msg.sender, value);
+        underlying.safeTransfer(msg.sender, value);
         _burn(msg.sender, value.div(exchangeRate));
     }
 
@@ -50,7 +51,7 @@ contract LERC20 is LToken {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
-        IERC20(underlying).safeTransfer(accountAddr, value);
+        underlying.safeTransfer(accountAddr, value);
         totalBorrows += value;
         borrowBalanceFor[accountAddr].principal += value;
         borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
