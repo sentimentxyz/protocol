@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {StorageSlot} from "../utils/Storage.sol";
+import {Errors} from "../utils/Errors.sol";
 import "./Base.sol";
 
 contract Proxy is BaseProxy {
@@ -25,7 +26,7 @@ contract Proxy is BaseProxy {
     }
 
     function _setImplementation(address implementation) internal {
-        require(implementation != address(0), "Zero Address");
+        if (implementation == address(0)) revert Errors.ZeroAddress();
         StorageSlot.setAddressAt(_IMPL_SLOT, implementation);
         emit Upgraded(implementation);
     }
