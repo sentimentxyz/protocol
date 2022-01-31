@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {StorageSlot} from "../utils/Storage.sol";
+import {Errors} from "../utils/Errors.sol";
 import "../interface/IBeacon.sol";
 import "./Base.sol";
 
@@ -30,7 +31,7 @@ contract BeaconProxy is BaseProxy {
     }
 
     function _setBeacon(address beacon) internal {
-        require(beacon != address(0), "Zero Address");
+        if (beacon == address(0)) revert Errors.ZeroAddress();
         StorageSlot.setAddressAt(_BEACON_SLOT, beacon);
         emit BeaconUpgraded(beacon);
     }

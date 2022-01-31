@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.10;
+
+import {Errors} from "../utils/Errors.sol";
 
 contract Beacon {
     
@@ -16,7 +17,7 @@ contract Beacon {
     }
 
     modifier adminOnly() {
-        require(msg.sender == admin, "Not Allowed");
+        if (msg.sender != admin) revert Errors.AdminOnly();
         _;
     }
 

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {StorageSlot} from "../utils/Storage.sol";
+import {Errors} from "../utils/Errors.sol";
 
 abstract contract BaseProxy {
 
@@ -11,7 +12,7 @@ abstract contract BaseProxy {
     event AdminChanged(address previousAdmin, address newAdmin);
 
     modifier adminOnly() {
-        require(msg.sender == getAdmin(), "AdminOnly");
+        if (msg.sender != getAdmin()) revert Errors.AdminOnly();
         _;
     }
 
@@ -24,7 +25,7 @@ abstract contract BaseProxy {
     }
 
     function _setAdmin(address admin) internal {
-        require(admin != address(0), "Zero Address");
+        if (admin == address(0)) revert Errors.ZeroAddress();
         emit AdminChanged(getAdmin(), admin);
         StorageSlot.setAddressAt(_ADMIN_SLOT, admin);
     }
