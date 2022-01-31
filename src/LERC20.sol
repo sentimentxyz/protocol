@@ -22,7 +22,7 @@ contract LERC20 is LToken {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
-        underlying = IERC20(_underlying);
+        underlying = _underlying;
         // Market State Variables
         exchangeRate = _initialExchangeRate * 1e18;
         borrowIndex = 1e18;
@@ -35,13 +35,13 @@ contract LERC20 is LToken {
     // Lender Functions
     function deposit(uint value) public {
         _updateState();
-        underlying.safeTransferFrom(msg.sender, address(this), value);
+        IERC20(underlying).safeTransferFrom(msg.sender, address(this), value);
         _mint(msg.sender, value.div(exchangeRate));
     }
 
     function withdraw(uint value) public {
         _updateState();
-        underlying.safeTransfer(msg.sender, value);
+        IERC20(underlying).safeTransfer(msg.sender, value);
         _burn(msg.sender, value.div(exchangeRate));
     }
 
@@ -50,7 +50,7 @@ contract LERC20 is LToken {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
-        underlying.safeTransfer(accountAddr, value);
+        IERC20(underlying).safeTransfer(accountAddr, value);
         totalBorrows += value;
         borrowBalanceFor[accountAddr].principal += value;
         borrowBalanceFor[accountAddr].interestIndex = borrowIndex;

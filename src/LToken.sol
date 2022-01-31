@@ -15,7 +15,7 @@ abstract contract LToken {
     string public name;
     string public symbol;
     uint8 public decimals;
-    IERC20 public underlying;
+    address public underlying;
 
     // Market State Variables
     uint public exchangeRate;
@@ -114,7 +114,7 @@ abstract contract LToken {
         if(lastUpdated == block.number) return;
 
         // Retrieve Data
-        uint totalDeposits = underlying.balanceOf(address(this));
+        uint totalDeposits = IERC20(underlying).balanceOf(address(this));
         uint currentPerBlockBorrowRate =
             rateModel.getBorrowRate(totalDeposits, totalBorrows, totalReserves);
 

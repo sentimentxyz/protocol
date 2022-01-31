@@ -10,9 +10,9 @@ interface IAccount {
     function initialize(address accountManager) external;
     function getAssets() external view returns (address[] memory);
     function getBorrows() external view returns (address[] memory);
-    function addAsset(address tokenAddr) external;
-    function addBorrow(address tokenAddr) external;
-    function removeAsset(address tokenAddr) external;
-    function removeBorrow(address tokenAddr) external;
+    function addAsset(address token) external;
+    function addBorrow(address token) external;
+    function removeAsset(address token) external;
+    function removeBorrow(address token) external;
     function exec(address target, uint amt, bytes memory data) external returns (bool, bytes memory);
 }

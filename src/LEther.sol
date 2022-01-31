@@ -21,7 +21,7 @@ contract LEther is LToken {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
-        underlying = IERC20(_underlying);
+        underlying = _underlying;
         // Market State Variables
         exchangeRate = _initialExchangeRate * 1e18;
         borrowIndex = 1e18;
