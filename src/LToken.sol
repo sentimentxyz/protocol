@@ -133,7 +133,7 @@ abstract contract LToken {
     }
 
     function _getCurrentPerBlockBorrowRate() internal view returns (uint) {
-        return rateModel.getBorrowRate(underlying.balanceOf(address(this)), totalBorrows, totalReserves);
+        return rateModel.getBorrowRate(_getBalance(), totalBorrows, totalReserves);
     }
 
     function _getBorrowIndex(uint rateFactor) internal view returns (uint) {
@@ -154,8 +154,10 @@ abstract contract LToken {
 
     function _getExchangeRate(uint _totalBorrows, uint _totalReserves) internal view returns (uint) {
         return (totalSupply == 0) ? exchangeRate :
-            (underlying.balanceOf(address(this)) + _totalBorrows - _totalReserves).div(totalSupply);
+            (_getBalance() + _totalBorrows - _totalReserves).div(totalSupply);
     }
+
+    function _getBalance() internal view virtual returns (uint);
 
     // Admin-only functions
     function setAccountManager(address _accountManager) external {

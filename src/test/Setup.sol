@@ -60,7 +60,12 @@ contract Test is DSTest {
         engine = new RiskEngine(address(oracle));
     }
 
+    function setUpRateModel() public {
+        rateModel = new DefaultRateModel();
+    }
+
     function basicSetup() public {
+        setUpRateModel();
         setUpAccountManager();
         setUpLEther();
         setUpLtoken();
