@@ -104,14 +104,10 @@ abstract contract LToken {
     }
 
     function _borrowBalance(address account) internal view returns (uint) {
-        uint _borrowIndex;
-        uint _rateFactor = _getRateFactor();
-        if (lastUpdated == block.number) _borrowIndex = borrowIndex;
-        else _borrowIndex = _getBorrowIndex(_rateFactor);
-
         if(borrowBalanceFor[account].principal == 0) return 0;
-        return (borrowBalanceFor[account].principal * _borrowIndex
-                / borrowBalanceFor[account].interestIndex);
+        return borrowBalanceFor[account].principal
+                .mul(_getBorrowIndex(_getRateFactor()))
+                .div(borrowBalanceFor[account].interestIndex);
     }
 
     function _updateState() internal {
