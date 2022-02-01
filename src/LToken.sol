@@ -104,34 +104,57 @@ abstract contract LToken {
     }
 
     function _borrowBalance(address account) internal view returns (uint) {
+        uint _borrowIndex;
+        uint _rateFactor = _getRateFactor();
+        if (lastUpdated == block.number) _borrowIndex = borrowIndex;
+        else _borrowIndex = _getBorrowIndex(_rateFactor);
+
         if(borrowBalanceFor[account].principal == 0) return 0;
-        return (borrowBalanceFor[account].principal * borrowIndex
+        return (borrowBalanceFor[account].principal * _borrowIndex
                 / borrowBalanceFor[account].interestIndex);
     }
 
     function _updateState() internal {
         if(lastUpdated == block.number) return;
 
-        // Retrieve Data
-        uint totalDeposits = underlying.balanceOf(address(this));
-        uint currentPerBlockBorrowRate =
-            rateModel.getBorrowRate(totalDeposits, totalBorrows, totalReserves);
-
-        // Compute Results
-        uint rateFactor = ((block.number - lastUpdated).fromUint()).mul(currentPerBlockBorrowRate);
-        uint newBorrowIndex = borrowIndex.mul(1e18 + rateFactor);
-        uint interestAccrued = totalBorrows.mul(rateFactor);
-        uint newTotalBorrows = totalBorrows + interestAccrued;
-        uint newTotalReserves = interestAccrued.mul(reserveFactor) + totalReserves;
-        uint newExchangeRate = (totalSupply == 0) ? exchangeRate :
-            (totalDeposits + newTotalBorrows - newTotalReserves).div(totalSupply);
+        uint rateFactor = _getRateFactor();
+        uint interestAccrued = _getInterestAccrued(rateFactor);
 
         // Store results
-        borrowIndex = newBorrowIndex;
-        totalBorrows = newTotalBorrows;
-        totalReserves = newTotalReserves;
-        exchangeRate = newExchangeRate;
+        borrowIndex = _getBorrowIndex(rateFactor);
+        totalBorrows = _getTotalBorrows(_getInterestAccrued(rateFactor));
+        totalReserves = _getTotalReserves(interestAccrued);
+        exchangeRate = _getExchangeRate(totalBorrows, totalReserves);
         lastUpdated = block.number;
+    }
+
+    function _getRateFactor() internal view returns (uint) {
+        return ((block.number - lastUpdated).fromUint()).mul(_getCurrentPerBlockBorrowRate());
+    }
+
+    function _getCurrentPerBlockBorrowRate() internal view returns (uint) {
+        return rateModel.getBorrowRate(underlying.balanceOf(address(this)), totalBorrows, totalReserves);
+    }
+
+    function _getBorrowIndex(uint rateFactor) internal view returns (uint) {
+        return borrowIndex.mul(1e18 + rateFactor);
+    }
+
+    function _getInterestAccrued(uint rateFactor) internal view returns (uint) {
+        return totalBorrows.mul(rateFactor);
+    }
+
+    function _getTotalBorrows(uint interestAccrued) internal view returns (uint) {
+        return totalBorrows + interestAccrued;
+    }
+
+    function _getTotalReserves(uint interestAccrued) internal view returns (uint) {
+        return interestAccrued.mul(reserveFactor) + totalReserves;
+    }
+
+    function _getExchangeRate(uint _totalBorrows, uint _totalReserves) internal view returns (uint) {
+        return (totalSupply == 0) ? exchangeRate :
+            (underlying.balanceOf(address(this)) + _totalBorrows - _totalReserves).div(totalSupply);
     }
 
     // Admin-only functions
