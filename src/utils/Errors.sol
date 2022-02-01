@@ -10,6 +10,7 @@ library Errors {
     error ETHTransferFailure();
     error AccountManagerOnly();
     error PriceFeedUnavailable();
+    error InvalidMarginAccount();
     error ControllerUnavailable();
     error RiskThresholdBreached();
     error FunctionCallRestricted();
