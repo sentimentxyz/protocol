@@ -8,8 +8,6 @@ contract AccountFactory {
 
     address public implementation;
 
-    mapping(address => bool) public marginAccounts;
-
     constructor (address _implementation) {
         implementation = _implementation;
     }
@@ -17,10 +15,5 @@ contract AccountFactory {
     function create(address accountManager) public returns (address account) {
         account = Clones.clone(implementation);
         IAccount(account).initialize(accountManager);
-        marginAccounts[account] = true;
-    }
-
-    function isMarginAccount(address marginAccount) public view returns (bool) {
-        return marginAccounts[marginAccount];
     }
 }

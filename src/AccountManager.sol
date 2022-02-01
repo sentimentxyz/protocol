@@ -43,8 +43,7 @@ contract AccountManager {
     }
 
     modifier onlyOwner(address account) {
-        if(!accountFactory.isMarginAccount(account)) revert Errors.InvalidMarginAccount();
-        if(IAccount(account).owner() != msg.sender) revert Errors.AccountOwnerOnly();
+        if(!userRegistry.isValidOwner(msg.sender, account)) revert Errors.AccountOwnerOnly();
         _;
     }
 
