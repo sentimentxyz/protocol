@@ -4,6 +4,7 @@ pragma solidity ^0.8.10;
 library Errors {
     error AdminOnly();
     error PendingDebt();
+    error ZeroAddress();
     error AccountsNotFound();
     error AccountOwnerOnly();
     error LTokenUnavailable();
@@ -15,6 +16,6 @@ library Errors {
     error FunctionCallRestricted();
     error AccountNotLiquidatable();
     error CollateralTypeRestricted();
-    error AccountAlreadyInitialized();
+    error ContractAlreadyInitialized();
     error AccountDeactivationFailure();
 }
