@@ -55,4 +55,8 @@ abstract contract BaseProxy {
     fallback() external payable {
         _delegate(getImplementation());
     }
+
+    receive() external payable {
+        _delegate(getImplementation());
+    }
 }
