@@ -65,6 +65,10 @@ contract LEther is LToken {
         borrowBalanceFor[account].interestIndex = borrowIndex;
         return (borrowBalanceFor[account].principal == 0);
     }
+
+    function _getBalance() internal view override returns (uint) {
+        return address(this).balance;
+    }
     
     receive() external payable {}
 }

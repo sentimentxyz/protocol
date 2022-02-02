@@ -64,4 +64,8 @@ contract LERC20 is LToken {
         borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
         return (borrowBalanceFor[accountAddr].principal == 0);
     }
+
+    function _getBalance() internal view override returns (uint) {
+        return underlying.balanceOf(address(this));
+    }
 }
