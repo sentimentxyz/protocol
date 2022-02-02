@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
-import "./interface/IOracle.sol";
+import "./interface/IPriceFeed.sol";
 import "./interface/ILToken.sol";
 import "./interface/IAccount.sol";
 import "./interface/IAccountManager.sol";
@@ -12,15 +12,15 @@ contract RiskEngine {
     using PRBMathUD60x18 for uint;
 
     address public admin;
-    IOracle public oracle;
+    IPriceFeed public priceFeed;
     IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
     event UpdateAccountManagerAddress(address indexed accountManagerAddr);
 
-    constructor(address _oracle) {
+    constructor(address _priceFeed) {
         admin = msg.sender;
-        oracle = IOracle(_oracle);
+        priceFeed = IPriceFeed(_priceFeed);
     }
 
     function isBorrowAllowed(
@@ -98,7 +98,7 @@ contract RiskEngine {
     }
 
     function _valueInWei(address token, uint value) internal view returns (uint) {
-        return oracle.getPrice(token).mul(value);
+        return priceFeed.getPrice(token).mul(value);
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows) internal pure returns (bool) {

@@ -4,8 +4,8 @@ pragma solidity ^0.8.10;
 import "@ds-test/src/test.sol";
 import { ERC20PresetMinterPauser } from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
-import "./mocks/oracle.sol";
 import "./Cheatcode.sol";
+import "./mocks/FeedAggregator.sol";
 
 import "../LERC20.sol";
 import "../LEther.sol";
@@ -62,8 +62,8 @@ contract Test is DSTest {
     }
 
     function setUpRiskEngine() public returns (RiskEngine engine) {
-        Oracle oracle = new Oracle();
-        engine = new RiskEngine(address(oracle));
+        FeedAggregator priceFeed = new FeedAggregator();
+        engine = new RiskEngine(address(priceFeed));
     }
 
     function setUpRateModel() public {
