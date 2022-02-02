@@ -36,7 +36,6 @@ contract Test is DSTest {
     Account public marginAccount;
 
     Beacon public beacon;
-    BeaconProxy public beaconProxy;
 
     function setUpLEther() public {
         lEther = new LEther("LEther", "LETH", 1, address(0), address(rateModel), address(accountManager), 1);
@@ -54,7 +53,7 @@ contract Test is DSTest {
     function setUpAccountManager() public {
         setUpBeaconProxy();
         riskEngine = setUpRiskEngine();
-        factory = new AccountFactory(address(beacon), address(beaconProxy));
+        factory = new AccountFactory(address(beacon));
         userRegistry = new UserRegistry();
         accountManager = new AccountManager(address(riskEngine), address(factory), address(userRegistry));
         riskEngine.setAccountManagerAddr(address(accountManager));
@@ -73,7 +72,6 @@ contract Test is DSTest {
     function setUpBeaconProxy() public {
         marginAccount = new Account();
         beacon = new Beacon(address(marginAccount));
-        beaconProxy = new BeaconProxy();
     }
 
     function basicSetup() public {

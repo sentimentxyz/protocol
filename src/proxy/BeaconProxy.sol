@@ -13,8 +13,7 @@ contract BeaconProxy is BaseProxy {
 
     event BeaconUpgraded(address indexed beacon);
 
-    function initializeProxy(address _beacon, address _admin) public {
-        if (getAdmin() != address(0)) revert Errors.ContractAlreadyInitialized();
+    constructor(address _beacon, address _admin) {
         _setAdmin(_admin);
         _setBeacon(_beacon);
     }
