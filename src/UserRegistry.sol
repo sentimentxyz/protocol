@@ -8,12 +8,8 @@ contract UserRegistry {
     address public admin;
     address public accountManager;
 
-    struct User {
-        address owner; // TODO do we really need this? Consider refactoring to address => address[]
-        address[] marginAccounts;
-    }
-    
-    mapping(address => User) public ownerUserMapping;
+    mapping(address => address) public accountOwnerMapping;
+    mapping(address => address[]) public ownerAccountsMapping;
 
     event UpdateAdminAddress(address indexed admin);
     event UpdateAccountManagerAddress(address indexed accountManager);
@@ -45,23 +41,18 @@ contract UserRegistry {
     }
 
     function getMarginAccounts(address _owner) public view returns (address[] memory) {
-        if(ownerUserMapping[_owner].owner == address(0)) revert Errors.AccountNotFound();
-        return ownerUserMapping[_owner].marginAccounts;
+        return ownerAccountsMapping[_owner];
     }
 
     function addMarginAccount(address _owner, address _marginAccount) public accountManagerOnly {
-        if (ownerUserMapping[_owner].owner == address(0)) {
-            ownerUserMapping[_owner] = User(_owner, new address[](1));
-            ownerUserMapping[_owner].marginAccounts[0] = _marginAccount;
-        } else {
-            ownerUserMapping[_owner].marginAccounts.push(_marginAccount);
-        }
+        ownerAccountsMapping[_owner].push(_marginAccount);
+        accountOwnerMapping[_marginAccount] = _owner;
         emit AddMarginAccount(_owner, _marginAccount);
     }
 
     function removeMarginAccount(address _owner, address _marginAccount) public accountManagerOnly {
-        if(ownerUserMapping[_owner].owner == address(0)) revert Errors.AccountNotFound();
-        address[] storage accounts = ownerUserMapping[_owner].marginAccounts;
+        if(ownerAccountsMapping[_owner].length == 0) revert Errors.AccountsNotFound();
+        address[] storage accounts = ownerAccountsMapping[_owner];
         for(uint i=0; i < accounts.length; i++) {
             if (accounts[i] == _marginAccount) {
                 accounts[i] = accounts[accounts.length-1];
@@ -69,7 +60,11 @@ contract UserRegistry {
                 break;
             }
         }
+        accountOwnerMapping[_marginAccount] = address(0);
         emit RemoveMarginAccount(_owner, _marginAccount);
     }
 
+    function isValidOwner(address _owner, address _account) public view returns (bool) {
+        return accountOwnerMapping[_account] == _owner;
+    }
 }
