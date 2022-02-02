@@ -36,7 +36,6 @@ contract Test is DSTest {
     Account public marginAccount;
 
     Beacon public beacon;
-    BeaconProxy public beaconProxy;
 
     function setUpLEther() public {
         lEther = new LEther("LEther", "LETH", 1, address(0), address(rateModel), address(accountManager), 1);
@@ -73,7 +72,6 @@ contract Test is DSTest {
     function setUpBeaconProxy() public {
         marginAccount = new Account();
         beacon = new Beacon(address(marginAccount));
-        beaconProxy = new BeaconProxy(address(beacon), address(this));
     }
 
     function basicSetup() public {
