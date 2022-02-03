@@ -2,16 +2,15 @@
 pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
+import "./utils/Pausable.sol";
 
-contract UserRegistry {
+contract UserRegistry is Pausable {
 
-    address public admin;
     address public accountManager;
 
     mapping(address => address) public accountOwnerMapping;
     mapping(address => address[]) public ownerAccountsMapping;
 
-    event UpdateAdminAddress(address indexed admin);
     event UpdateAccountManagerAddress(address indexed accountManager);
     event AddMarginAccount(address indexed owner, address indexed marginAccount);
     event RemoveMarginAccount(address indexed owner, address indexed marginAccount);
@@ -20,24 +19,9 @@ contract UserRegistry {
         admin = msg.sender;
     }
 
-    modifier adminOnly() {
-        if(msg.sender != admin) revert Errors.AdminOnly();
-        _;
-    }
-
     modifier accountManagerOnly() {
         if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
-    }
-
-    function updateAdminAddress(address _admin) public adminOnly {
-        admin = _admin;
-        emit UpdateAdminAddress(admin);
-    }
-
-    function setAccountManagerAddress(address _accountManager) public adminOnly {
-        accountManager = _accountManager;
-        emit UpdateAccountManagerAddress(accountManager);
     }
 
     function getMarginAccounts(address _owner) public view returns (address[] memory) {
@@ -66,5 +50,11 @@ contract UserRegistry {
 
     function isValidOwner(address _owner, address _account) public view returns (bool) {
         return accountOwnerMapping[_account] == _owner;
+    }
+
+    // admin only
+    function setAccountManagerAddress(address _accountManager) public adminOnly {
+        accountManager = _accountManager;
+        emit UpdateAccountManagerAddress(accountManager);
     }
 }

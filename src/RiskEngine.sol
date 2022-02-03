@@ -2,16 +2,16 @@
 pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
+import "./utils/Pausable.sol";
 import "./interface/IPriceFeed.sol";
 import "./interface/ILToken.sol";
 import "./interface/IAccount.sol";
 import "./interface/IAccountManager.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
-contract RiskEngine {
+contract RiskEngine is Pausable {
     using PRBMathUD60x18 for uint;
 
-    address public admin;
     IPriceFeed public priceFeed;
     IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
@@ -62,12 +62,6 @@ contract RiskEngine {
         return _currentAccountBorrows(account);
     }
 
-    function setAccountManagerAddr(address _accountManager) public {
-        if(msg.sender != admin) revert Errors.AdminOnly();
-        accountManager = IAccountManager(_accountManager);
-        emit UpdateAccountManagerAddress(address(accountManager));
-    }
-
     // Internal Functions
     function _currentAccountBalance(address account) internal view returns (uint) {
         address[] memory assets = IAccount(account).getAssets();
@@ -108,5 +102,11 @@ contract RiskEngine {
 
     function _LTokenAddressFor(address token) internal view returns (address) {
         return accountManager.LTokenAddressFor(token);
+    }
+
+    // admin only
+    function setAccountManagerAddr(address _accountManager) public adminOnly {
+        accountManager = IAccountManager(_accountManager);
+        emit UpdateAccountManagerAddress(address(accountManager));
     }
 }

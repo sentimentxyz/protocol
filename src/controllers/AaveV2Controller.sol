@@ -1,11 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-contract AaveV2Controller {
-    address public admin;
+import "../utils/Pausable.sol";
+
+contract AaveV2Controller is Pausable {
     bytes4 public constant DEPOSIT = 0xe8eda9df;
     bytes4 public constant WITHDRAW = 0x69328dec;
     mapping(address => address) public aTokenAddrFor; // TODO Query from Aave contracts instead
+
+    constructor() {
+        admin = msg.sender;
+    }
 
     function canCall(
         address target,
