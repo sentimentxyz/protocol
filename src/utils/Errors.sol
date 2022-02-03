@@ -5,8 +5,10 @@ library Errors {
     error AdminOnly();
     error PendingDebt();
     error ZeroAddress();
+    error ContractPaused();
     error AccountsNotFound();
     error AccountOwnerOnly();
+    error ContractNotPaused();
     error LTokenUnavailable();
     error ETHTransferFailure();
     error AccountManagerOnly();

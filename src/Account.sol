@@ -3,9 +3,10 @@ pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
 import "./utils/Helpers.sol";
+import "./utils/Pausable.sol";
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
-contract Account {
+contract Account is Pausable {
     using Helpers for address;
 
     uint public activationBlock;

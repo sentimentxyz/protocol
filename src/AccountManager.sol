@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
 import "./utils/Helpers.sol";
+import "./utils/Pausable.sol";
 import "./interface/ILToken.sol";
 import "./interface/IAccount.sol";
 import "./interface/IRiskEngine.sol";
@@ -10,10 +11,9 @@ import "./interface/IController.sol";
 import "./interface/IUserRegistry.sol";
 import "./interface/IAccountFactory.sol";
 
-contract AccountManager {
+contract AccountManager is Pausable {
     using Helpers for address;
 
-    address public admin;
     IRiskEngine public riskEngine;
     IUserRegistry public userRegistry;
     IAccountFactory public accountFactory;
@@ -44,11 +44,6 @@ contract AccountManager {
 
     modifier onlyOwner(address account) {
         if(!userRegistry.isValidOwner(msg.sender, account)) revert Errors.AccountOwnerOnly();
-        _;
-    }
-
-    modifier onlyAdmin() {
-        if(admin != msg.sender) revert Errors.AdminOnly();
         _;
     }
 
@@ -186,31 +181,31 @@ contract AccountManager {
     }
 
     // Admin-Only
-    function toggleCollateralState(address token) public onlyAdmin {
+    function toggleCollateralState(address token) public adminOnly {
         isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
 
-    function setLTokenAddress(address token, address LToken) public onlyAdmin {
+    function setLTokenAddress(address token, address LToken) public adminOnly {
         LTokenAddressFor[token] = LToken;
         emit UpdateLTokenAddress(token, LToken);
     }
 
-    function setRiskEngineAddress(address _riskEngine) public onlyAdmin {
+    function setRiskEngineAddress(address _riskEngine) public adminOnly {
         riskEngine = IRiskEngine(_riskEngine);
         emit UpdateRiskEngineAddress(address(riskEngine));
     }
 
-    function setUserRegistryAddress(address _userRegistry) public onlyAdmin {
+    function setUserRegistryAddress(address _userRegistry) public adminOnly {
         userRegistry = IUserRegistry(_userRegistry);
         emit UpdateUserRegistryAddress(address(userRegistry));
     }
 
-    function setControllerAddress(address target, address controller) public onlyAdmin {
+    function setControllerAddress(address target, address controller) public adminOnly {
         controllerAddrFor[target] = controller;
         emit UpdateControllerAddress(target, controller);
     }
 
-    function setAccountFactoryAddress(address _accountFactory) public onlyAdmin {
+    function setAccountFactoryAddress(address _accountFactory) public adminOnly {
         accountFactory = IAccountFactory(_accountFactory);
         emit UpdateAccountFactoryAddress(address(accountFactory));
     }

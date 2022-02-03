@@ -3,10 +3,11 @@ pragma solidity ^0.8.10;
 
 import "./utils/Errors.sol";
 import "./utils/Helpers.sol";
+import "./utils/Pausable.sol";
 import "./interface/IRateModel.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
-abstract contract LToken {
+abstract contract LToken is Pausable {
     using Helpers for address;
     using PRBMathUD60x18 for uint;
 
@@ -32,7 +33,6 @@ abstract contract LToken {
     mapping(address => BorrowSnapshot) public borrowBalanceFor;
 
     // Privileged addresses
-    address public admin;
     IRateModel public rateModel;
     address public accountManager;
 
@@ -45,7 +45,6 @@ abstract contract LToken {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
     event UpdateAccountManagerAddress(address indexed accountManagerAddr);
-    event UpdateAdminAddress(address indexed adminAddr);
     event UpdateRateModelAddress(address indexed rateModelAddr);
 
     // ERC20 Functions
@@ -156,20 +155,12 @@ abstract contract LToken {
     function _getBalance() internal view virtual returns (uint);
 
     // Admin-only functions
-    function setAccountManager(address _accountManager) external {
-        if(msg.sender != admin) revert Errors.AdminOnly();
+    function setAccountManager(address _accountManager) external adminOnly {
         accountManager = _accountManager;
         emit UpdateAccountManagerAddress(accountManager);
     }
 
-    function setAdmin(address _admin) external {
-        if(msg.sender != admin) revert Errors.AdminOnly();
-        admin = _admin;
-        emit UpdateAdminAddress(admin);
-    }
-
-    function setRateModel(address _rateModel) external {
-        if(msg.sender != admin) revert Errors.AdminOnly();
+    function setRateModel(address _rateModel) external adminOnly {
         rateModel = IRateModel(_rateModel);
         emit UpdateRateModelAddress(address(rateModel));
     }
