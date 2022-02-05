@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Base.sol";
 import "./utils/Errors.sol";
 import "./utils/Helpers.sol";
 import "./utils/Pausable.sol";
+import "./utils/ContractNames.sol";
 import "./interface/ILToken.sol";
 import "./interface/IAccount.sol";
 import "./interface/IRiskEngine.sol";
@@ -11,17 +13,12 @@ import "./interface/IController.sol";
 import "./interface/IUserRegistry.sol";
 import "./interface/IAccountFactory.sol";
 
-contract AccountManager is Pausable {
+contract AccountManager is Pausable, Base {
     using Helpers for address;
-
-    IRiskEngine public riskEngine;
-    IUserRegistry public userRegistry;
-    IAccountFactory public accountFactory;
     
     address[] public inactiveAccounts;
     
     mapping(address => bool) public isCollateralAllowed; // tokenAddr => bool
-    mapping(address => address) public LTokenAddressFor; // token => LToken
     mapping(address => address) public controllerAddrFor; // address => controller
 
     event AccountAssigned(address indexed accountAddr, address indexed ownerAddr);
@@ -29,34 +26,30 @@ contract AccountManager is Pausable {
     event AccountLiquidated(address indexed accountAddr, address indexed accountOwner);
     event Borrow(address indexed accountAddr, address indexed accountOwner, address indexed tokenAddr, uint value);
     event Repay(address indexed accountAddr, address indexed accountOwner, address indexed tokenAddr, uint value);
-    event UpdateRiskEngineAddress(address indexed riskEngineAddr);
-    event UpdateUserRegistryAddress(address indexed userRegistryAddr);
     event UpdateControllerAddress(address indexed contractAddr,address indexed controllerAddr);
-    event UpdateAccountFactoryAddress(address indexed accountFactoryAddr);
-    event UpdateLTokenAddress(address indexed tokenAddr, address indexed LTokenAddr);
 
-    constructor(address _riskEngine, address _accountFactory, address _userRegistry) {
+    constructor(address _addressProvider) {
         admin = msg.sender;
-        riskEngine = IRiskEngine(_riskEngine);
-        accountFactory = IAccountFactory(_accountFactory);
-        userRegistry = IUserRegistry(_userRegistry);
+        addressProvider = IAddressProvider(_addressProvider);
     }
 
     modifier onlyOwner(address account) {
-        if(!userRegistry.isValidOwner(msg.sender, account)) revert Errors.AccountOwnerOnly();
+        if(
+            !IUserRegistry(getAddress(ContractNames.UserRegistry)).isValidOwner(msg.sender, account)
+        ) revert Errors.AccountOwnerOnly();
         _;
     }
 
     function openAccount(address owner) public {
         address account;
         if(inactiveAccounts.length == 0) {
-            account = accountFactory.create(address(this));
+            account = IAccountFactory(getAddress(ContractNames.AccountFactory)).create();
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
         }
         IAccount(account).activateFor(owner);
-        userRegistry.addMarginAccount(owner, account);
+        IUserRegistry(getAddress(ContractNames.UserRegistry)).addMarginAccount(owner, account);
         emit AccountAssigned(account, owner);
     }
 
@@ -65,7 +58,7 @@ contract AccountManager is Pausable {
         if(account.hasNoDebt()) revert Errors.PendingDebt();
         account.sweepTo(msg.sender);
         account.deactivate();
-        userRegistry.removeMarginAccount(msg.sender, address(account));
+        IUserRegistry(getAddress(ContractNames.UserRegistry)).removeMarginAccount(msg.sender, address(account));
         inactiveAccounts.push(address(account));
         emit AccountClosed(address(account), msg.sender);
     }
@@ -100,7 +93,7 @@ contract AccountManager is Pausable {
         // TODO Add custom error after changing behavior of hasNoDebt() so that 
         // there is a way to execute this without always running isWithdrawAllowed
         require(IAccount(account).hasNoDebt() ||
-            riskEngine.isWithdrawAllowed(account, token, value),
+            IRiskEngine(getAddress(ContractNames.RiskEngine)).isWithdrawAllowed(account, token, value),
             "AccMgr/withdraw: Risky");
         account.withdrawERC20FromAcc(msg.sender, token, value);
         if(token.balanceOf(account) == 0)
@@ -114,12 +107,13 @@ contract AccountManager is Pausable {
     ) 
         public onlyOwner(account)
     { 
-        if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
-        if(!riskEngine.isBorrowAllowed(account, token, value)) 
+        ILToken lToken = _getLToken(token);
+        if(address(lToken) == address(0)) revert Errors.LTokenUnavailable();
+        if(!IRiskEngine(getAddress(ContractNames.RiskEngine)).isBorrowAllowed(account, token, value)) 
             revert Errors.RiskThresholdBreached();
         if(token != address(0) && token.balanceOf(account) == 0) 
             IAccount(account).addAsset(token);
-        if(ILToken(LTokenAddressFor[token]).lendTo(account, value))
+        if(lToken.lendTo(account, value))
             IAccount(account).addBorrow(token);
         emit Borrow(account, msg.sender, token, value);
     }
@@ -131,13 +125,13 @@ contract AccountManager is Pausable {
     ) 
         public onlyOwner(account) 
     {
-        if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
+        if(address(_getLToken(token)) == address(0)) revert Errors.LTokenUnavailable();
         _repay(account, token, value);
         emit Repay(account, msg.sender, token, value);
     }
 
     function liquidate(address account) public {
-        if(!riskEngine.isLiquidatable(account)) revert Errors.AccountNotLiquidatable();
+        if(!IRiskEngine(getAddress(ContractNames.RiskEngine)).isLiquidatable(account)) revert Errors.AccountNotLiquidatable();
         _liquidate(account);
         emit AccountLiquidated(account, IAccount(account).owner());
     }
@@ -169,7 +163,9 @@ contract AccountManager is Pausable {
         if(!isAllowed) revert Errors.FunctionCallRestricted();
         IAccount(account).exec(target, amt, bytes.concat(sig, data));
         _updateTokens(account, tokensIn, tokensOut);
-        if(riskEngine.isLiquidatable(account)) revert Errors.RiskThresholdBreached();
+        if(
+            IRiskEngine(getAddress(ContractNames.RiskEngine)).isLiquidatable(account)
+        ) revert Errors.RiskThresholdBreached();
     }
 
     function settle(address account) public onlyOwner(account) {
@@ -185,34 +181,14 @@ contract AccountManager is Pausable {
         isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
 
-    function setLTokenAddress(address token, address LToken) public adminOnly {
-        LTokenAddressFor[token] = LToken;
-        emit UpdateLTokenAddress(token, LToken);
-    }
-
-    function setRiskEngineAddress(address _riskEngine) public adminOnly {
-        riskEngine = IRiskEngine(_riskEngine);
-        emit UpdateRiskEngineAddress(address(riskEngine));
-    }
-
-    function setUserRegistryAddress(address _userRegistry) public adminOnly {
-        userRegistry = IUserRegistry(_userRegistry);
-        emit UpdateUserRegistryAddress(address(userRegistry));
-    }
-
     function setControllerAddress(address target, address controller) public adminOnly {
         controllerAddrFor[target] = controller;
         emit UpdateControllerAddress(target, controller);
     }
 
-    function setAccountFactoryAddress(address _accountFactory) public adminOnly {
-        accountFactory = IAccountFactory(_accountFactory);
-        emit UpdateAccountFactoryAddress(address(accountFactory));
-    }
-
     // Internal Functions
     function _repay(address account, address token, uint value) internal {
-        ILToken LToken = ILToken(LTokenAddressFor[token]);
+        ILToken LToken = _getLToken(token);
         bool isEth = token == address(0);
         if(value == type(uint).max) value = LToken.currentBorrowBalance(account);
 
@@ -247,6 +223,10 @@ contract AccountManager is Pausable {
             _repay(_account, accountBorrows[i], type(uint).max);
         }
         account.sweepTo(msg.sender);
+    }
+
+    function _getLToken(address _token) internal view returns (ILToken) {
+        return ILToken(addressProvider.getLToken(_token));
     }
 
     receive() external payable {}

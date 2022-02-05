@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {StorageSlot} from "../utils/Storage.sol";
 import {Errors} from "../utils/Errors.sol";
+import "../utils/Ownable.sol";
 import "../interface/IBeacon.sol";
 import "./Base.sol";
 

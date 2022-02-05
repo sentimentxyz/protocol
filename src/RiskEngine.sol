@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Base.sol";
 import "./utils/Errors.sol";
+import "./utils/ContractNames.sol";
 import "./utils/Pausable.sol";
 import "./interface/IPriceFeed.sol";
 import "./interface/ILToken.sol";
@@ -9,18 +11,14 @@ import "./interface/IAccount.sol";
 import "./interface/IAccountManager.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
-contract RiskEngine is Pausable {
+contract RiskEngine is Pausable, Base {
     using PRBMathUD60x18 for uint;
 
-    IPriceFeed public priceFeed;
-    IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
-    event UpdateAccountManagerAddress(address indexed accountManagerAddr);
-
-    constructor(address _priceFeed) {
+    constructor(address _addressProvider) {
         admin = msg.sender;
-        priceFeed = IPriceFeed(_priceFeed);
+        addressProvider = IAddressProvider(_addressProvider);
     }
 
     function isBorrowAllowed(
@@ -82,17 +80,17 @@ contract RiskEngine is Pausable {
         uint borrowsLen = borrows.length;
         uint totalBorrows = 0;
         for(uint i = 0; i < borrowsLen; ++i) {
-            address LTokenAddr = _LTokenAddressFor(borrows[i]);
+            ILToken lToken = _LTokenAddressFor(borrows[i]);
             totalBorrows += _valueInWei(
                 borrows[i],
-                ILToken(LTokenAddr).currentBorrowBalance(account)
+                lToken.currentBorrowBalance(account)
             );
         }
         return totalBorrows;
     }
 
     function _valueInWei(address token, uint value) internal view returns (uint) {
-        return priceFeed.getPrice(token).mul(value);
+        return IPriceFeed(getAddress(ContractNames.FeedAggregator)).getPrice(token).mul(value);
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows) internal pure returns (bool) {
@@ -100,13 +98,7 @@ contract RiskEngine is Pausable {
             (accountBalance.div(accountBorrows) > balanceToBorrowThreshold);
     }
 
-    function _LTokenAddressFor(address token) internal view returns (address) {
-        return accountManager.LTokenAddressFor(token);
-    }
-
-    // admin only
-    function setAccountManagerAddr(address _accountManager) public adminOnly {
-        accountManager = IAccountManager(_accountManager);
-        emit UpdateAccountManagerAddress(address(accountManager));
+    function _LTokenAddressFor(address token) internal view returns (ILToken) {
+        return ILToken(addressProvider.getLToken(token));
     }
 }

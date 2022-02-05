@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Base.sol";
 import "./utils/Errors.sol";
 import "./utils/Helpers.sol";
 import "./utils/Pausable.sol";
+import "./utils/ContractNames.sol";
 import "./interface/IRateModel.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
-abstract contract LToken is Pausable {
+abstract contract LToken is Pausable, Base {
     using Helpers for address;
     using PRBMathUD60x18 for uint;
 
@@ -32,10 +34,6 @@ abstract contract LToken is Pausable {
     }
     mapping(address => BorrowSnapshot) public borrowBalanceFor;
 
-    // Privileged addresses
-    IRateModel public rateModel;
-    address public accountManager;
-
     // ERC20 accounting
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
@@ -44,8 +42,6 @@ abstract contract LToken is Pausable {
     // ERC20 Events
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    event UpdateAccountManagerAddress(address indexed accountManagerAddr);
-    event UpdateRateModelAddress(address indexed rateModelAddr);
 
     // ERC20 Functions
     function approve(address spender, uint256 value) public returns (bool) {
@@ -70,7 +66,9 @@ abstract contract LToken is Pausable {
     }
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
+        if(
+            msg.sender != getAddress(ContractNames.AccountManager)
+        ) revert Errors.AccountManagerOnly();
         _;
     }
 
@@ -128,7 +126,7 @@ abstract contract LToken is Pausable {
     }
 
     function _getCurrentPerBlockBorrowRate() internal view returns (uint) {
-        return rateModel.getBorrowRate(_getBalance(), totalBorrows, totalReserves);
+        return IRateModel(getAddress(ContractNames.DefaultRateModel)).getBorrowRate(_getBalance(), totalBorrows, totalReserves);
     }
 
     function _getBorrowIndex(uint rateFactor) internal view returns (uint) {
@@ -153,15 +151,4 @@ abstract contract LToken is Pausable {
     }
 
     function _getBalance() internal view virtual returns (uint);
-
-    // Admin-only functions
-    function setAccountManager(address _accountManager) external adminOnly {
-        accountManager = _accountManager;
-        emit UpdateAccountManagerAddress(accountManager);
-    }
-
-    function setRateModel(address _rateModel) external adminOnly {
-        rateModel = IRateModel(_rateModel);
-        emit UpdateRateModelAddress(address(rateModel));
-    }
 }

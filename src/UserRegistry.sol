@@ -1,26 +1,28 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Base.sol";
 import "./utils/Errors.sol";
 import "./utils/Pausable.sol";
+import "./utils/ContractNames.sol";
 
-contract UserRegistry is Pausable {
-
-    address public accountManager;
+contract UserRegistry is Pausable, Base {
 
     mapping(address => address) public accountOwnerMapping;
     mapping(address => address[]) public ownerAccountsMapping;
 
-    event UpdateAccountManagerAddress(address indexed accountManager);
     event AddMarginAccount(address indexed owner, address indexed marginAccount);
     event RemoveMarginAccount(address indexed owner, address indexed marginAccount);
 
-    constructor() {
+    constructor(address _addressProvider) {
         admin = msg.sender;
+        addressProvider = IAddressProvider(_addressProvider);
     }
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
+        if(
+            msg.sender != getAddress(ContractNames.AccountManager)
+        ) revert Errors.AccountManagerOnly();
         _;
     }
 
@@ -50,11 +52,5 @@ contract UserRegistry is Pausable {
 
     function isValidOwner(address _owner, address _account) public view returns (bool) {
         return accountOwnerMapping[_account] == _owner;
-    }
-
-    // admin only
-    function setAccountManagerAddress(address _accountManager) public adminOnly {
-        accountManager = _accountManager;
-        emit UpdateAccountManagerAddress(accountManager);
     }
 }

@@ -11,8 +11,7 @@ contract LEther is LToken {
         string memory _symbol, 
         uint8 _decimals,
         address _underlying,
-        address _rateModel,
-        address _accountManager,
+        address _addressProvider,
         uint _initialExchangeRate
     )
     {
@@ -26,8 +25,7 @@ contract LEther is LToken {
         borrowIndex = 1e18;
         // Privileged Addresses
         admin = msg.sender;
-        rateModel = IRateModel(_rateModel);
-        accountManager = _accountManager;
+        addressProvider = IAddressProvider(_addressProvider);
     }
 
     // Lender Functions
@@ -57,7 +55,6 @@ contract LEther is LToken {
     }
 
     function collectFrom(address account, uint value) public accountManagerOnly returns (bool) {
-        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
         totalBorrows -= value;

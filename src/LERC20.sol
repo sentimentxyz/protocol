@@ -12,8 +12,7 @@ contract LERC20 is LToken {
         string memory _symbol, 
         uint8 _decimals,
         address _underlying,
-        address _rateModel,
-        address _accountManager,
+        address _addressProvider,
         uint _initialExchangeRate
     )
     {
@@ -27,8 +26,7 @@ contract LERC20 is LToken {
         borrowIndex = 1e18;
         // Privileged Addresses
         admin = msg.sender;
-        rateModel = IRateModel(_rateModel);
-        accountManager = _accountManager;
+        addressProvider = IAddressProvider(_addressProvider);
     }
 
     // Lender Functions

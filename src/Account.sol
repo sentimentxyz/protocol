@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Base.sol";
+import "./utils/ContractNames.sol";
 import "./utils/Errors.sol";
 import "./utils/Helpers.sol";
 import "./utils/Pausable.sol";
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
-contract Account is Pausable {
+contract Account is Pausable, Base {
     using Helpers for address;
 
     uint public activationBlock;
@@ -15,16 +17,15 @@ contract Account is Pausable {
     address[] public borrows;
 
     address public owner;
-    address public accountManager;
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
+        if(msg.sender != getAddress(ContractNames.AccountManager)) revert Errors.AccountManagerOnly();
         _;
     }
 
-    function initialize(address _accountManager) public {
-        if(accountManager != address(0)) revert Errors.ContractAlreadyInitialized();
-        accountManager = _accountManager;
+    function initialize(address _addressProvider) public {
+        if(address(addressProvider) != address(0)) revert Errors.ContractAlreadyInitialized();
+        addressProvider = IAddressProvider(_addressProvider);
     }
 
     function activateFor(address _owner) public accountManagerOnly {

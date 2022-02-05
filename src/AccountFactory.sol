@@ -1,22 +1,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import "./Base.sol";
 import "./utils/Pausable.sol";
+import "./utils/ContractNames.sol";
 import "./interface/IAccount.sol";
 import "./proxy/BeaconProxy.sol";
-import "./interface/IBeaconProxy.sol";
 
-contract AccountFactory is Pausable {
+contract AccountFactory is Pausable, Base {
 
-    address public beaconImplementation;
-
-    constructor (address _implementation) {
+    constructor (address _addressProvider) {
         admin = msg.sender;
-        beaconImplementation = _implementation;
+        addressProvider = IAddressProvider(_addressProvider);
     }
 
-    function create(address accountManager) public returns (address account) {
-        account = address(new BeaconProxy(beaconImplementation, accountManager));
-        IAccount(account).initialize(accountManager);
+    function create() public returns (address account) {
+        account = address(
+            new BeaconProxy(
+                getAddress(ContractNames.AccountBeacon),
+                getAddress(ContractNames.AccountManager)
+            )
+        );
+        IAccount(account).initialize(address(addressProvider));
     }
 }
