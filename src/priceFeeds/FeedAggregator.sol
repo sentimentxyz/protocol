@@ -13,7 +13,7 @@ contract FeedAggregator is PriceFeedBase {
 
     /// @dev Assume that the response has 18 decimals
     function getPrice(address token) external view override returns (uint) {
-        if(token == WETH_ADDR) return 1e18;
+        if(token == address(0) || token == WETH_ADDR) return 1e18;
         if(priceFeed[token] == address(0)) revert Errors.PriceFeedUnavailable();
         return PriceFeedBase(priceFeed[token]).getPrice(token);
     }
