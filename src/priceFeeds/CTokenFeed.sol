@@ -8,10 +8,10 @@ import "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract CTokenFeed {
     using PRBMathUD60x18 for uint;
-    address public immutable priceFeedAggregator;
+    IPriceFeed public immutable priceFeedAggregator;
 
     constructor(address _priceFeedAggregator) {
-        priceFeedAggregator = _priceFeedAggregator;
+        priceFeedAggregator = IPriceFeed(_priceFeedAggregator);
     }
 
     function getPrice(address cToken) external view returns (uint) {
@@ -30,6 +30,6 @@ contract CTokenFeed {
 
     /// @dev Assume this returns an 18 decimal response
     function _priceOfUnderlying(address underlying) internal view returns (uint) {
-        return IPriceFeed(priceFeedAggregator).getPrice(underlying);
+        return priceFeedAggregator.getPrice(underlying);
     }
 }
