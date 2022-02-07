@@ -5,7 +5,7 @@ import "../utils/Errors.sol";
 import "../utils/Pausable.sol";
 
 abstract contract PriceFeedBase is Pausable {
-    mapping(address => address) priceFeed;
+    mapping(address => address) public priceFeed;
 
     event UpdateFeed(address indexed tokenAddr, address indexed feedAddr);
 
