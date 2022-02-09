@@ -2,8 +2,9 @@
 pragma solidity ^0.8.10;
 
 import "@prb-math/contracts/PRBMathUD60x18.sol";
+import "../interface/core/IRateModel.sol";
 
-contract DefaultRateModel {
+contract DefaultRateModel is IRateModel {
     using PRBMathUD60x18 for uint;
 
     // Constant coefficients with 18 decimals

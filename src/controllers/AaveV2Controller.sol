@@ -2,8 +2,9 @@
 pragma solidity ^0.8.10;
 
 import "../utils/Pausable.sol";
+import "../interface/controllers/IController.sol";
 
-contract AaveV2Controller is Pausable {
+contract AaveV2Controller is Pausable, IController {
     bytes4 public constant DEPOSIT = 0xe8eda9df;
     bytes4 public constant WITHDRAW = 0x69328dec;
     mapping(address => address) public aTokenAddrFor; // TODO Query from Aave contracts instead

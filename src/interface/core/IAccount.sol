@@ -14,5 +14,5 @@ interface IAccount {
     function addBorrow(address token) external;
     function removeAsset(address token) external;
     function removeBorrow(address token) external;
-    function exec(address target, uint amt, bytes memory data) external returns (bool, bytes memory);
+    function exec(address target, uint amt, bytes memory data) payable external returns (bool, bytes memory);
 }

@@ -2,8 +2,8 @@
 pragma solidity ^0.8.10;
 
 import "./Errors.sol";
-import "../interface/IERC20.sol";
-import "../interface/IAccount.sol";
+import "../interface/tokens/IERC20.sol";
+import "../interface/core/IAccount.sol";
 
 /// @author Modified from Rari-Capital/Solmate
 library Helpers {

@@ -3,8 +3,8 @@ pragma solidity ^0.8.10;
 
 import {StorageSlot} from "../utils/Storage.sol";
 import {Errors} from "../utils/Errors.sol";
-import "../interface/IBeacon.sol";
-import "./Base.sol";
+import "../interface/proxy/IBeacon.sol";
+import "./BaseProxy.sol";
 
 contract BeaconProxy is BaseProxy {
 

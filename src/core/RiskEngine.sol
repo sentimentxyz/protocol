@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./utils/Errors.sol";
-import "./utils/Pausable.sol";
-import "./interface/IPriceFeed.sol";
-import "./interface/ILToken.sol";
-import "./interface/IAccount.sol";
-import "./interface/IAccountManager.sol";
+import "../utils/Errors.sol";
+import "../utils/Pausable.sol";
+import "../interface/priceFeeds/IPriceFeed.sol";
+import "../interface/tokens/ILToken.sol";
+import "../interface/core/IAccount.sol";
+import "../interface/core/IAccountManager.sol";
+import "../interface/core/IRiskEngine.sol";
 import "@prb-math/contracts/PRBMathUD60x18.sol";
 
-contract RiskEngine is Pausable {
+contract RiskEngine is Pausable, IRiskEngine {
     using PRBMathUD60x18 for uint;
 
     IPriceFeed public priceFeed;

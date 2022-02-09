@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./utils/Pausable.sol";
-import "./interface/IAccount.sol";
-import "./proxy/BeaconProxy.sol";
-import "./interface/IBeaconProxy.sol";
+import "../proxy/BeaconProxy.sol";
+import "../interface/core/IAccount.sol";
+import "../interface/core/IAccountFactory.sol";
 
-contract AccountFactory is Pausable {
+contract AccountFactory is IAccountFactory {
 
     address public beaconImplementation;
 
     constructor (address _implementation) {
-        admin = msg.sender;
         beaconImplementation = _implementation;
     }
 
