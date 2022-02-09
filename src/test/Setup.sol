@@ -7,15 +7,15 @@ import { ERC20PresetMinterPauser } from "@openzeppelin/contracts/token/ERC20/pre
 import "./Cheatcode.sol";
 import "./mocks/FeedAggregator.sol";
 
-import "../LERC20.sol";
-import "../LEther.sol";
-import "../DefaultRateModel.sol";
-import "../interface/IERC20.sol";
-import "../AccountManager.sol";
-import "../RiskEngine.sol";
-import "../UserRegistry.sol";
-import "../AccountFactory.sol";
-import "../Account.sol";
+import "../core/tokens/LERC20.sol";
+import "../core/tokens/LEther.sol";
+import "../core/DefaultRateModel.sol";
+import "../interface/tokens/IERC20.sol";
+import "../core/AccountManager.sol";
+import "../core/RiskEngine.sol";
+import "../core/UserRegistry.sol";
+import "../core/AccountFactory.sol";
+import "../core/Account.sol";
 
 import "../proxy/BeaconProxy.sol";
 import "../proxy/Beacon.sol";

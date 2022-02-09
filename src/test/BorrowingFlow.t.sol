@@ -7,7 +7,7 @@ import "./Cheatcode.sol";
 
 import "./Setup.sol";
 
-import "../interface/IAccount.sol";
+import "../interface/core/IAccount.sol";
 
 contract BorrowingFlowTest is Test {
     

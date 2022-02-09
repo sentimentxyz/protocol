@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../interface/IController.sol";
+import "../interface/controllers/IController.sol";
 
 contract WETHController is IController {
     bytes4 constant DEPOSIT_SIG = 0xd0e30db0;

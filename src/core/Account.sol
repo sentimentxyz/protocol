@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./utils/Errors.sol";
-import "./utils/Helpers.sol";
-import "./utils/Pausable.sol";
+import "../utils/Errors.sol";
+import "../utils/Helpers.sol";
+import "../interface/core/IAccount.sol";
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
-contract Account is Pausable {
+contract Account is IAccount {
     using Helpers for address;
 
     uint public activationBlock;

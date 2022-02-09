@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./utils/Errors.sol";
-import "./utils/Pausable.sol";
+import "../utils/Errors.sol";
+import "../utils/Pausable.sol";
+import "../interface/core/IUserRegistry.sol";
 
-contract UserRegistry is Pausable {
+contract UserRegistry is Pausable, IUserRegistry {
 
     address public accountManager;
 

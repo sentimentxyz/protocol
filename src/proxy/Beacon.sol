@@ -2,8 +2,9 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
+import "../interface/proxy/IBeacon.sol";
 
-contract Beacon {
+contract Beacon is IBeacon {
     
     address public implementation;
     address public admin;

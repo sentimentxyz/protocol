@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./utils/Errors.sol";
-import "./utils/Helpers.sol";
-import "./utils/Pausable.sol";
-import "./interface/ILToken.sol";
-import "./interface/IAccount.sol";
-import "./interface/IRiskEngine.sol";
-import "./interface/IController.sol";
-import "./interface/IUserRegistry.sol";
-import "./interface/IAccountFactory.sol";
+import "../utils/Errors.sol";
+import "../utils/Helpers.sol";
+import "../utils/Pausable.sol";
+import "../interface/tokens/ILToken.sol";
+import "../interface/core/IAccount.sol";
+import "../interface/core/IRiskEngine.sol";
+import "../interface/controllers/IController.sol";
+import "../interface/core/IUserRegistry.sol";
+import "../interface/core/IAccountFactory.sol";
+import "../interface/core/IAccountManager.sol";
 
-contract AccountManager is Pausable {
+contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
     IRiskEngine public riskEngine;
