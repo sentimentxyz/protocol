@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import "./Errors.sol";
+import {Errors} from "./Errors.sol";
 
 abstract contract Ownable {
 

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../utils/Pausable.sol";
-import "../interface/controllers/IController.sol";
+import {Pausable} from "../utils/Pausable.sol";
+import {IController} from "../interface/controllers/IController.sol";
 
 contract AaveV2Controller is Pausable, IController {
     bytes4 public constant DEPOSIT = 0xe8eda9df;

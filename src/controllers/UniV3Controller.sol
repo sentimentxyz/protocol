@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../utils/Pausable.sol";
-import "../interface/controllers/IController.sol";
-import '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
+import {Pausable} from "../utils/Pausable.sol";
+import {IController} from "../interface/controllers/IController.sol";
+import {ISwapRouter} from '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 
 contract UniV3Controller is Pausable, IController {
     bytes4 public constant EXACT_INPUT_SINGLE = 0x414bf389;

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./LToken.sol";
+import {LToken} from "./LToken.sol";
+import {Helpers} from "../../utils/Helpers.sol";
+import {IRateModel} from "../../interface/core/IRateModel.sol";
+import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LERC20 is LToken {
     using Helpers for address;

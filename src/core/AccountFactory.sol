@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../proxy/BeaconProxy.sol";
-import "../interface/core/IAccount.sol";
-import "../interface/core/IAccountFactory.sol";
+import {BeaconProxy} from "../proxy/BeaconProxy.sol";
+import {IAccount} from "../interface/core/IAccount.sol";
+import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 
 contract AccountFactory is IAccountFactory {
 
