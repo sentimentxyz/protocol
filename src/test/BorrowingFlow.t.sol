@@ -24,11 +24,11 @@ contract BorrowingFlowTest is Test {
         cheatCode.stopPrank();
     }
 
-    function testMarginAccountCreation() public {
-        address user = cheatCode.addr(2);
-        accountManager.openAccount(user);
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        assertEq(IAccount(accounts[0]).owner(), user);
+    function getUserMarginAccount(address owner) public view returns (address) {
+        address[] memory accounts = userRegistry.getMarginAccounts();
+        for (uint256 index = 0; index < accounts.length; index++) {
+            if (IAccount(accounts[index]).owner() == owner) return accounts[index];
+        }
     }
 
     function testDepost() public {
@@ -37,9 +37,8 @@ contract BorrowingFlowTest is Test {
         
         cheatCode.deal(user, 100);
         token.mint(user, 100);
-        
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        address marginAccount = accounts[0];
+
+        address marginAccount = getUserMarginAccount(user);
         
         cheatCode.startPrank(user);
         
@@ -61,8 +60,7 @@ contract BorrowingFlowTest is Test {
         cheatCode.deal(user, 100);
         token.mint(user, 100);
         
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        address marginAccount = accounts[0];
+        address marginAccount = getUserMarginAccount(user);
         
         cheatCode.startPrank(user);
         
@@ -85,8 +83,7 @@ contract BorrowingFlowTest is Test {
         cheatCode.deal(user, 100);
         token.mint(user, 100);
         
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        address marginAccount = accounts[0];
+        address marginAccount = getUserMarginAccount(user);
         
         cheatCode.startPrank(user);
         
@@ -109,8 +106,7 @@ contract BorrowingFlowTest is Test {
         cheatCode.deal(user, 100);
         token.mint(user, 100);
         
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        address marginAccount = accounts[0];
+        address marginAccount = getUserMarginAccount(user);
         
         cheatCode.startPrank(user);
         
@@ -129,8 +125,7 @@ contract BorrowingFlowTest is Test {
         cheatCode.deal(user, 100);
         token.mint(user, 100);
         
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        address marginAccount = accounts[0];
+        address marginAccount = getUserMarginAccount(user);
         
         cheatCode.startPrank(user);
         
@@ -156,8 +151,7 @@ contract BorrowingFlowTest is Test {
         cheatCode.deal(user, 100);
         token.mint(user, 100);
         
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        address marginAccount = accounts[0];
+        address marginAccount = getUserMarginAccount(user);
         
         cheatCode.startPrank(user);
         
@@ -186,8 +180,7 @@ contract BorrowingFlowTest is Test {
         cheatCode.deal(user, 100);
         token.mint(user, 100);
         
-        address[] memory accounts = userRegistry.getMarginAccounts(user);
-        address marginAccount = accounts[0];
+        address marginAccount = getUserMarginAccount(user);
         
         cheatCode.startPrank(user);
         
