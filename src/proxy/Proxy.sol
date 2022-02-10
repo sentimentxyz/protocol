@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {StorageSlot} from "../utils/Storage.sol";
+import {BaseProxy} from "./BaseProxy.sol";
 import {Errors} from "../utils/Errors.sol";
-import "./BaseProxy.sol";
+import {StorageSlot} from "../utils/Storage.sol";
 
 contract Proxy is BaseProxy {
 

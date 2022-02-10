@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../interface/tokens/IERC20.sol";
-import "../interface/priceFeeds/IPriceFeed.sol";
-import "../interface/priceFeeds/ICToken.sol";
-import "@prb-math/contracts/PRBMathUD60x18.sol";
+import {IERC20} from "../interface/tokens/IERC20.sol";
+import {ICToken} from "../interface/priceFeeds/ICToken.sol";
+import {IPriceFeed} from "../interface/priceFeeds/IPriceFeed.sol";
+import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract CTokenFeed {
     using PRBMathUD60x18 for uint;

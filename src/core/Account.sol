@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../utils/Errors.sol";
-import "../utils/Helpers.sol";
-import "../interface/core/IAccount.sol";
+import {Errors} from "../utils/Errors.sol";
+import {Helpers} from "../utils/Helpers.sol";
+import {IAccount} from "../interface/core/IAccount.sol";
 
 // TODO Reduce total number of functions in this contract to minimize bytecode
 contract Account is IAccount {

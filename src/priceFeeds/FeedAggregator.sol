@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./PriceFeedBase.sol";
+import {PriceFeedBase} from "./PriceFeedBase.sol";
+import {Errors} from "../utils/Errors.sol";
 
 contract FeedAggregator is PriceFeedBase {
     address public immutable WETH_ADDR;

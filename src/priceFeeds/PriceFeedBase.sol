@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../utils/Errors.sol";
-import "../utils/Pausable.sol";
+import {Errors} from "../utils/Errors.sol";
+import {Pausable} from "../utils/Pausable.sol";
 
 abstract contract PriceFeedBase is Pausable {
     mapping(address => address) public priceFeed;

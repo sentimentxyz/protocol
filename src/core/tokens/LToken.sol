@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../../utils/Errors.sol";
-import "../../utils/Helpers.sol";
-import "../../utils/Pausable.sol";
-import "../../interface/core/IRateModel.sol";
-import "../../interface/tokens/ILToken.sol";
-import "@prb-math/contracts/PRBMathUD60x18.sol";
+import {Errors} from "../../utils/Errors.sol";
+import {Helpers} from "../../utils/Helpers.sol";
+import {Pausable} from "../../utils/Pausable.sol";
+import {ILToken} from "../../interface/tokens/ILToken.sol";
+import {IRateModel} from "../../interface/core/IRateModel.sol";
+import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 abstract contract LToken is Pausable, ILToken {
     using Helpers for address;

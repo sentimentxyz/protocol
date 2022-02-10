@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "@ds-test/src/test.sol";
-
-import "./Cheatcode.sol";
-
-import "./Setup.sol";
+import {Test} from "./Setup.sol";
+import {CheatCode} from "./Cheatcode.sol";
+import {DSTest} from "@ds-test/src/test.sol";
 
 contract LendingFlowTest is Test {
     

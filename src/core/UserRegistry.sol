@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "../utils/Errors.sol";
-import "../utils/Pausable.sol";
-import "../interface/core/IUserRegistry.sol";
+import {Errors} from "../utils/Errors.sol";
+import {Pausable} from "../utils/Pausable.sol";
+import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
 
 contract UserRegistry is Pausable, IUserRegistry {
 

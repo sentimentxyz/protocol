@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "./Ownable.sol";
-import "./Errors.sol";
+import {Errors} from "./Errors.sol";
+import {Ownable} from  "./Ownable.sol";
 
 abstract contract Pausable is Ownable {
     bool public paused;
