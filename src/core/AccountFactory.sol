@@ -15,6 +15,5 @@ contract AccountFactory is IAccountFactory {
 
     function create(address accountManager) public returns (address account) {
         account = address(new BeaconProxy(beaconImplementation, accountManager));
-        IAccount(account).initialize(accountManager);
     }
 }

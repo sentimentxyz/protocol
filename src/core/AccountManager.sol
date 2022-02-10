@@ -53,6 +53,7 @@ contract AccountManager is Pausable, IAccountManager {
         address account;
         if(inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
+            IAccount(account).initialize(address(this));
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
