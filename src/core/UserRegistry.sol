@@ -9,12 +9,11 @@ contract UserRegistry is Pausable, IUserRegistry {
 
     address public accountManager;
 
+    address[] public marginAccounts;
     mapping(address => address) public accountOwnerMapping;
-    mapping(address => address[]) public ownerAccountsMapping;
 
     event UpdateAccountManagerAddress(address indexed accountManager);
-    event AddMarginAccount(address indexed owner, address indexed marginAccount);
-    event RemoveMarginAccount(address indexed owner, address indexed marginAccount);
+    event UpdateMarginAccountOwner(address indexed marginAccount, address indexed owner);
 
     constructor() {
         admin = msg.sender;
@@ -25,28 +24,17 @@ contract UserRegistry is Pausable, IUserRegistry {
         _;
     }
 
-    function getMarginAccounts(address _owner) public view returns (address[] memory) {
-        return ownerAccountsMapping[_owner];
+    function addMarginAccount(address _marginAccount) public accountManagerOnly {
+        marginAccounts.push(_marginAccount);
     }
 
-    function addMarginAccount(address _owner, address _marginAccount) public accountManagerOnly {
-        ownerAccountsMapping[_owner].push(_marginAccount);
+    function getMarginAccounts() public view returns (address[] memory) {
+        return marginAccounts;
+    }
+
+    function setMarginAccountOwner(address _owner, address _marginAccount) public accountManagerOnly {
         accountOwnerMapping[_marginAccount] = _owner;
-        emit AddMarginAccount(_owner, _marginAccount);
-    }
-
-    function removeMarginAccount(address _owner, address _marginAccount) public accountManagerOnly {
-        if(ownerAccountsMapping[_owner].length == 0) revert Errors.AccountsNotFound();
-        address[] storage accounts = ownerAccountsMapping[_owner];
-        for(uint i=0; i < accounts.length; i++) {
-            if (accounts[i] == _marginAccount) {
-                accounts[i] = accounts[accounts.length-1];
-                accounts.pop();
-                break;
-            }
-        }
-        accountOwnerMapping[_marginAccount] = address(0);
-        emit RemoveMarginAccount(_owner, _marginAccount);
+        emit UpdateMarginAccountOwner(_marginAccount, _owner);
     }
 
     function isValidOwner(address _owner, address _account) public view returns (bool) {
