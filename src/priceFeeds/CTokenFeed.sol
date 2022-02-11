@@ -6,7 +6,7 @@ import {ICToken} from "../interface/priceFeeds/ICToken.sol";
 import {IPriceFeed} from "../interface/priceFeeds/IPriceFeed.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
-contract CTokenFeed {
+contract CTokenFeed is IPriceFeed {
     using PRBMathUD60x18 for uint;
     IPriceFeed public immutable priceFeedAggregator;
 

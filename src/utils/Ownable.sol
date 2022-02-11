@@ -9,6 +9,10 @@ abstract contract Ownable {
 
     event OwnershipTransferred(address indexed previousAdmin, address indexed newAdmin);
 
+    constructor(address _admin) {
+        admin = _admin;
+    }
+
     modifier adminOnly() {
         if (admin != msg.sender) revert Errors.AdminOnly();
         _;

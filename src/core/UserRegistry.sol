@@ -15,9 +15,7 @@ contract UserRegistry is Pausable, IUserRegistry {
     event UpdateAccountManagerAddress(address indexed accountManager);
     event UpdateMarginAccountOwner(address indexed marginAccount, address indexed owner);
 
-    constructor() {
-        admin = msg.sender;
-    }
+    constructor() Pausable(msg.sender) {}
 
     modifier accountManagerOnly() {
         if(msg.sender != accountManager) revert Errors.AccountManagerOnly();

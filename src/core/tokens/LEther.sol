@@ -11,28 +11,23 @@ contract LEther is LToken {
     using PRBMathUD60x18 for uint;
 
     constructor(
-        string memory _name, 
-        string memory _symbol, 
+        bytes32 _name, 
+        bytes32 _symbol, 
         uint8 _decimals,
         address _underlying,
         address _rateModel,
         address _accountManager,
         uint _initialExchangeRate
-    )
-    {
-        // Token Metadata
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
-        underlying = _underlying;
-        // Market State Variables
-        exchangeRate = _initialExchangeRate * 1e18;
-        borrowIndex = 1e18;
-        // Privileged Addresses
-        admin = msg.sender;
-        rateModel = IRateModel(_rateModel);
-        accountManager = _accountManager;
-    }
+    ) LToken(
+        msg.sender,
+        _name,
+        _symbol,
+        _decimals,
+        _underlying,
+        _rateModel,
+        _accountManager,
+        _initialExchangeRate
+    ) {}
 
     // Lender Functions
     function deposit() public payable {
