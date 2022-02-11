@@ -13,10 +13,10 @@ abstract contract LToken is Pausable, ILToken {
     using PRBMathUD60x18 for uint;
 
     // Token Metadata
-    string public name;
-    string public symbol;
-    uint8 public decimals;
-    address public underlying;
+    bytes32 public immutable name;
+    bytes32 public immutable symbol;
+    address public immutable underlying;
+    uint8 public immutable decimals;
 
     // Market State Variables
     uint public exchangeRate;
@@ -47,6 +47,28 @@ abstract contract LToken is Pausable, ILToken {
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
     event UpdateAccountManagerAddress(address indexed accountManagerAddr);
     event UpdateRateModelAddress(address indexed rateModelAddr);
+
+    constructor(
+        address _admin,
+        bytes32 _name,
+        bytes32 _symbol,
+        uint8 _decimals,
+        address _underlying,
+        address _rateModel,
+        address _accountManager,
+        uint _initialExchangeRate
+
+    ) Pausable(_admin) {
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
+        underlying = _underlying;
+        exchangeRate = _initialExchangeRate * 1e18;
+        borrowIndex = 1e18;
+        rateModel = IRateModel(_rateModel);
+        accountManager = _accountManager;
+
+    }
 
     // ERC20 Functions
     function approve(address spender, uint256 value) public returns (bool) {

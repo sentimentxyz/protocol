@@ -37,8 +37,7 @@ contract AccountManager is Pausable, IAccountManager {
     event UpdateAccountFactoryAddress(address indexed accountFactoryAddr);
     event UpdateLTokenAddress(address indexed tokenAddr, address indexed LTokenAddr);
 
-    constructor(address _riskEngine, address _accountFactory, address _userRegistry) {
-        admin = msg.sender;
+    constructor(address _riskEngine, address _accountFactory, address _userRegistry) Pausable(msg.sender) {
         riskEngine = IRiskEngine(_riskEngine);
         accountFactory = IAccountFactory(_accountFactory);
         userRegistry = IUserRegistry(_userRegistry);

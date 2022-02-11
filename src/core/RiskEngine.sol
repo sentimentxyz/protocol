@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
-import {Pausable} from "../utils/Pausable.sol";
+import {Ownable} from "../utils/Ownable.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
@@ -11,17 +11,14 @@ import {IPriceFeed} from "../interface/priceFeeds/IPriceFeed.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
-contract RiskEngine is Pausable, IRiskEngine {
+contract RiskEngine is Ownable, IRiskEngine {
     using PRBMathUD60x18 for uint;
 
     IPriceFeed public priceFeed;
     IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
-    event UpdateAccountManagerAddress(address indexed accountManagerAddr);
-
-    constructor(address _priceFeed) {
-        admin = msg.sender;
+    constructor(address _priceFeed) Ownable(msg.sender) {
         priceFeed = IPriceFeed(_priceFeed);
     }
 
@@ -106,9 +103,7 @@ contract RiskEngine is Pausable, IRiskEngine {
         return accountManager.LTokenAddressFor(token);
     }
 
-    // admin only
-    function setAccountManagerAddr(address _accountManager) public adminOnly {
+    function setAccountManagerAddress(address _accountManager) public adminOnly {
         accountManager = IAccountManager(_accountManager);
-        emit UpdateAccountManagerAddress(address(accountManager));
     }
 }

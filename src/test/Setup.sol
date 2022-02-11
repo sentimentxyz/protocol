@@ -56,7 +56,7 @@ contract Test is DSTest {
         factory = new AccountFactory(address(beacon));
         userRegistry = new UserRegistry();
         accountManager = new AccountManager(address(riskEngine), address(factory), address(userRegistry));
-        riskEngine.setAccountManagerAddr(address(accountManager));
+        riskEngine.setAccountManagerAddress(address(accountManager));
         userRegistry.setAccountManagerAddress(address(accountManager));
     }
 

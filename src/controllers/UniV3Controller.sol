@@ -1,18 +1,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {Pausable} from "../utils/Pausable.sol";
+import {Ownable} from "../utils/Ownable.sol";
 import {IController} from "../interface/controllers/IController.sol";
 import {ISwapRouter} from '@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol';
 
-contract UniV3Controller is Pausable, IController {
+contract UniV3Controller is Ownable, IController {
     bytes4 public constant EXACT_INPUT_SINGLE = 0x414bf389;
     bytes4 public constant EXACT_OUTPUT_SINGLE = 0xac9650d8;
     mapping(address => bool) public isSwapAllowed;
 
-    constructor() {
-        admin = msg.sender;
-    }
+    constructor() Ownable(msg.sender) {}
 
     function canCall(
         address target,
@@ -23,8 +21,7 @@ contract UniV3Controller is Pausable, IController {
         return _parseSwapArgs(sig, data);
     }
 
-    function toggleAllowance(address tokenAddr) external {
-        require(msg.sender == admin);
+    function toggleAllowance(address tokenAddr) external adminOnly {
         isSwapAllowed[tokenAddr] = !isSwapAllowed[tokenAddr];
     }
 

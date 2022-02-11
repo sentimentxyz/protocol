@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {Pausable} from "../utils/Pausable.sol";
+import {Ownable} from "../utils/Ownable.sol";
 import {IController} from "../interface/controllers/IController.sol";
 
-contract AaveV2Controller is Pausable, IController {
+contract AaveV2Controller is Ownable, IController {
     bytes4 public constant DEPOSIT = 0xe8eda9df;
     bytes4 public constant WITHDRAW = 0x69328dec;
     mapping(address => address) public aTokenAddrFor; // TODO Query from Aave contracts instead
 
-    constructor() {
-        admin = msg.sender;
-    }
+    constructor() Ownable(msg.sender) {}
 
     function canCall(
         address target,
