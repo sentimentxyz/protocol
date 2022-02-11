@@ -2,14 +2,14 @@
 pragma solidity ^0.8.10;
 
 import {Ownable} from "../utils/Ownable.sol";
-import {IYToken} from "../interface/priceFeeds/IYToken.sol";
+import {IYVToken} from "../interface/priceFeeds/IYVToken.sol";
 import {IController} from "../interface/controllers/IController.sol";
 
-contract YearnController is IController, Ownable {
+contract YearnController is IController {
     bytes4 public constant DEPOSIT = 0xb6b55f25;
     bytes4 public constant WITHDRAW = 0x3ccfd60b;
 
-    constructor() Ownable(msg.sender) {}
+    constructor() {}
 
     function canCall(
         address target,
@@ -24,20 +24,15 @@ contract YearnController is IController, Ownable {
         bytes4 sig
     ) internal view returns (bool, address[] memory tokensIn, address[] memory tokensOut)
     {
-        if ( sig != DEPOSIT && sig != WITHDRAW ) {
-            return (false, new address[](0), new address[](0));
-        }
-        
         tokensIn = new address[](1);
         tokensOut = new address[](1);
-        address underlying = address(IYToken(target).token());
         if(sig == DEPOSIT) {
             tokensIn[0] = target;
-            tokensOut[0] = underlying;
-        } else {
-            tokensIn[0] = underlying;
+            tokensOut[0] = address(IYVToken(target).token());
+        } else if (sig == WITHDRAW){
+            tokensIn[0] = address(IYVToken(target).token());
             tokensOut[0] = target;
-        }
+        } else return (false, new address[](0), new address[](0));
         return(true, tokensIn, tokensOut);
     }
 
