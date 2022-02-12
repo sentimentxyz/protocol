@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {Test} from "./Setup.sol";
-import {CheatCode} from "./Cheatcode.sol";
-import {DSTest} from "@ds-test/src/test.sol";
+import {TestBase} from "./utils/TestBase.sol";
 
-contract LendingFlowTest is Test {
+contract LendingFlowTest is TestBase {
     
     address user1 = cheatCode.addr(1);
 

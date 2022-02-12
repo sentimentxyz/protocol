@@ -4,24 +4,24 @@ pragma solidity ^0.8.10;
 import {DSTest} from "@ds-test/src/test.sol";
 import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
-import {CheatCode} from "./Cheatcode.sol";
-import {FeedAggregator} from "./mocks/FeedAggregator.sol";
+import {CheatCodes} from "./CheatCodes.sol";
+import {FeedAggregator} from "../mocks/FeedAggregator.sol";
 
-import {Account} from "../core/Account.sol";
-import {LERC20} from "../core/tokens/LERC20.sol";
-import {LEther} from "../core/tokens/LEther.sol";
-import {RiskEngine} from "../core/RiskEngine.sol";
-import {UserRegistry} from "../core/UserRegistry.sol";
-import {IERC20} from "../interface/tokens/IERC20.sol";
-import {AccountManager} from "../core/AccountManager.sol";
-import {AccountFactory} from "../core/AccountFactory.sol";
-import {DefaultRateModel} from "../core/DefaultRateModel.sol";
+import {Account} from "../../core/Account.sol";
+import {LERC20} from "../../core/tokens/LERC20.sol";
+import {LEther} from "../../core/tokens/LEther.sol";
+import {RiskEngine} from "../../core/RiskEngine.sol";
+import {UserRegistry} from "../../core/UserRegistry.sol";
+import {IERC20} from "../../interface/tokens/IERC20.sol";
+import {AccountManager} from "../../core/AccountManager.sol";
+import {AccountFactory} from "../../core/AccountFactory.sol";
+import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 
-import {Beacon} from "../proxy/Beacon.sol";
-import {BeaconProxy} from "../proxy/BeaconProxy.sol";
+import {Beacon} from "../../proxy/Beacon.sol";
+import {BeaconProxy} from "../../proxy/BeaconProxy.sol";
 
-contract Test is DSTest {
-    CheatCode cheatCode = CheatCode(HEVM_ADDRESS);
+contract TestBase is DSTest {
+    CheatCodes cheatCode = CheatCodes(HEVM_ADDRESS);
 
     LERC20 public ltoken;
     LEther public lEther;
