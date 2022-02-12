@@ -2,58 +2,79 @@
 pragma solidity ^0.8.10;
 
 import {TestBase} from "./utils/TestBase.sol";
+import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LendingFlowTest is TestBase {
-    
-    address user1 = cheatCode.addr(1);
+    using PRBMathUD60x18 for uint;
+
+    address lender = cheats.addr(1);
 
     function setUp() public {
-        basicSetup();
-        token.mint(user1, 100);
+        setupContracts();
     }
 
-    function testLtokenCreation() public {
-        assertEq(ltoken.name(), "LSentiment");
-        assertEq(token.balanceOf(user1), 100);
-        assertEq(ltoken.underlying(), address(token));
+    function testDepositETH(uint amt) public {
+        // Setup
+        cheats.deal(lender, amt);
+
+        // Test
+        cheats.prank(lender);
+        lEth.deposit{value: amt}();
+
+        // Asserts
+        assertEq(lender.balance, 0);
+        assertEq(address(lEth).balance, amt);
+        assertGe(
+            lEth.balanceOf(lender).mul(lEth.exchangeRate()),
+            amt
+        );
     }
 
-    function testDeposit() public {
-        cheatCode.startPrank(user1);
-        token.approve(address(ltoken), type(uint).max);
-        ltoken.deposit(10);
-        assertEq(token.balanceOf(user1), 90);
-        assertEq(token.balanceOf(address(ltoken)), 10);
-        assertEq(ltoken.balanceOf(user1), 10);
+    function testWithdrawETH(uint amt) public {
+        // Setup
+        testDepositETH(amt);
+
+        // Test
+        cheats.prank(lender);
+        lEth.withdraw(amt);
+        
+        // Asserts
+        assertEq(lender.balance, amt);
+        assertEq(lEth.balanceOf(lender), 0);
+        assertEq(address(lEth).balance, 0);
     }
 
-    function testWithdraw() public {
-        cheatCode.startPrank(user1);
-        token.approve(address(ltoken), type(uint).max);
-        ltoken.deposit(10);
-        ltoken.withdraw(10);
-        assertEq(token.balanceOf(user1), 100);
-        assertEq(token.balanceOf(address(ltoken)), 0);
-        assertEq(ltoken.balanceOf(user1), 0);
+    function testDepositERC20(uint amt) public {
+        // Setup
+        erc20.mint(lender, amt);
+        
+        // Test
+        cheats.startPrank(lender);
+        erc20.approve(address(lErc20), type(uint).max);
+        lErc20.deposit(amt);
+        cheats.stopPrank();
+
+        // Asserts
+        assertEq(erc20.balanceOf(lender), 0);
+        assertEq(erc20.balanceOf(address(lErc20)), amt);
+        assertGe(
+            lErc20.balanceOf(lender).mul(lEth.exchangeRate()),
+            amt
+        );
     }
 
-    function testDepositEth() public {
-        cheatCode.deal(user1, 100);
-        cheatCode.startPrank(user1);
-        lEther.deposit{value: 10}();
-        assertEq(address(lEther).balance, 10);
-        assertEq(lEther.balanceOf(user1), 10);
-        assertEq(user1.balance, 90);
-    }
+    function testWithdrawERC20(uint amt) public {
+        // Setup
+        testDepositERC20(amt);
 
-    function testWithdrawEth() public {
-        address user2 = cheatCode.addr(10);
-        cheatCode.deal(user2, 10);
-        cheatCode.startPrank(user2);
-        lEther.deposit{value: 10}();
-        lEther.withdraw(10);
-        assertEq(user2.balance, 10);
-        assertEq(address(lEther).balance, 0);
-        assertEq(lEther.balanceOf(user2), 0);
+        // Test
+        cheats.prank(lender);
+        lErc20.withdraw(amt);
+
+        // Asserts
+        assertEq(erc20.balanceOf(lender), amt);
+        assertEq(erc20.balanceOf(address(lErc20)), 0);
+        assertEq(lErc20.balanceOf(lender), 0);
+
     }
 }

@@ -1,83 +1,120 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {DSTest} from "@ds-test/src/test.sol";
-import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
-
 import {CheatCodes} from "./CheatCodes.sol";
-import {FeedAggregator} from "../mocks/FeedAggregator.sol";
-
+import {DSTest} from "@ds-test/src/test.sol";
+import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
 import {LERC20} from "../../core/tokens/LERC20.sol";
 import {LEther} from "../../core/tokens/LEther.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
 import {UserRegistry} from "../../core/UserRegistry.sol";
-import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
+import {FeedAggregator} from "../../priceFeeds/FeedAggregator.sol";
+import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
-import {Beacon} from "../../proxy/Beacon.sol";
-import {BeaconProxy} from "../../proxy/BeaconProxy.sol";
+abstract contract TestBase is DSTest {
+    CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
 
-contract TestBase is DSTest {
-    CheatCodes cheatCode = CheatCodes(HEVM_ADDRESS);
+    // Dummy ERC20 Token
+    ERC20PresetMinterPauser public erc20;
 
-    LERC20 public ltoken;
-    LEther public lEther;
-    ERC20PresetMinterPauser public token;
+    // LTokens
+    LEther public lEth;
+    LERC20 public lErc20;
 
-    DefaultRateModel public rateModel;
-    
-    AccountManager public accountManager;
+    // Core Contracts
     RiskEngine public riskEngine;
     UserRegistry public userRegistry;
-    AccountFactory public factory;
-    Account public marginAccount;
+    AccountManager public accountManager;
 
+    // Account Factory
     Beacon public beacon;
+    AccountFactory public accountFactory;
 
-    function setUpLEther() public {
-        lEther = new LEther("LEther", "LETH", 1, address(0), address(rateModel), address(accountManager), 1);
-        accountManager.setLTokenAddress(address(0), address(lEther));
-        accountManager.toggleCollateralState(address(0));
+    // Rate Model
+    DefaultRateModel public rateModel;
+
+    // Price Feeds
+    FeedAggregator public feedAggregator;
+
+    function setupContracts() public virtual {
+        setupRateModel();
+        setupPriceFeeds();
+        setupRiskEngine();
+        setupBeacon();
+        setupAccountFactory();
+        setupUserRegistry();
+        setupAccountManager();
+        setupLEther();
+        setupLERC20();
     }
 
-    function setUpLtoken() public {
-        token = new ERC20PresetMinterPauser("Sentiment", "STM");
-        ltoken = new LERC20("LSentiment", "LSTM", 1, address(token), address(rateModel), address(accountManager), 1);
-        accountManager.setLTokenAddress(address(token), address(ltoken));
-        accountManager.toggleCollateralState(address(token));
+    function setupRateModel() private {
+        rateModel = new DefaultRateModel();
     }
 
-    function setUpAccountManager() public {
-        setUpBeaconProxy();
-        riskEngine = setUpRiskEngine();
-        factory = new AccountFactory(address(beacon));
+    function setupPriceFeeds() private {
+        feedAggregator = new FeedAggregator(address(0));
+        cheats.mockCall(
+            address(feedAggregator),
+            abi.encodeWithSelector(FeedAggregator.getPrice.selector),
+            abi.encode(1e18)
+        );
+    }
+
+    function setupRiskEngine() private {
+        riskEngine = new RiskEngine(address(feedAggregator));
+    }
+
+    function setupBeacon() private {
+        beacon = new Beacon(address(new Account()));
+    }
+
+    function setupAccountFactory() private {
+        accountFactory = new AccountFactory(address(beacon));
+    }
+
+    function setupUserRegistry() private {
         userRegistry = new UserRegistry();
-        accountManager = new AccountManager(address(riskEngine), address(factory), address(userRegistry));
+    }
+
+    function setupAccountManager() private {
+        accountManager = new AccountManager(
+            address(riskEngine), 
+            address(accountFactory), 
+            address(userRegistry)
+        );
         riskEngine.setAccountManagerAddress(address(accountManager));
         userRegistry.setAccountManagerAddress(address(accountManager));
     }
 
-    function setUpRiskEngine() public returns (RiskEngine engine) {
-        FeedAggregator priceFeed = new FeedAggregator();
-        engine = new RiskEngine(address(priceFeed));
+    function setupLEther() private {
+        lEth = new LEther(
+            "LEther",
+            "LETH",
+            1,
+            address(0),
+            address(rateModel),
+            address(accountManager),
+            1
+        );
+        accountManager.setLTokenAddress(address(0), address(lEth));
     }
 
-    function setUpRateModel() public {
-        rateModel = new DefaultRateModel();
-    }
-    
-    function setUpBeaconProxy() public {
-        marginAccount = new Account();
-        beacon = new Beacon(address(marginAccount));
-    }
-
-    function basicSetup() public {
-        setUpRateModel();
-        setUpAccountManager();
-        setUpLEther();
-        setUpLtoken();
+    function setupLERC20() private {
+        erc20 = new ERC20PresetMinterPauser("TestERC20", "TEST");
+        lErc20 = new LERC20(
+            "LERC20Test",
+            "LERC20",
+            1,
+            address(erc20),
+            address(rateModel),
+            address(accountManager),
+            1
+        );
+        accountManager.setLTokenAddress(address(erc20), address(lErc20));
     }
 }

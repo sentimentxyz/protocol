@@ -10,6 +10,7 @@ import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 contract LEther is LToken {
     using PRBMathUD60x18 for uint;
 
+    // TODO name, symbol, decimals and underlying are known and need not be input args
     constructor(
         bytes32 _name, 
         bytes32 _symbol, 
@@ -35,6 +36,7 @@ contract LEther is LToken {
         _mint(msg.sender, msg.value.div(exchangeRate));
     }
 
+    // TODO should this denote LToken amount instead of underlying amount
     function withdraw(uint value) public {
         _updateState();
         (bool success, ) = msg.sender.call{value: value}("");
