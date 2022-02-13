@@ -68,7 +68,7 @@ contract AccountManager is Pausable, IAccountManager {
         if(account.hasNoDebt()) revert Errors.PendingDebt();
         account.sweepTo(msg.sender);
         account.deactivate();
-        userRegistry.updateRegistry(_account, address(0));
+        userRegistry.updateRegistry(msg.sender, address(0));
         inactiveAccounts.push(address(account));
         emit AccountClosed(address(account), msg.sender);
     }
