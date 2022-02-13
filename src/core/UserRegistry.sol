@@ -10,7 +10,7 @@ contract UserRegistry is Pausable, IUserRegistry {
 
     address public accountManager;
     mapping(address => address[]) accountListFor;
-    mapping(address => address) public accountOwnerFor;
+    mapping(address => address) public ownerFor;
 
     event UpdateAccountManagerAddress(address indexed accountManager);
 
@@ -22,12 +22,12 @@ contract UserRegistry is Pausable, IUserRegistry {
     }
 
     function addAccount(address account, address owner) external accountManagerOnly {
-        accountOwnerFor[account] = owner;
+        ownerFor[account] = owner;
         accountListFor[owner].push(account);
     }
 
     function closeAccount(address account, address owner) external accountManagerOnly {
-        accountOwnerFor[account] = address(0);
+        ownerFor[account] = address(0);
         
         address[] storage accounts = accountListFor[owner];
         for(uint i = 0; i < accounts.length; ++i) {

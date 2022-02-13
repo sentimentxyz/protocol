@@ -3,9 +3,9 @@ pragma solidity ^0.8.10;
 
 library Errors {
     error AdminOnly();
-    error PendingDebt();
     error ZeroAddress();
     error ContractPaused();
+    error OutstandingDebt();
     error AccountsNotFound();
     error AccountOwnerOnly();
     error ContractNotPaused();

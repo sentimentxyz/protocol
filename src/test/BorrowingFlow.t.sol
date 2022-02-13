@@ -19,7 +19,7 @@ contract BorrowingFlowTest is TestBase {
         account = IAccount(userRegistry.accountsOwnedBy(borrower)[0]);
 
         // Assert
-        assertEq(account.owner(), borrower);
+        assertEq(userRegistry.ownerFor(address(account)), borrower);
         assertTrue(account.hasNoDebt());
     }
 

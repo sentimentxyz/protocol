@@ -44,7 +44,7 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     modifier onlyOwner(address account) {
-        if(IAccount(account).owner() != msg.sender) revert Errors.AccountOwnerOnly();
+        if(userRegistry.ownerFor(account) != msg.sender) revert Errors.AccountOwnerOnly();
         _;
     }
 
@@ -57,16 +57,16 @@ contract AccountManager is Pausable, IAccountManager {
             account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
         }
-        IAccount(account).activateFor(owner);
+        IAccount(account).activate();
         userRegistry.addAccount(account, owner);
         emit AccountAssigned(account, owner);
     }
 
     function closeAccount(address _account) public onlyOwner(_account) {
         IAccount account = IAccount(_account);
-        if(account.hasNoDebt()) revert Errors.PendingDebt(); // TODO Refactor to OutstandingDebt
+        if(account.activationBlock() == block.number) revert Errors.AccountDeactivationFailure();
+        if(account.hasNoDebt()) revert Errors.OutstandingDebt();
         account.sweepTo(msg.sender);
-        account.deactivate();
         userRegistry.closeAccount(_account, msg.sender);
         inactiveAccounts.push(_account);
         emit AccountClosed(_account, msg.sender);
@@ -138,7 +138,7 @@ contract AccountManager is Pausable, IAccountManager {
     function liquidate(address account) public {
         if(!riskEngine.isLiquidatable(account)) revert Errors.AccountNotLiquidatable();
         _liquidate(account);
-        emit AccountLiquidated(account, IAccount(account).owner());
+        emit AccountLiquidated(account, userRegistry.ownerFor(account));
     }
 
     function approve(
