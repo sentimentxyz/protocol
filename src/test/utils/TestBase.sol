@@ -116,5 +116,6 @@ abstract contract TestBase is DSTest {
             1
         );
         accountManager.setLTokenAddress(address(erc20), address(lErc20));
+        accountManager.toggleCollateralState(address(erc20));
     }
 }
