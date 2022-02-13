@@ -65,7 +65,7 @@ contract AccountManager is Pausable, IAccountManager {
     function closeAccount(address _account) public onlyOwner(_account) {
         IAccount account = IAccount(_account);
         if(account.activationBlock() == block.number) revert Errors.AccountDeactivationFailure();
-        if(account.hasNoDebt()) revert Errors.OutstandingDebt();
+        if(!account.hasNoDebt()) revert Errors.OutstandingDebt();
         account.sweepTo(msg.sender);
         userRegistry.closeAccount(_account, msg.sender);
         inactiveAccounts.push(_account);
