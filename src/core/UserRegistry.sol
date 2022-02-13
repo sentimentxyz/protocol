@@ -3,17 +3,17 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
 import {Pausable} from "../utils/Pausable.sol";
+import {IAccount} from "../interface/core/IAccount.sol";
 import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
 
 contract UserRegistry is Pausable, IUserRegistry {
 
     address public accountManager;
 
-    address[] public marginAccounts;
-    mapping(address => address) public accountOwnerMapping;
+    address[] public accounts;
+    mapping(address => uint) public ownerAccountCount;
 
     event UpdateAccountManagerAddress(address indexed accountManager);
-    event UpdateMarginAccountOwner(address indexed marginAccount, address indexed owner);
 
     constructor() Pausable(msg.sender) {}
 
@@ -22,25 +22,27 @@ contract UserRegistry is Pausable, IUserRegistry {
         _;
     }
 
-    function addMarginAccount(address _marginAccount) public accountManagerOnly {
-        marginAccounts.push(_marginAccount);
+    function addAccount(address account) external accountManagerOnly {
+        accounts.push(account);
+        ownerAccountCount[address(0)]++;
     }
 
-    function getMarginAccounts() public view returns (address[] memory) {
-        return marginAccounts;
+    function updateRegistry(address prevOwner, address newOwner) external accountManagerOnly {
+        ownerAccountCount[prevOwner]--;
+        ownerAccountCount[newOwner]++;
     }
 
-    function setMarginAccountOwner(address _owner, address _marginAccount) public accountManagerOnly {
-        accountOwnerMapping[_marginAccount] = _owner;
-        emit UpdateMarginAccountOwner(_marginAccount, _owner);
+    function getAccountsFor(address user) external view returns (address[] memory) {
+        address[] memory result = new address[](ownerAccountCount[user]);
+        uint counter = 0;
+        for(uint i = 0; i < accounts.length; ++i) {
+            if(IAccount(accounts[i]).owner() == user) result[counter++] = accounts[i];
+        }
+        return result;
     }
 
-    function isValidOwner(address _owner, address _account) public view returns (bool) {
-        return accountOwnerMapping[_account] == _owner;
-    }
-
-    // admin only
-    function setAccountManagerAddress(address _accountManager) public adminOnly {
+    // Admin only
+    function setAccountManagerAddress(address _accountManager) external adminOnly {
         accountManager = _accountManager;
         emit UpdateAccountManagerAddress(accountManager);
     }

@@ -2,8 +2,7 @@
 pragma solidity ^0.8.10;
 
 interface IUserRegistry {
-    function getMarginAccounts() external view returns (address[] memory);
-    function addMarginAccount(address marginAccount) external;
-    function setMarginAccountOwner(address owner, address marginAccount) external;
-    function isValidOwner(address owner, address marginAccount) external returns (bool);
+    function addAccount(address account) external;
+    function updateRegistry(address prevOwner, address newOwner) external;
+    function getAccountsFor(address user) external view returns (address[] memory);
 }
