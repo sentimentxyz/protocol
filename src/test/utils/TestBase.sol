@@ -92,15 +92,7 @@ abstract contract TestBase is DSTest {
     }
 
     function setupLEther() private {
-        lEth = new LEther(
-            "LEther",
-            "LETH",
-            1,
-            address(0),
-            address(rateModel),
-            address(accountManager),
-            1
-        );
+        lEth = new LEther(address(rateModel), address(accountManager), 1);
         accountManager.setLTokenAddress(address(0), address(lEth));
     }
 
