@@ -77,8 +77,8 @@ contract AccountManager is Pausable, IAccountManager {
         account.safeTransferETH(msg.value);
     }
 
-    function withdrawEth(address account, uint value) public onlyOwner(account) {
-        account.withdrawEthFromAcc(msg.sender, value);
+    function withdrawETH(address account, uint value) public onlyOwner(account) {
+        account.withdrawETH(msg.sender, value);
     }
 
     function deposit(
@@ -100,12 +100,9 @@ contract AccountManager is Pausable, IAccountManager {
     ) 
         public onlyOwner(account) 
     {
-        // TODO Add custom error after changing behavior of hasNoDebt() so that 
-        // there is a way to execute this without always running isWithdrawAllowed
-        require(IAccount(account).hasNoDebt() ||
-            riskEngine.isWithdrawAllowed(account, token, value),
-            "AccMgr/withdraw: Risky");
-        account.withdrawERC20FromAcc(msg.sender, token, value);
+        if(!riskEngine.isWithdrawAllowed(account, token, value))
+            revert Errors.RiskThresholdBreached();
+        account.withdraw(msg.sender, token, value);
         if(token.balanceOf(account) == 0)
             IAccount(account).removeAsset(token);
     }
@@ -151,7 +148,7 @@ contract AccountManager is Pausable, IAccountManager {
         address spender, 
         uint value
     ) public onlyOwner(account) {
-        account.approveForAcc(token, spender, value);
+        account.safeApprove(token, spender, value);
     }
 
     function exec(
@@ -216,14 +213,13 @@ contract AccountManager is Pausable, IAccountManager {
     // Internal Functions
     function _repay(address account, address token, uint value) internal {
         ILToken LToken = ILToken(LTokenAddressFor[token]);
-        bool isEth = token == address(0);
         if(value == type(uint).max) value = LToken.currentBorrowBalance(account);
 
-        if(isEth) account.withdrawEthFromAcc(address(LToken), value);
-        else account.withdrawERC20FromAcc(address(LToken), token, value);
+        if(token.isETH()) account.withdrawETH(address(LToken), value);
+        else account.withdraw(address(LToken), token, value);
         
-        if(LToken.collectFrom(account, value) && !isEth) IAccount(account).removeBorrow(token);
-        if (!isEth && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
+        if(LToken.collectFrom(account, value) && !token.isETH()) IAccount(account).removeBorrow(token);
+        if (!token.isETH() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
     }
 
     function _updateTokens(address account, address[] memory tokensIn, address[] memory tokensOut) internal {

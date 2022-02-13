@@ -5,7 +5,6 @@ import {Errors} from "../utils/Errors.sol";
 import {Helpers} from "../utils/Helpers.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 
-// TODO Reduce total number of functions in this contract to minimize bytecode
 contract Account is IAccount {
     using Helpers for address;
 

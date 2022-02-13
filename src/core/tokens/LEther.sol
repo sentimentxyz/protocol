@@ -9,22 +9,17 @@ import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LEther is LToken {
     using PRBMathUD60x18 for uint;
-
-    // TODO name, symbol, decimals and underlying are known and need not be input args
+    
     constructor(
-        bytes32 _name, 
-        bytes32 _symbol, 
-        uint8 _decimals,
-        address _underlying,
-        address _rateModel,
-        address _accountManager,
+        address _rateModel, 
+        address _accountManager, 
         uint _initialExchangeRate
     ) LToken(
         msg.sender,
-        _name,
-        _symbol,
-        _decimals,
-        _underlying,
+        "LEther",
+        "LETH",
+        18,
+        address(0),
         _rateModel,
         _accountManager,
         _initialExchangeRate
@@ -47,7 +42,7 @@ contract LEther is LToken {
     // Account Manager Functions
     function lendTo(address account, uint value) public accountManagerOnly returns (bool) {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
-        if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
+        if(block.number != lastUpdated) _updateState();
         bool isFirstBorrow = (borrowBalanceFor[account].principal == 0);
         (bool success, ) = account.call{value: value}("");
         if(!success) revert Errors.ETHTransferFailure();
@@ -60,7 +55,7 @@ contract LEther is LToken {
     function collectFrom(address account, uint value) public accountManagerOnly returns (bool) {
         if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
-        if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
+        if(block.number != lastUpdated) _updateState();
         totalBorrows -= value;
         borrowBalanceFor[account].principal -= value;
         borrowBalanceFor[account].interestIndex = borrowIndex;

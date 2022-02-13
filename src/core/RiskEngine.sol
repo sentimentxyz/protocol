@@ -36,14 +36,15 @@ contract RiskEngine is Ownable, IRiskEngine {
     }
 
     function isWithdrawAllowed(
-        address accountAddr, 
-        address tokenAddr, 
+        address account, 
+        address token, 
         uint value
     )
     public returns (bool) 
     {
-        uint newAccountBalance = _currentAccountBalance(accountAddr) - _valueInWei(tokenAddr, value);
-        return _isAccountHealthy(newAccountBalance, _currentAccountBorrows(accountAddr));
+        if(IAccount(account).hasNoDebt()) return true;
+        uint newAccountBalance = _currentAccountBalance(account) - _valueInWei(token, value);
+        return _isAccountHealthy(newAccountBalance, _currentAccountBorrows(account));
     }
 
     function isLiquidatable(address account) public returns (bool) {

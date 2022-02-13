@@ -6,15 +6,13 @@ import {IAccount} from "../interface/core/IAccount.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 
 contract AccountFactory is IAccountFactory {
+    address public beacon;
 
-    // TODO Rename to beacon
-    address public beaconImplementation;
-
-    constructor (address _implementation) {
-        beaconImplementation = _implementation;
+    constructor (address _beacon) {
+        beacon = _beacon;
     }
 
     function create(address accountManager) public returns (address account) {
-        account = address(new BeaconProxy(beaconImplementation, accountManager));
+        account = address(new BeaconProxy(beacon, accountManager));
     }
 }

@@ -45,7 +45,7 @@ contract LERC20 is LToken {
     // Account Manager Functions
     function lendTo(address accountAddr, uint value) public accountManagerOnly returns (bool) {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
-        if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
+        if(block.number != lastUpdated) _updateState();
         bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
         underlying.safeTransfer(accountAddr, value);
         totalBorrows += value;
@@ -56,7 +56,7 @@ contract LERC20 is LToken {
 
     function collectFrom(address accountAddr, uint value) public accountManagerOnly returns (bool) {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
-        if(block.number != lastUpdated) _updateState(); // TODO how did it get here w/o updating
+        if(block.number != lastUpdated) _updateState();
         totalBorrows -= value;
         borrowBalanceFor[accountAddr].principal -= value;
         borrowBalanceFor[accountAddr].interestIndex = borrowIndex;

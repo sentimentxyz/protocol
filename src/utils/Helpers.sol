@@ -50,20 +50,24 @@ library Helpers {
         return IERC20(token).balanceOf(owner);
     }
 
-    function withdrawEthFromAcc(address account, address to, uint value) internal {
+    function withdrawETH(address account, address to, uint value) internal {
         (bool success, ) = IAccount(account).exec(to, value, new bytes(0));
         if(!success) revert Errors.ETHTransferFailure();
     }
 
-    function withdrawERC20FromAcc(address account, address to, address token, uint value) internal {
+    function withdraw(address account, address to, address token, uint value) internal {
         (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
                 abi.encodeWithSelector(IERC20.transfer.selector, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
     }
 
-    function approveForAcc(address account, address token, address spender, uint value) internal {
+    function safeApprove(address account, address token, address spender, uint value) internal {
         (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
             abi.encodeWithSelector(IERC20.approve.selector, spender, value));
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED"); // TODO Refactor using custom errors
+        require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED");
+    }
+
+    function isETH(address token) internal pure returns (bool) {
+        return token == address(0);
     }
 }
