@@ -12,6 +12,7 @@ contract FeedAggregator is IPriceFeed, Ownable {
 
     event UpdateFeed(address indexed tokenAddr, address indexed feedAddr);
 
+    // TODO Should WETH_ADDR be mutable?
     constructor(address wethAddress) Ownable(msg.sender) {
         WETH_ADDR = wethAddress;
     }

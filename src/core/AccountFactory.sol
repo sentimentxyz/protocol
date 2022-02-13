@@ -7,6 +7,7 @@ import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 
 contract AccountFactory is IAccountFactory {
 
+    // TODO Rename to beacon
     address public beaconImplementation;
 
     constructor (address _implementation) {

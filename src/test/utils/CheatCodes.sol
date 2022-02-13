@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-interface CheatCode {
+interface CheatCodes {
     // Set block.timestamp
     function warp(uint256) external;
     // Set block.number
