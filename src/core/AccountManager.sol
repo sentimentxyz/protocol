@@ -53,24 +53,23 @@ contract AccountManager is Pausable, IAccountManager {
         if(inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
             IAccount(account).initialize(address(this));
-            userRegistry.addAccount(account);
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
         }
         IAccount(account).activateFor(owner);
-        userRegistry.updateRegistry(address(0), owner);
+        userRegistry.addAccount(account, owner);
         emit AccountAssigned(account, owner);
     }
 
     function closeAccount(address _account) public onlyOwner(_account) {
         IAccount account = IAccount(_account);
-        if(account.hasNoDebt()) revert Errors.PendingDebt();
+        if(account.hasNoDebt()) revert Errors.PendingDebt(); // TODO Refactor to OutstandingDebt
         account.sweepTo(msg.sender);
         account.deactivate();
-        userRegistry.updateRegistry(msg.sender, address(0));
-        inactiveAccounts.push(address(account));
-        emit AccountClosed(address(account), msg.sender);
+        userRegistry.closeAccount(_account, msg.sender);
+        inactiveAccounts.push(_account);
+        emit AccountClosed(_account, msg.sender);
     }
 
     function depositEth(address account) external payable onlyOwner(account) {

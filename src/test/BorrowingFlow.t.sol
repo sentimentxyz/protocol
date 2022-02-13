@@ -16,7 +16,7 @@ contract BorrowingFlowTest is TestBase {
         // Test
         cheats.prank(borrower);
         accountManager.openAccount(borrower);
-        account = IAccount(userRegistry.getAccountsFor(borrower)[0]);
+        account = IAccount(userRegistry.accountsOwnedBy(borrower)[0]);
 
         // Assert
         assertEq(account.owner(), borrower);
