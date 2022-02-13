@@ -102,6 +102,7 @@ abstract contract LToken is Pausable, ILToken {
         _updateState();
     }
     
+    // TODO Refactor to a single getBorrowBalance function that returns the debt + interest 
     function currentBorrowBalance(address account) public returns (uint) {
         if(_borrowBalance(account) == 0) return 0;
         _updateState();
