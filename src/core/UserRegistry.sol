@@ -9,8 +9,8 @@ import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
 contract UserRegistry is Pausable, IUserRegistry {
 
     address public accountManager;
-    mapping(address => address[]) accountListFor;
     mapping(address => address) public ownerFor;
+    mapping(address => address[]) accountsFor;
 
     event UpdateAccountManagerAddress(address indexed accountManager);
 
@@ -23,13 +23,13 @@ contract UserRegistry is Pausable, IUserRegistry {
 
     function addAccount(address account, address owner) external accountManagerOnly {
         ownerFor[account] = owner;
-        accountListFor[owner].push(account);
+        accountsFor[owner].push(account);
     }
 
     function closeAccount(address account, address owner) external accountManagerOnly {
         ownerFor[account] = address(0);
         
-        address[] storage accounts = accountListFor[owner];
+        address[] storage accounts = accountsFor[owner];
         for(uint i = 0; i < accounts.length; ++i) {
             if(accounts[i] == account) {
                 accounts[i] = accounts[accounts.length - 1];
@@ -40,7 +40,7 @@ contract UserRegistry is Pausable, IUserRegistry {
     }
 
     function accountsOwnedBy(address user) external view returns (address[] memory) {
-        return accountListFor[user];
+        return accountsFor[user];
     }
 
     // Admin only
