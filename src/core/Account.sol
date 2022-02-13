@@ -20,8 +20,7 @@ contract Account is IAccount {
     }
 
     function initialize(address _accountManager) public {
-        if(activationBlock != 0) revert Errors.ContractAlreadyInitialized();
-        activationBlock = block.number;
+        if(accountManager != address(0)) revert Errors.ContractAlreadyInitialized();
         accountManager = _accountManager;
     }
 
