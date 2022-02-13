@@ -9,9 +9,8 @@ import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
 contract UserRegistry is Pausable, IUserRegistry {
 
     address public accountManager;
-
-    address[] public accounts;
-    mapping(address => uint) public ownerAccountCount;
+    mapping(address => address) public ownerFor;
+    mapping(address => address[]) accountsFor;
 
     event UpdateAccountManagerAddress(address indexed accountManager);
 
@@ -22,23 +21,26 @@ contract UserRegistry is Pausable, IUserRegistry {
         _;
     }
 
-    function addAccount(address account) external accountManagerOnly {
-        accounts.push(account);
-        ownerAccountCount[address(0)]++;
+    function addAccount(address account, address owner) external accountManagerOnly {
+        ownerFor[account] = owner;
+        accountsFor[owner].push(account);
     }
 
-    function updateRegistry(address prevOwner, address newOwner) external accountManagerOnly {
-        ownerAccountCount[prevOwner]--;
-        ownerAccountCount[newOwner]++;
-    }
-
-    function getAccountsFor(address user) external view returns (address[] memory) {
-        address[] memory result = new address[](ownerAccountCount[user]);
-        uint counter = 0;
+    function closeAccount(address account, address owner) external accountManagerOnly {
+        ownerFor[account] = address(0);
+        
+        address[] storage accounts = accountsFor[owner];
         for(uint i = 0; i < accounts.length; ++i) {
-            if(IAccount(accounts[i]).owner() == user) result[counter++] = accounts[i];
+            if(accounts[i] == account) {
+                accounts[i] = accounts[accounts.length - 1];
+                accounts.pop();
+                break;
+            }
         }
-        return result;
+    }
+
+    function accountsOwnedBy(address user) external view returns (address[] memory) {
+        return accountsFor[user];
     }
 
     // Admin only

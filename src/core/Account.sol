@@ -9,12 +9,10 @@ contract Account is IAccount {
     using Helpers for address;
 
     uint public activationBlock;
+    address public accountManager;
 
     address[] public assets;
     address[] public borrows;
-
-    address public owner;
-    address public accountManager;
 
     modifier accountManagerOnly() {
         if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
@@ -26,15 +24,9 @@ contract Account is IAccount {
         accountManager = _accountManager;
     }
 
-    function activateFor(address _owner) public accountManagerOnly {
-        owner = _owner;
-        activationBlock = block.number;
-    }
-
-    function deactivate() public accountManagerOnly {
-        if (activationBlock == block.number) revert Errors.AccountDeactivationFailure();
+    function activate() public accountManagerOnly {
         delete assets;
-        owner = address(0);
+        activationBlock = block.number;
     }
 
     function getAssets() external view returns (address[] memory) {
