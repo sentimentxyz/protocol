@@ -48,7 +48,7 @@ contract AccountManager is Pausable, IAccountManager {
         _;
     }
 
-    function openAccount(address owner) public {
+    function openAccount(address owner) external {
         address account;
         if(inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
@@ -76,7 +76,7 @@ contract AccountManager is Pausable, IAccountManager {
         account.safeTransferETH(msg.value);
     }
 
-    function withdrawETH(address account, uint value) public onlyOwner(account) {
+    function withdrawETH(address account, uint value) external onlyOwner(account) {
         account.withdrawETH(msg.sender, value);
     }
 
@@ -85,7 +85,7 @@ contract AccountManager is Pausable, IAccountManager {
         address token,
         uint value
     ) 
-        public onlyOwner(account) 
+        external onlyOwner(account) 
     {
         if(!isCollateralAllowed[token]) revert Errors.CollateralTypeRestricted();
         if(token.balanceOf(account) == 0) IAccount(account).addAsset(address(token));
@@ -97,7 +97,7 @@ contract AccountManager is Pausable, IAccountManager {
         address token, 
         uint value
     ) 
-        public onlyOwner(account) 
+        external onlyOwner(account) 
     {
         if(!riskEngine.isWithdrawAllowed(account, token, value))
             revert Errors.RiskThresholdBreached();
@@ -111,7 +111,7 @@ contract AccountManager is Pausable, IAccountManager {
         address token, 
         uint value
     ) 
-        public onlyOwner(account)
+        external onlyOwner(account)
     { 
         if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
         if(!riskEngine.isBorrowAllowed(account, token, value)) 
@@ -135,7 +135,7 @@ contract AccountManager is Pausable, IAccountManager {
         emit Repay(account, msg.sender, token, value);
     }
 
-    function liquidate(address account) public {
+    function liquidate(address account) external {
         if(!riskEngine.isLiquidatable(account)) revert Errors.AccountNotLiquidatable();
         _liquidate(account);
         emit AccountLiquidated(account, userRegistry.ownerFor(account));
@@ -146,7 +146,7 @@ contract AccountManager is Pausable, IAccountManager {
         address token,
         address spender, 
         uint value
-    ) public onlyOwner(account) {
+    ) external onlyOwner(account) {
         account.safeApprove(token, spender, value);
     }
 
@@ -156,7 +156,7 @@ contract AccountManager is Pausable, IAccountManager {
         uint amt,
         bytes4 sig,
         bytes calldata data
-    ) public onlyOwner(account) {
+    ) external onlyOwner(account) {
         bool isAllowed;
         address[] memory tokensIn;
         address[] memory tokensOut;
@@ -171,7 +171,7 @@ contract AccountManager is Pausable, IAccountManager {
         if(riskEngine.isLiquidatable(account)) revert Errors.RiskThresholdBreached();
     }
 
-    function settle(address account) public onlyOwner(account) {
+    function settle(address account) external onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
             uint balance = borrows[i].balanceOf(account);
@@ -180,31 +180,31 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     // Admin-Only
-    function toggleCollateralState(address token) public adminOnly {
+    function toggleCollateralState(address token) external adminOnly {
         isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
 
-    function setLTokenAddress(address token, address LToken) public adminOnly {
+    function setLTokenAddress(address token, address LToken) external adminOnly {
         LTokenAddressFor[token] = LToken;
         emit UpdateLTokenAddress(token, LToken);
     }
 
-    function setRiskEngineAddress(address _riskEngine) public adminOnly {
+    function setRiskEngineAddress(address _riskEngine) external adminOnly {
         riskEngine = IRiskEngine(_riskEngine);
         emit UpdateRiskEngineAddress(address(riskEngine));
     }
 
-    function setUserRegistryAddress(address _userRegistry) public adminOnly {
+    function setUserRegistryAddress(address _userRegistry) external adminOnly {
         userRegistry = IUserRegistry(_userRegistry);
         emit UpdateUserRegistryAddress(address(userRegistry));
     }
 
-    function setControllerAddress(address target, address controller) public adminOnly {
+    function setControllerAddress(address target, address controller) external adminOnly {
         controllerAddrFor[target] = controller;
         emit UpdateControllerAddress(target, controller);
     }
 
-    function setAccountFactoryAddress(address _accountFactory) public adminOnly {
+    function setAccountFactoryAddress(address _accountFactory) external adminOnly {
         accountFactory = IAccountFactory(_accountFactory);
         emit UpdateAccountFactoryAddress(address(accountFactory));
     }

@@ -22,12 +22,12 @@ contract Beacon is IBeacon {
         _;
     }
 
-    function changeAdmin(address newAdmin) public adminOnly {
+    function changeAdmin(address newAdmin) external adminOnly {
         admin = newAdmin;
         emit AdminChanged(msg.sender, newAdmin);
     }
 
-    function upgradeTo(address newImplementation) public adminOnly {
+    function upgradeTo(address newImplementation) external adminOnly {
         _setImplementation(newImplementation);
         emit Upgraded(newImplementation);
     }

@@ -17,7 +17,7 @@ contract Proxy is BaseProxy {
         _setAdmin(msg.sender);
     }
 
-    function changeImplementation(address implementation) public adminOnly {
+    function changeImplementation(address implementation) external adminOnly {
         _setImplementation(implementation);
     }
 

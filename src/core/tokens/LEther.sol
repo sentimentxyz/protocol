@@ -26,13 +26,13 @@ contract LEther is LToken {
     ) {}
 
     // Lender Functions
-    function deposit() public payable {
+    function deposit() external payable {
         _updateState();
         _mint(msg.sender, msg.value.div(exchangeRate));
     }
 
     // TODO should this denote LToken amount instead of underlying amount
-    function withdraw(uint value) public {
+    function withdraw(uint value) external {
         _updateState();
         (bool success, ) = msg.sender.call{value: value}("");
         if(!success) revert Errors.ETHTransferFailure();
@@ -40,7 +40,7 @@ contract LEther is LToken {
     }
 
     // Account Manager Functions
-    function lendTo(address account, uint value) public accountManagerOnly returns (bool) {
+    function lendTo(address account, uint value) external accountManagerOnly returns (bool) {
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState();
         bool isFirstBorrow = (borrowBalanceFor[account].principal == 0);
@@ -52,7 +52,7 @@ contract LEther is LToken {
         return isFirstBorrow;
     }
 
-    function collectFrom(address account, uint value) public accountManagerOnly returns (bool) {
+    function collectFrom(address account, uint value) external accountManagerOnly returns (bool) {
         if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
         // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState();

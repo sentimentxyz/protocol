@@ -19,12 +19,12 @@ contract Account is IAccount {
         _;
     }
 
-    function initialize(address _accountManager) public {
+    function initialize(address _accountManager) external {
         if(accountManager != address(0)) revert Errors.ContractAlreadyInitialized();
         accountManager = _accountManager;
     }
 
-    function activate() public accountManagerOnly {
+    function activate() external accountManagerOnly {
         delete assets;
         activationBlock = block.number;
     }
@@ -53,17 +53,17 @@ contract Account is IAccount {
         _remove(borrows, token);
     }
 
-    function hasNoDebt() public view returns (bool) {
+    function hasNoDebt() external view returns (bool) {
         return borrows.length == 0;
     }
 
-    function exec(address target, uint amt, bytes memory data) 
-        public payable accountManagerOnly returns (bool, bytes memory) {
+    function exec(address target, uint amt, bytes calldata data) 
+        external payable accountManagerOnly returns (bool, bytes memory) {
         (bool success, bytes memory retData) = target.call{value: amt}(data);
         return (success, retData);
     }
 
-    function sweepTo(address toAddress) public accountManagerOnly {
+    function sweepTo(address toAddress) external accountManagerOnly {
         uint assetsLen = assets.length;
         for(uint i = 0; i < assetsLen; ++i) {
             assets[i].safeTransfer(
