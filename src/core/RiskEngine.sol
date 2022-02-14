@@ -48,8 +48,7 @@ contract RiskEngine is Ownable, IRiskEngine {
     }
 
     function isLiquidatable(address account) public returns (bool) {
-        return false;
-        // return _isAccountHealthy(_currentAccountBalance(account), _currentAccountBorrows(account));
+        return _isAccountHealthy(_currentAccountBalance(account), _currentAccountBorrows(account));
     }
 
     // TODO Implement storedAccountBalance view func
