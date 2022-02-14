@@ -2,6 +2,8 @@
 pragma solidity ^0.8.10;
 
 interface IUserRegistry {
+    event UpdateAccountManagerAddress(address indexed accountManager);
+
     function addAccount(address account, address owner) external;
     function closeAccount(address account, address owner) external;
     function ownerFor(address account) external view returns (address);

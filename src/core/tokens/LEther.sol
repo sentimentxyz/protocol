@@ -41,7 +41,6 @@ contract LEther is LToken {
 
     // Account Manager Functions
     function lendTo(address account, uint value) external accountManagerOnly returns (bool) {
-        // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState();
         bool isFirstBorrow = (borrowBalanceFor[account].principal == 0);
         (bool success, ) = account.call{value: value}("");
@@ -53,8 +52,6 @@ contract LEther is LToken {
     }
 
     function collectFrom(address account, uint value) external accountManagerOnly returns (bool) {
-        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
-        // require(block.number == lastUpdated, "LToken/collectFromStale Market State");
         if(block.number != lastUpdated) _updateState();
         totalBorrows -= value;
         borrowBalanceFor[account].principal -= value;
