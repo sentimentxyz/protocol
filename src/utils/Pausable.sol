@@ -21,7 +21,7 @@ abstract contract Pausable is Ownable {
         _;
     }
 
-    function togglePause() public adminOnly {
+    function togglePause() external adminOnly {
         paused = !paused;
         emit PauseToggled(msg.sender, paused);
     }

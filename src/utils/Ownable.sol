@@ -18,7 +18,7 @@ abstract contract Ownable {
         _;
     }
 
-    function transferOwnership(address newAdmin) public virtual adminOnly {
+    function transferOwnership(address newAdmin) external virtual adminOnly {
         emit OwnershipTransferred(admin, newAdmin);
         admin = newAdmin;
         

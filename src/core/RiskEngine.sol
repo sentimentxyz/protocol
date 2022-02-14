@@ -27,7 +27,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         address tokenAddr, 
         uint value
     )
-    public returns (bool) 
+    external returns (bool) 
     {
         uint borrowAmt = _valueInWei(tokenAddr, value);
         uint newAccountBalance = _currentAccountBalance(accountAddr) + borrowAmt;
@@ -40,24 +40,24 @@ contract RiskEngine is Ownable, IRiskEngine {
         address token, 
         uint value
     )
-    public returns (bool) 
+    external returns (bool) 
     {
         if(IAccount(account).hasNoDebt()) return true;
         uint newAccountBalance = _currentAccountBalance(account) - _valueInWei(token, value);
         return _isAccountHealthy(newAccountBalance, _currentAccountBorrows(account));
     }
 
-    function isLiquidatable(address account) public returns (bool) {
+    function isLiquidatable(address account) external returns (bool) {
         return _isAccountHealthy(_currentAccountBalance(account), _currentAccountBorrows(account));
     }
 
     // TODO Implement storedAccountBalance view func
 
-    function currentAccountBalance(address account) public view returns (uint) {
+    function currentAccountBalance(address account) external view returns (uint) {
         return _currentAccountBalance(account);
     }
 
-    function currentAccountBorrows(address account) public returns (uint) {
+    function currentAccountBorrows(address account) external returns (uint) {
         return _currentAccountBorrows(account);
     }
 
@@ -103,7 +103,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         return accountManager.LTokenAddressFor(token);
     }
 
-    function setAccountManagerAddress(address _accountManager) public adminOnly {
+    function setAccountManagerAddress(address _accountManager) external adminOnly {
         accountManager = IAccountManager(_accountManager);
     }
 }

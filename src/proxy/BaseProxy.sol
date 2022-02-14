@@ -16,7 +16,7 @@ abstract contract BaseProxy {
         _;
     }
 
-    function changeAdmin(address newAdmin) public adminOnly {
+    function changeAdmin(address newAdmin) external adminOnly {
         _setAdmin(newAdmin);
     }
 

@@ -12,6 +12,6 @@ contract ATokenPriceFeed is IPriceFeed {
     }
 
     function getPrice(address aToken) external view returns (uint) {
-        IPriceFeed(priceFeedAggregator).getPrice(IAToken(aToken).UNDERLYING_ASSET_ADDRESS());
+        return IPriceFeed(priceFeedAggregator).getPrice(IAToken(aToken).UNDERLYING_ASSET_ADDRESS());
     }
 }

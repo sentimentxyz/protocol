@@ -71,20 +71,20 @@ abstract contract LToken is Pausable, ILToken {
     }
 
     // ERC20 Functions
-    function approve(address spender, uint256 value) public returns (bool) {
+    function approve(address spender, uint256 value) external returns (bool) {
         allowance[msg.sender][spender] = value;
         emit Approval(msg.sender, spender, value);
         return true;
     }
 
-    function transfer(address to, uint256 value) public returns (bool) {
+    function transfer(address to, uint256 value) external returns (bool) {
         balanceOf[msg.sender] -= value;
         balanceOf[to] += value;
         emit Transfer(msg.sender, to, value);
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 value) public returns (bool) {
+    function transferFrom(address from, address to, uint256 value) external returns (bool) {
         allowance[from][msg.sender] -= value;
         balanceOf[from] -= value;
         balanceOf[to] += value;
@@ -103,13 +103,13 @@ abstract contract LToken is Pausable, ILToken {
     }
     
     // TODO Refactor to a single getBorrowBalance function that returns the debt + interest 
-    function currentBorrowBalance(address account) public returns (uint) {
+    function currentBorrowBalance(address account) external returns (uint) {
         if(_borrowBalance(account) == 0) return 0;
         _updateState();
         return _borrowBalance(account);
     }
 
-    function storedBorrowBalance(address account) public view returns (uint) {
+    function storedBorrowBalance(address account) external view returns (uint) {
         return _borrowBalance(account);
     }
 

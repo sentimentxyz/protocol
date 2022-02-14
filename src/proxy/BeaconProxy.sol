@@ -18,7 +18,7 @@ contract BeaconProxy is BaseProxy {
         _setBeacon(_beacon);
     }
 
-    function changeBeacon(address beacon) public adminOnly {
+    function changeBeacon(address beacon) external adminOnly {
         _setBeacon(beacon);
     }
 
