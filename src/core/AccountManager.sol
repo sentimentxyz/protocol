@@ -12,6 +12,7 @@ import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
 import {IController} from "../interface/controllers/IController.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
+import {IZapController} from "../interface/controllers/IZapController.sol";
 
 contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
@@ -167,6 +168,30 @@ contract AccountManager is Pausable, IAccountManager {
             IController(controller).canCall(target, sig, data);
         if(!isAllowed) revert Errors.FunctionCallRestricted();
         IAccount(account).exec(target, amt, bytes.concat(sig, data));
+        _updateTokens(account, tokensIn, tokensOut);
+        if(riskEngine.isLiquidatable(account)) revert Errors.RiskThresholdBreached();
+    }
+
+    function zap(
+        address account,
+        address sellToken,
+        address buyToken,
+        address payable zapContract,
+        uint amt,
+        bytes calldata data
+    ) public onlyOwner(account) payable {
+        address controller = controllerAddrFor[zapContract];
+        if(controller == address(0)) revert Errors.ControllerUnavailable();
+        (
+            bool isAllowed,
+            address[] memory tokensIn,
+            address[] memory tokensOut
+        ) = IZapController(controller).canCall(sellToken, buyToken);
+        if(!isAllowed) revert Errors.FunctionCallRestricted();
+        
+        approve(account, sellToken, zapContract, amt);
+        IAccount(account).exec(zapContract, amt, data);
+        
         _updateTokens(account, tokensIn, tokensOut);
         if(riskEngine.isLiquidatable(account)) revert Errors.RiskThresholdBreached();
     }
