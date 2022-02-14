@@ -131,43 +131,24 @@ abstract contract LToken is Pausable, ILToken {
         if(lastUpdated == block.number) return;
 
         uint rateFactor = _getRateFactor();
-        uint interestAccrued = _getInterestAccrued(rateFactor);
+        uint interestAccrued = totalBorrows.mul(rateFactor);
 
         // Store results
         borrowIndex = _getBorrowIndex(rateFactor);
-        totalBorrows = _getTotalBorrows(_getInterestAccrued(rateFactor));
-        totalReserves = _getTotalReserves(interestAccrued);
-        exchangeRate = _getExchangeRate(totalBorrows, totalReserves);
+        totalBorrows = totalBorrows + interestAccrued;
+        totalReserves = interestAccrued.mul(reserveFactor) + totalReserves;
+        exchangeRate = (totalSupply == 0) ? exchangeRate :
+            (_getBalance() + totalBorrows - totalReserves).div(totalSupply);
         lastUpdated = block.number;
     }
 
     function _getRateFactor() internal view returns (uint) {
-        return ((block.number - lastUpdated).fromUint()).mul(_getCurrentPerBlockBorrowRate());
-    }
-
-    function _getCurrentPerBlockBorrowRate() internal view returns (uint) {
-        return IRateModel(rateModel).getBorrowRate(_getBalance(), totalBorrows, totalReserves);
+        return ((block.number - lastUpdated).fromUint())
+        .mul(IRateModel(rateModel).getBorrowRate(_getBalance(), totalBorrows, totalReserves));
     }
 
     function _getBorrowIndex(uint rateFactor) internal view returns (uint) {
         return borrowIndex.mul(1e18 + rateFactor);
-    }
-
-    function _getInterestAccrued(uint rateFactor) internal view returns (uint) {
-        return totalBorrows.mul(rateFactor);
-    }
-
-    function _getTotalBorrows(uint interestAccrued) internal view returns (uint) {
-        return totalBorrows + interestAccrued;
-    }
-
-    function _getTotalReserves(uint interestAccrued) internal view returns (uint) {
-        return interestAccrued.mul(reserveFactor) + totalReserves;
-    }
-
-    function _getExchangeRate(uint _totalBorrows, uint _totalReserves) internal view returns (uint) {
-        return (totalSupply == 0) ? exchangeRate :
-            (_getBalance() + _totalBorrows - _totalReserves).div(totalSupply);
     }
 
     function _getBalance() internal view virtual returns (uint);
