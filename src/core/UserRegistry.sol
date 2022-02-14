@@ -12,8 +12,6 @@ contract UserRegistry is Pausable, IUserRegistry {
     mapping(address => address) public ownerFor;
     mapping(address => address[]) accountsFor;
 
-    event UpdateAccountManagerAddress(address indexed accountManager);
-
     constructor() Pausable(msg.sender) {}
 
     modifier accountManagerOnly() {

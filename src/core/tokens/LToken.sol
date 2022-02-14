@@ -34,19 +34,13 @@ abstract contract LToken is Pausable, ILToken {
     mapping(address => BorrowSnapshot) public borrowBalanceFor;
 
     // Privileged addresses
-    IRateModel public rateModel;
+    address public rateModel;
     address public accountManager;
 
     // ERC20 accounting
     uint256 public totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
-
-    // ERC20 Events
-    event Transfer(address indexed _from, address indexed _to, uint256 _value);
-    event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-    event UpdateAccountManagerAddress(address indexed accountManagerAddr);
-    event UpdateRateModelAddress(address indexed rateModelAddr);
 
     constructor(
         address _admin,
@@ -65,7 +59,7 @@ abstract contract LToken is Pausable, ILToken {
         underlying = _underlying;
         exchangeRate = _initialExchangeRate * 1e18;
         borrowIndex = 1e18;
-        rateModel = IRateModel(_rateModel);
+        rateModel = _rateModel;
         accountManager = _accountManager;
 
     }
@@ -152,7 +146,7 @@ abstract contract LToken is Pausable, ILToken {
     }
 
     function _getCurrentPerBlockBorrowRate() internal view returns (uint) {
-        return rateModel.getBorrowRate(_getBalance(), totalBorrows, totalReserves);
+        return IRateModel(rateModel).getBorrowRate(_getBalance(), totalBorrows, totalReserves);
     }
 
     function _getBorrowIndex(uint rateFactor) internal view returns (uint) {
@@ -185,7 +179,7 @@ abstract contract LToken is Pausable, ILToken {
     }
 
     function setRateModel(address _rateModel) external adminOnly {
-        rateModel = IRateModel(_rateModel);
+        rateModel = _rateModel;
         emit UpdateRateModelAddress(address(rateModel));
     }
 }

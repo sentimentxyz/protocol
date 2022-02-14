@@ -26,17 +26,6 @@ contract AccountManager is Pausable, IAccountManager {
     mapping(address => address) public LTokenAddressFor; // token => LToken
     mapping(address => address) public controllerAddrFor; // address => controller
 
-    event AccountAssigned(address indexed accountAddr, address indexed ownerAddr);
-    event AccountClosed(address indexed accountAddr, address indexed accountOwner);
-    event AccountLiquidated(address indexed accountAddr, address indexed accountOwner);
-    event Borrow(address indexed accountAddr, address indexed accountOwner, address indexed tokenAddr, uint value);
-    event Repay(address indexed accountAddr, address indexed accountOwner, address indexed tokenAddr, uint value);
-    event UpdateRiskEngineAddress(address indexed riskEngineAddr);
-    event UpdateUserRegistryAddress(address indexed userRegistryAddr);
-    event UpdateControllerAddress(address indexed contractAddr,address indexed controllerAddr);
-    event UpdateAccountFactoryAddress(address indexed accountFactoryAddr);
-    event UpdateLTokenAddress(address indexed tokenAddr, address indexed LTokenAddr);
-
     constructor(address _riskEngine, address _accountFactory, address _userRegistry) Pausable(msg.sender) {
         riskEngine = IRiskEngine(_riskEngine);
         accountFactory = IAccountFactory(_accountFactory);
