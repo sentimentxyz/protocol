@@ -97,23 +97,25 @@ abstract contract LToken is Pausable, ILToken {
     function getBorrowBalance(address account) external view returns (uint) {
         return (borrowBalanceFor[account].principal == 0) ? 0 :
                 borrowBalanceFor[account].principal
-                .mul(_getBorrowIndex())
+                .mul((lastUpdated == block.number) ? borrowIndex : _getBorrowIndex(_getRateFactor()))
                 .div(borrowBalanceFor[account].interestIndex);
     }
 
     // Internal Accounting Functions
+    /// @notice Amount of underlying assets currently held by this contract
     function _getBalance() internal view virtual returns (uint);
-    
+
+    // Rate Factor = Block Delta * Interest Rate Per Block
     function _getRateFactor() internal view returns (uint) {
-        return ((block.number - lastUpdated).fromUint())
-        .mul(IRateModel(rateModel).getBorrowRate(_getBalance(), totalBorrows, totalReserves));
+        return (block.number - lastUpdated).fromUint()
+            .mul(IRateModel(rateModel).getBorrowRate(_getBalance(), totalBorrows, totalReserves));
     }
 
-    function _getBorrowIndex() internal view returns (uint) {
-        return (lastUpdated == block.number) ? borrowIndex 
-            : borrowIndex.mul(1e18 + _getRateFactor());
+    function _getBorrowIndex(uint rateFactor) internal view returns (uint) {
+        return borrowIndex.mul(1e18 + rateFactor);
     }
 
+    // TODO Is there a way to update exchangeRate without checking for zero totalSupply?
     function _updateState() internal {
         if(lastUpdated == block.number) return;
 
@@ -121,9 +123,9 @@ abstract contract LToken is Pausable, ILToken {
         uint interestAccrued = totalBorrows.mul(rateFactor);
 
         // Store results
-        borrowIndex = _getBorrowIndex();
-        totalBorrows = totalBorrows + interestAccrued;
-        totalReserves = interestAccrued.mul(reserveFactor) + totalReserves;
+        borrowIndex = _getBorrowIndex(rateFactor);
+        totalBorrows += interestAccrued;
+        totalReserves += interestAccrued.mul(reserveFactor);
         exchangeRate = (totalSupply == 0) ? exchangeRate :
             (_getBalance() + totalBorrows - totalReserves).div(totalSupply);
         lastUpdated = block.number;
