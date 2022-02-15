@@ -51,7 +51,7 @@ contract BorrowingFlowTest is TestBase {
         // Assert
         assertEq(address(lEth).balance, 0);
         assertEq(address(account).balance, uint(2) * amt);
-        assertEq(lEth.currentBorrowBalance(address(account)), amt);
+        assertEq(lEth.getBorrowBalance(address(account)), amt);
     }
 
     function testDepositCollateralERC20(uint96 amt) public {
@@ -84,6 +84,6 @@ contract BorrowingFlowTest is TestBase {
         // Assert
         assertEq(erc20.balanceOf(address(lErc20)), 0);
         assertEq(erc20.balanceOf(address(account)), uint(2) * amt);
-        assertEq(lErc20.currentBorrowBalance(address(account)), amt);
+        assertEq(lErc20.getBorrowBalance(address(account)), amt);
     }
 }

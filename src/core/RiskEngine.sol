@@ -84,7 +84,7 @@ contract RiskEngine is Ownable, IRiskEngine {
             address LTokenAddr = _LTokenAddressFor(borrows[i]);
             totalBorrows += _valueInWei(
                 borrows[i],
-                ILToken(LTokenAddr).currentBorrowBalance(account)
+                ILToken(LTokenAddr).getBorrowBalance(account)
             );
         }
         return totalBorrows;

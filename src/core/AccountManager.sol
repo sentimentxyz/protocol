@@ -201,7 +201,7 @@ contract AccountManager is Pausable, IAccountManager {
     // Internal Functions
     function _repay(address account, address token, uint value) internal {
         ILToken LToken = ILToken(LTokenAddressFor[token]);
-        if(value == type(uint).max) value = LToken.currentBorrowBalance(account);
+        if(value == type(uint).max) value = LToken.getBorrowBalance(account);
 
         if(token.isETH()) account.withdrawETH(address(LToken), value);
         else account.withdraw(address(LToken), token, value);
