@@ -157,7 +157,7 @@ contract AccountManager is Pausable, IAccountManager {
         if(!isAllowed) revert Errors.FunctionCallRestricted();
         IAccount(account).exec(target, amt, bytes.concat(sig, data));
         _updateTokens(account, tokensIn, tokensOut);
-        if(riskEngine.isAccountHealthy(account)) revert Errors.RiskThresholdBreached();
+        if(!riskEngine.isAccountHealthy(account)) revert Errors.RiskThresholdBreached();
     }
 
     function settle(address account) external onlyOwner(account) {
