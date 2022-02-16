@@ -35,7 +35,7 @@ contract BorrowingFlowTest is TestBase {
         // Assert
         assertEq(borrower.balance, 0);
         assertEq(address(account).balance, amt);
-        assertEq(riskEngine.currentAccountBalance(address(account)), amt);
+        assertEq(riskEngine.getBalance(address(account)), amt);
         assertTrue(account.hasNoDebt());
     }
 
@@ -68,7 +68,7 @@ contract BorrowingFlowTest is TestBase {
         // Assert
         assertEq(erc20.balanceOf(borrower), 0);
         assertEq(erc20.balanceOf(address(account)), amt);
-        assertEq(riskEngine.currentAccountBalance(address(account)), amt); // 1 ERC20 = 1 ETHs
+        assertEq(riskEngine.getBalance(address(account)), amt); // 1 ERC20 = 1 ETH
         assertTrue(account.hasNoDebt());   
     }
 

@@ -27,12 +27,13 @@ contract RiskEngine is Ownable, IRiskEngine {
         address tokenAddr, 
         uint value
     )
-    external returns (bool) 
+    external view returns (bool) 
     {
         uint borrowAmt = _valueInWei(tokenAddr, value);
-        uint newAccountBalance = _currentAccountBalance(accountAddr) + borrowAmt;
-        uint newAccountBorrow = _currentAccountBorrows(accountAddr) + borrowAmt;
-        return _isAccountHealthy(newAccountBalance, newAccountBorrow);
+        return _isAccountHealthy(
+            _getBalance(accountAddr) + borrowAmt, 
+            _getBorrows(accountAddr) + borrowAmt
+        );
     }
 
     function isWithdrawAllowed(
@@ -40,29 +41,32 @@ contract RiskEngine is Ownable, IRiskEngine {
         address token, 
         uint value
     )
-    external returns (bool) 
+    external view returns (bool) 
     {
         if(IAccount(account).hasNoDebt()) return true;
-        uint newAccountBalance = _currentAccountBalance(account) - _valueInWei(token, value);
-        return _isAccountHealthy(newAccountBalance, _currentAccountBorrows(account));
+        return _isAccountHealthy(
+            _getBalance(account) - _valueInWei(token, value),
+            _getBorrows(account)
+        );
     }
 
-    function isLiquidatable(address account) external returns (bool) {
-        return _isAccountHealthy(_currentAccountBalance(account), _currentAccountBorrows(account));
+    function isAccountHealthy(address account) external view returns (bool) {
+        return _isAccountHealthy(
+            _getBalance(account), 
+            _getBorrows(account)
+        );
     }
 
-    // TODO Implement storedAccountBalance view func
-
-    function currentAccountBalance(address account) external view returns (uint) {
-        return _currentAccountBalance(account);
+    function getBalance(address account) external view returns (uint) {
+        return _getBalance(account);
     }
 
-    function currentAccountBorrows(address account) external returns (uint) {
-        return _currentAccountBorrows(account);
+    function getBorrows(address account) external view returns (uint) {
+        return _getBorrows(account);
     }
 
     // Internal Functions
-    function _currentAccountBalance(address account) internal view returns (uint) {
+    function _getBalance(address account) internal view returns (uint) {
         address[] memory assets = IAccount(account).getAssets();
         uint assetsLen = assets.length;
         uint totalBalance = 0;
@@ -75,7 +79,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         return totalBalance + account.balance;
     }
 
-    function _currentAccountBorrows(address account) internal returns (uint) {
+    function _getBorrows(address account) internal view returns (uint) {
         if(IAccount(account).hasNoDebt()) return 0;
         address[] memory borrows = IAccount(account).getBorrows();
         uint borrowsLen = borrows.length;
@@ -103,6 +107,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         return accountManager.LTokenAddressFor(token);
     }
 
+    // Admin Only
     function setAccountManagerAddress(address _accountManager) external adminOnly {
         accountManager = IAccountManager(_accountManager);
     }

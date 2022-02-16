@@ -11,7 +11,7 @@ interface ILToken {
 
     function totalSupply() external view returns (uint);
     function underlying() external view returns (address);
-    function getBorrowBalance(address account) external returns (uint);
     function lendTo(address account, uint value) external returns (bool);
+    function getBorrowBalance(address account) external view returns (uint);
     function collectFrom(address account, uint value) external returns (bool);
 }
