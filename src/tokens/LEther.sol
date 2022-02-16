@@ -8,6 +8,7 @@ import {IRateModel} from "../interface/core/IRateModel.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LEther is LToken {
+    using Helpers for address;
     using PRBMathUD60x18 for uint;
     
     constructor(
@@ -31,11 +32,10 @@ contract LEther is LToken {
         _mint(msg.sender, msg.value.div(exchangeRate));
     }
 
-    // TODO should this denote LToken amount instead of underlying amount
+    /// @param value ltoken amount to be withdrawn
     function withdraw(uint value) external {
         _updateState();
-        (bool success, ) = msg.sender.call{value: value.mul(exchangeRate)}("");
-        if(!success) revert Errors.ETHTransferFailure();
+        msg.sender.safeTransferETH(value.mul(exchangeRate));
         _burn(msg.sender, value);
     }
 
