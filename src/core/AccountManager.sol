@@ -125,7 +125,7 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     function liquidate(address account) external {
-        if(!riskEngine.isLiquidatable(account)) revert Errors.AccountNotLiquidatable();
+        if(!riskEngine.isAccountHealthy(account)) revert Errors.AccountNotLiquidatable();
         _liquidate(account);
         emit AccountLiquidated(account, userRegistry.ownerFor(account));
     }
@@ -157,7 +157,7 @@ contract AccountManager is Pausable, IAccountManager {
         if(!isAllowed) revert Errors.FunctionCallRestricted();
         IAccount(account).exec(target, amt, bytes.concat(sig, data));
         _updateTokens(account, tokensIn, tokensOut);
-        if(riskEngine.isLiquidatable(account)) revert Errors.RiskThresholdBreached();
+        if(riskEngine.isAccountHealthy(account)) revert Errors.RiskThresholdBreached();
     }
 
     function settle(address account) external onlyOwner(account) {
