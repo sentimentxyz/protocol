@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {TestBase} from "./utils/TestBase.sol";
+import {TestBase} from "../utils/TestBase.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LendingFlowTest is TestBase {
