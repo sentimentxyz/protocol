@@ -34,9 +34,9 @@ contract LEther is LToken {
     // TODO should this denote LToken amount instead of underlying amount
     function withdraw(uint value) external {
         _updateState();
-        (bool success, ) = msg.sender.call{value: value}("");
+        (bool success, ) = msg.sender.call{value: value.mul(exchangeRate)}("");
         if(!success) revert Errors.ETHTransferFailure();
-        _burn(msg.sender, value.div(exchangeRate));
+        _burn(msg.sender, value);
     }
 
     // Account Manager Functions

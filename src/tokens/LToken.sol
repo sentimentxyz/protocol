@@ -101,6 +101,15 @@ abstract contract LToken is Pausable, ILToken {
                 .div(borrowBalanceFor[account].interestIndex);
     }
 
+    function getExchangeRate() external view returns (uint) {
+        if (lastUpdated == block.number) return exchangeRate;
+        uint interestAccrued = totalBorrows.mul(_getRateFactor());
+        return _getExchangeRate(
+            (totalBorrows + interestAccrued),
+            (totalReserves + interestAccrued.mul(reserveFactor))
+        );
+    }
+
     // Internal Accounting Functions
     /// @notice Amount of underlying assets currently held by this contract
     function _getBalance() internal view virtual returns (uint);
@@ -126,9 +135,17 @@ abstract contract LToken is Pausable, ILToken {
         borrowIndex = _getBorrowIndex(rateFactor);
         totalBorrows += interestAccrued;
         totalReserves += interestAccrued.mul(reserveFactor);
-        exchangeRate = (totalSupply == 0) ? exchangeRate :
-            (_getBalance() + totalBorrows - totalReserves).div(totalSupply);
+        exchangeRate = _getExchangeRate(totalBorrows, totalReserves);
         lastUpdated = block.number;
+    }
+
+    // Exchange Rate = (underlying balance + total borrow - total reserves) / total supply
+    function _getExchangeRate(
+        uint _totalBorrows,
+        uint _totalReserves
+    ) internal view returns (uint) {
+        return (totalSupply == 0) ? exchangeRate :
+            (_getBalance() + _totalBorrows - _totalReserves).div(totalSupply);
     }
 
     // Internal ERC20 Functions
