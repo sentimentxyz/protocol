@@ -24,8 +24,8 @@ contract RepayingFlowTest is TestBase {
         accountManager.repay(address(account), address(0), amt);
 
         // Assert
-        assertEq(riskEngine.currentAccountBalance(address(account)), amt);
-        assertEq(riskEngine.currentAccountBorrows(address(account)), 0);
+        assertEq(riskEngine.getBalance(address(account)), amt);
+        assertEq(riskEngine.getBorrows(address(account)), 0);
     }
 
     function testRepayERC20(uint96 amt) public {
@@ -40,7 +40,7 @@ contract RepayingFlowTest is TestBase {
         accountManager.repay(address(account), address(erc20), amt);
 
         // Assert
-        assertEq(riskEngine.currentAccountBalance(address(account)), amt);
-        assertEq(riskEngine.currentAccountBorrows(address(account)), 0);
+        assertEq(riskEngine.getBalance(address(account)), amt);
+        assertEq(riskEngine.getBorrows(address(account)), 0);
     }
 }
