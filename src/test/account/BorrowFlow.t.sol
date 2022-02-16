@@ -21,6 +21,7 @@ contract BorrowFlowTest is TestBase {
         // Assert
         assertEq(address(lEth).balance, 0);
         assertEq(account.balance, uint(2) * amt);
+        assertTrue(!IAccount(account).hasNoDebt());
         assertEq(lEth.getBorrowBalance(address(account)), amt);
     }
 
@@ -30,8 +31,9 @@ contract BorrowFlowTest is TestBase {
         borrow(borrower, account, address(erc20), amt);
 
         // Assert
+        assertTrue(!IAccount(account).hasNoDebt());
         assertEq(erc20.balanceOf(address(lErc20)), 0);
-        assertEq(erc20.balanceOf(address(account)), uint(2) * amt);
         assertEq(lErc20.getBorrowBalance(address(account)), amt);
+        assertEq(erc20.balanceOf(address(account)), uint(2) * amt);
     }
 }
