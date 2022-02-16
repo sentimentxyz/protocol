@@ -12,20 +12,9 @@ contract BorrowingFlowTest is TestBase {
         setupContracts();
     }
 
-    function testAccountOpen() public {
-        // Test
-        cheats.prank(borrower);
-        accountManager.openAccount(borrower);
-        account = IAccount(userRegistry.accountsOwnedBy(borrower)[0]);
-
-        // Assert
-        assertEq(userRegistry.ownerFor(address(account)), borrower);
-        assertTrue(account.hasNoDebt());
-    }
-
     function testDepositCollateralETH(uint96 amt) public {
         // Setup
-        testAccountOpen();
+        account = IAccount(openAccount(borrower));
         cheats.deal(borrower, amt);
 
         // Test
@@ -56,7 +45,7 @@ contract BorrowingFlowTest is TestBase {
 
     function testDepositCollateralERC20(uint96 amt) public {
         // Setup
-        testAccountOpen();
+        account = IAccount(openAccount(borrower));
         erc20.mint(borrower, amt);
 
         // Test
