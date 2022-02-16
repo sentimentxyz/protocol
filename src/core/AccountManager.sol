@@ -125,7 +125,7 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     function liquidate(address account) external {
-        if(!riskEngine.isAccountHealthy(account)) revert Errors.AccountNotLiquidatable();
+        if(riskEngine.isAccountHealthy(account)) revert Errors.AccountNotLiquidatable();
         _liquidate(account);
         emit AccountLiquidated(account, userRegistry.ownerFor(account));
     }
