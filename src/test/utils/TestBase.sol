@@ -110,4 +110,35 @@ abstract contract TestBase is DSTest {
         accountManager.setLTokenAddress(address(erc20), address(lErc20));
         accountManager.toggleCollateralState(address(erc20));
     }
+
+    function openAccount(address owner) public returns (address account) {
+        accountManager.openAccount(owner);
+        account = userRegistry.accountsOwnedBy(owner)[0];
+    }
+
+    function deposit(address owner, address account, address token, uint amt) public {
+        if (token == address(0)) {
+            cheats.deal(owner, amt);
+            cheats.prank(owner);
+            accountManager.depositEth{value: amt}(account);
+        } else {
+            erc20.mint(owner, amt);
+            cheats.startPrank(owner);
+            erc20.approve(address(accountManager), type(uint).max);
+            accountManager.deposit(account, token, amt);
+            cheats.stopPrank();
+        }
+    }
+
+    function borrow(address owner, address account, address token, uint amt) public {
+        if (token == address(0)) {
+            cheats.deal(address(lEth), amt);
+            cheats.prank(owner);
+            accountManager.borrow(account, token, amt);
+        } else {
+            erc20.mint(accountManager.LTokenAddressFor(token), amt);
+            cheats.prank(owner);
+            accountManager.borrow(account, token, amt);
+        }
+    }
 }
