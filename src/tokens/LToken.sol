@@ -139,7 +139,7 @@ abstract contract LToken is Pausable, ILToken {
         lastUpdated = block.number;
     }
 
-    // Exchange Rate = (underlying balance + total borrow - total reserves) / total supply
+    /// @notice Exchange Rate = (underlying balance + total borrow - total reserves) / total supply
     function _getExchangeRate(
         uint _totalBorrows,
         uint _totalReserves
