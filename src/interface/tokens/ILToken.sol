@@ -7,9 +7,8 @@ interface ILToken {
     event Approval(address indexed owner, address indexed spender, uint value);
     
     event UpdateRateModelAddress(address indexed rateModel);
+    event ReservesRedeemed(address indexed treasury, uint value);
     event UpdateAccountManagerAddress(address indexed accountManager);
-
-    event ReservesTransferred(address indexed treasury, uint value);
 
     function totalSupply() external view returns (uint);
     function underlying() external view returns (address);

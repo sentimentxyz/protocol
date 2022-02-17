@@ -64,4 +64,8 @@ contract LERC20 is LToken {
     function _getBalance() internal view override returns (uint) {
         return underlying.balanceOf(address(this));
     }
+
+    function _transfer(address to, uint value) internal override {
+        underlying.safeTransfer(to, value);
+    }
 }

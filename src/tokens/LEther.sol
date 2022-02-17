@@ -8,6 +8,7 @@ import {IRateModel} from "../interface/core/IRateModel.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LEther is LToken {
+    using Helpers for address;
     using PRBMathUD60x18 for uint;
     
     constructor(
@@ -61,6 +62,10 @@ contract LEther is LToken {
 
     function _getBalance() internal view override returns (uint) {
         return address(this).balance;
+    }
+
+    function _transfer(address to, uint value) internal override {
+        to.safeTransferETH(value);
     }
     
     receive() external payable {}

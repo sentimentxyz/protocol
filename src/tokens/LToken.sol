@@ -158,18 +158,19 @@ abstract contract LToken is Pausable, ILToken {
     /// @notice transfers underlying token to specified address
     /// @param treasury address to transfer underlying token
     /// @param value amount of underlying token to transfer
-    function transferReserves(address treasury, uint value) external adminOnly {
+    function redeemReserves(address treasury, uint value) external adminOnly {
         _updateState();
 
         if (value == type(uint).max) value = totalReserves;
         
         totalReserves -= value;
-        if (underlying == address(0)) treasury.safeTransferETH(value);
-        else underlying.safeTransfer(treasury, value);
-        
-        emit ReservesTransferred(treasury, value);
+        _transfer(treasury, value);
+        emit ReservesRedeemed(treasury, value);
 
         exchangeRate = (totalSupply == 0) ? exchangeRate :
             (_getBalance() + totalBorrows - totalReserves).div(totalSupply);
-    } 
+    }
+
+    /// @notice transfers underlying token to given address
+    function _transfer(address to, uint value) internal virtual;
 }
