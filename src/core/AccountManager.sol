@@ -125,7 +125,7 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     function liquidate(address account) external {
-        if(!riskEngine.isAccountHealthy(account)) revert Errors.AccountNotLiquidatable();
+        if(riskEngine.isAccountHealthy(account)) revert Errors.AccountNotLiquidatable();
         _liquidate(account);
         emit AccountLiquidated(account, userRegistry.ownerFor(account));
     }
@@ -206,8 +206,8 @@ contract AccountManager is Pausable, IAccountManager {
         if(token.isETH()) account.withdrawETH(address(LToken), value);
         else account.withdraw(address(LToken), token, value);
         
-        if(LToken.collectFrom(account, value) && !token.isETH()) IAccount(account).removeBorrow(token);
-        if (!token.isETH() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
+        if(LToken.collectFrom(account, value)) IAccount(account).removeBorrow(token);
+        if(!token.isETH() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
     }
 
     function _updateTokens(address account, address[] memory tokensIn, address[] memory tokensOut) internal {

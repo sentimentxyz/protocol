@@ -60,7 +60,7 @@ abstract contract TestBase is DSTest {
         feedAggregator = new FeedAggregator(address(0));
         cheats.mockCall(
             address(feedAggregator),
-            abi.encodeWithSelector(FeedAggregator.getPrice.selector),
+            abi.encodeWithSelector(feedAggregator.getPrice.selector),
             abi.encode(1e18)
         );
     }
