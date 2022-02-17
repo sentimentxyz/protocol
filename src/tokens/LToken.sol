@@ -164,7 +164,7 @@ abstract contract LToken is Pausable, ILToken {
         if (value == type(uint).max) value = totalReserves;
         
         totalReserves -= value;
-        _transfer(treasury, value);
+        _redeemUnderlying(treasury, value);
         emit ReservesRedeemed(treasury, value);
 
         exchangeRate = (totalSupply == 0) ? exchangeRate :
@@ -172,5 +172,5 @@ abstract contract LToken is Pausable, ILToken {
     }
 
     /// @notice transfers underlying token to given address
-    function _transfer(address to, uint value) internal virtual;
+    function _redeemUnderlying(address to, uint value) internal virtual;
 }

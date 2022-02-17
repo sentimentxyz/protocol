@@ -64,7 +64,7 @@ contract LEther is LToken {
         return address(this).balance;
     }
 
-    function _transfer(address to, uint value) internal override {
+    function _redeemUnderlying(address to, uint value) internal override {
         to.safeTransferETH(value);
     }
     
