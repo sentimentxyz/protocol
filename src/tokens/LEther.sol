@@ -62,6 +62,10 @@ contract LEther is LToken {
     function _getBalance() internal view override returns (uint) {
         return address(this).balance;
     }
+
+    function _redeemUnderlying(address to, uint value) internal override {
+        to.safeTransferETH(value);
+    }
     
     receive() external payable {}
 }
