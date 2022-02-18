@@ -3,7 +3,6 @@ pragma solidity ^0.8.10;
 
 import {LToken} from "./LToken.sol";
 import {Helpers} from "../utils/Helpers.sol";
-import {IRateModel} from "../interface/core/IRateModel.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LERC20 is LToken {
@@ -37,37 +36,11 @@ contract LERC20 is LToken {
         _mint(msg.sender, value.div(exchangeRate));
     }
 
-    /// @param value ltoken amount to be withdrawn
-    function withdraw(uint value) external {
-        _updateState();
-        underlying.safeTransfer(msg.sender, value.mul(exchangeRate));
-        _burn(msg.sender, value);
-    }
-
-    // Account Manager Functions
-    function lendTo(address accountAddr, uint value) external accountManagerOnly returns (bool) {
-        if(block.number != lastUpdated) _updateState();
-        bool isFirstBorrow = (borrowBalanceFor[accountAddr].principal == 0);
-        underlying.safeTransfer(accountAddr, value);
-        totalBorrows += value;
-        borrowBalanceFor[accountAddr].principal += value;
-        borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
-        return isFirstBorrow;
-    }
-
-    function collectFrom(address accountAddr, uint value) external accountManagerOnly returns (bool) {
-        if(block.number != lastUpdated) _updateState();
-        totalBorrows -= value;
-        borrowBalanceFor[accountAddr].principal -= value;
-        borrowBalanceFor[accountAddr].interestIndex = borrowIndex;
-        return (borrowBalanceFor[accountAddr].principal == 0);
-    }
-
     function _getBalance() internal view override returns (uint) {
         return underlying.balanceOf(address(this));
     }
 
-    function _redeemUnderlying(address to, uint value) internal override {
+    function _transferUnderlying(address to, uint value) internal override {
         underlying.safeTransfer(to, value);
     }
 }

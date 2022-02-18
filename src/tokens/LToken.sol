@@ -61,8 +61,15 @@ abstract contract LToken is Pausable, ILToken {
         borrowIndex = 1e18;
         rateModel = _rateModel;
         accountManager = _accountManager;
-
     }
+
+    // Virtual Functions
+    /// @notice transfers underlying token to given address
+    function _transferUnderlying(address to, uint value) internal virtual;
+
+    /// @notice Total amount of underlying assets held by this contract
+    function _getBalance() internal view virtual returns (uint);
+
 
     // ERC20 Functions
     function approve(address spender, uint256 value) external returns (bool) {
@@ -91,6 +98,32 @@ abstract contract LToken is Pausable, ILToken {
         _;
     }
 
+    // Account Manager Functions
+    function lendTo(address account, uint value) external accountManagerOnly returns (bool) {
+        if(block.number != lastUpdated) _updateState();
+        bool isFirstBorrow = (borrowBalanceFor[account].principal == 0);
+        _transferUnderlying(account, value);
+        totalBorrows += value;
+        borrowBalanceFor[account].principal += value;
+        borrowBalanceFor[account].interestIndex = borrowIndex;
+        return isFirstBorrow;
+    }
+
+    function collectFrom(address account, uint value) external accountManagerOnly returns (bool) {
+        if(block.number != lastUpdated) _updateState();
+        totalBorrows -= value;
+        borrowBalanceFor[account].principal -= value;
+        borrowBalanceFor[account].interestIndex = borrowIndex;
+        return (borrowBalanceFor[account].principal == 0);
+    }
+
+    /// @param value ltoken amount to be withdrawn
+    function withdraw(uint value) external {
+        _updateState();
+        _transferUnderlying(msg.sender, value.mul(exchangeRate));
+        _burn(msg.sender, value);
+    }
+
     // Utility Functions
     function updateState() external { _updateState(); }
 
@@ -111,9 +144,6 @@ abstract contract LToken is Pausable, ILToken {
     }
 
     // Internal Accounting Functions
-    /// @notice Amount of underlying assets currently held by this contract
-    function _getBalance() internal view virtual returns (uint);
-
     // Rate Factor = Block Delta * Interest Rate Per Block
     function _getRateFactor() internal view returns (uint) {
         return (block.number - lastUpdated).fromUint()
@@ -181,13 +211,10 @@ abstract contract LToken is Pausable, ILToken {
         if (value == type(uint).max) value = totalReserves;
         
         totalReserves -= value;
-        _redeemUnderlying(treasury, value);
+        _transferUnderlying(treasury, value);
         emit ReservesRedeemed(treasury, value);
 
         exchangeRate = (totalSupply == 0) ? exchangeRate :
             (_getBalance() + totalBorrows - totalReserves).div(totalSupply);
     }
-
-    /// @notice transfers underlying token to given address
-    function _redeemUnderlying(address to, uint value) internal virtual;
 }
