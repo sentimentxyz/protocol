@@ -11,6 +11,7 @@ interface IAccount {
     function hasNoDebt() external view returns (bool);
     function initialize(address accountManager) external;
     function activationBlock() external view returns (uint);
+    function accountManager() external view returns (address);
     function getAssets() external view returns (address[] memory);
     function getBorrows() external view returns (address[] memory);
     function exec(
