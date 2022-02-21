@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 
@@ -59,6 +60,7 @@ def deploy(contract):
     add_private_key(commands)
     add_src(contract, commands)
     print(commands)
+    os.chdir("../")
     output = subprocess.run(
         commands,
         stdout=subprocess.PIPE,
