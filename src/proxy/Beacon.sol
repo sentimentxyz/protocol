@@ -2,29 +2,17 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
+import {Ownable} from "../utils/Ownable.sol";
 import {IBeacon} from "../interface/proxy/IBeacon.sol";
 
-contract Beacon is IBeacon {
+contract Beacon is IBeacon, Ownable {
     
     address public implementation;
-    address public admin;
 
     event Upgraded(address indexed implementation);
-    event AdminChanged(address indexed previousAdmin, address indexed newAdmin);
 
-    constructor(address _implementation) {
+    constructor(address _implementation) Ownable(msg.sender) {
         _setImplementation(_implementation);
-        admin = msg.sender;
-    }
-
-    modifier adminOnly() {
-        if (msg.sender != admin) revert Errors.AdminOnly();
-        _;
-    }
-
-    function changeAdmin(address newAdmin) external adminOnly {
-        admin = newAdmin;
-        emit AdminChanged(msg.sender, newAdmin);
     }
 
     function upgradeTo(address newImplementation) external adminOnly {
