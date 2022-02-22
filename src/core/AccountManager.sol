@@ -42,12 +42,13 @@ contract AccountManager is Pausable, IAccountManager {
         if(inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
             IAccount(account).initialize(address(this));
+            userRegistry.addAccount(account, owner);
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
+            userRegistry.updateAccount(account, owner);
         }
         IAccount(account).activate();
-        userRegistry.addAccount(account, owner);
         emit AccountAssigned(account, owner);
     }
 
@@ -56,7 +57,7 @@ contract AccountManager is Pausable, IAccountManager {
         if(account.activationBlock() == block.number) revert Errors.AccountDeactivationFailure();
         if(!account.hasNoDebt()) revert Errors.OutstandingDebt();
         account.sweepTo(msg.sender);
-        userRegistry.closeAccount(_account, msg.sender);
+        userRegistry.closeAccount(_account);
         inactiveAccounts.push(_account);
         emit AccountClosed(_account, msg.sender);
     }
