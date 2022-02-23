@@ -5,7 +5,8 @@ interface IUserRegistry {
     event UpdateAccountManagerAddress(address indexed accountManager);
 
     function addAccount(address account, address owner) external;
-    function closeAccount(address account, address owner) external;
+    function updateAccount(address account, address owner) external;
+    function closeAccount(address account) external;
     function ownerFor(address account) external view returns (address);
     function accountsOwnedBy(address user) external view returns (address[] memory);
 }
