@@ -6,20 +6,20 @@ import {Ownable} from "../utils/Ownable.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
+import {IOracle} from "../interface/periphery/IOracle.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
-import {IPriceFeed} from "../interface/priceFeeds/IPriceFeed.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract RiskEngine is Ownable, IRiskEngine {
     using PRBMathUD60x18 for uint;
 
-    IPriceFeed public priceFeed;
+    IOracle public oracle;
     IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
-    constructor(address _priceFeed) Ownable(msg.sender) {
-        priceFeed = IPriceFeed(_priceFeed);
+    constructor(address _oracle) Ownable(msg.sender) {
+        oracle = IOracle(_oracle);
     }
 
     function isBorrowAllowed(
@@ -95,7 +95,7 @@ contract RiskEngine is Ownable, IRiskEngine {
     }
 
     function _valueInWei(address token, uint value) internal view returns (uint) {
-        return priceFeed.getPrice(token).mul(value);
+        return oracle.getPrice(token).mul(value);
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows) internal pure returns (bool) {
