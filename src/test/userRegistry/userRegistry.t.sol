@@ -103,24 +103,24 @@ contract UserRegistryTest is TestBase {
 
     }
 
-    function testSetAccountManagerAddress(address newAccountManager) public {
+    function testSetAccountManagerAddress(address _accountManager) public {
         // Setup
         cheats.expectEmit(true, false, false, false);
-        emit UpdateAccountManagerAddress(newAccountManager);
+        emit UpdateAccountManagerAddress(_accountManager);
 
         // Test
         cheats.prank(address(this));
-        userRegistry.setAccountManagerAddress(newAccountManager);
+        userRegistry.setAccountManagerAddress(_accountManager);
 
         // Assert
-        assertEq(userRegistry.accountManager(), newAccountManager);
+        assertEq(userRegistry.accountManager(), _accountManager);
     }
 
-    function testSetAccountManagerAddressError(address caller, address newAccountManager) public {
+    function testSetAccountManagerAddressError(address caller, address _accountManager) public {
         // Test
         cheats.expectRevert(Errors.AdminOnly.selector);
         cheats.prank(caller);
-        userRegistry.setAccountManagerAddress(newAccountManager);
+        userRegistry.setAccountManagerAddress(_accountManager);
 
         // Assert
         assertEq(userRegistry.accountManager(), address(accountManager));
