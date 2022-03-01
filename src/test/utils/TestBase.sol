@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {Errors} from "./Errors.sol";
 import {CheatCodes} from "./CheatCodes.sol";
 import {DSTest} from "@ds-test/src/test.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
@@ -17,6 +18,7 @@ import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/prese
 
 abstract contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+    Errors errors = new Errors();
 
     // Dummy ERC20 Token
     ERC20PresetMinterPauser public erc20;
