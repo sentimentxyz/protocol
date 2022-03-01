@@ -47,6 +47,10 @@ contract UserRegistry is Pausable, IUserRegistry {
         return userAccounts;
     }
 
+    function getAccounts() external view returns (address[] memory) {
+        return accounts;
+    }
+
     // Admin only
     function setAccountManagerAddress(address _accountManager) external adminOnly {
         accountManager = _accountManager;
