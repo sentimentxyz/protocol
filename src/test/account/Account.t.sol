@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
+import {Errors} from "../../utils/Errors.sol";
 
 contract AccountTest is TestBase {
     
@@ -19,7 +20,7 @@ contract AccountTest is TestBase {
 
     function testInitialize() public {
         // Test
-        cheats.expectRevert(errors.contractAlreadyInitialized());
+        cheats.expectRevert(Errors.ContractAlreadyInitialized.selector);
         marginAccount.initialize(address(accountManager));
     }
 
@@ -34,7 +35,7 @@ contract AccountTest is TestBase {
 
     function testAddAssetError(address token) public {
         // Test
-        cheats.expectRevert(errors.accountManagerOnly());
+        cheats.expectRevert(Errors.AccountManagerOnly.selector);
         marginAccount.addAsset(token);
     }
 
@@ -49,7 +50,7 @@ contract AccountTest is TestBase {
 
     function testAddBorrowError(address token) public {
         // Test
-        cheats.expectRevert(errors.accountManagerOnly());
+        cheats.expectRevert(Errors.AccountManagerOnly.selector);
         marginAccount.addBorrow(token);
     }
 
@@ -67,7 +68,7 @@ contract AccountTest is TestBase {
 
     function testRemoveAssetError(address token) public {
         // Test
-        cheats.expectRevert(errors.accountManagerOnly());
+        cheats.expectRevert(Errors.AccountManagerOnly.selector);
         marginAccount.removeAsset(token);
     }
 
@@ -85,7 +86,7 @@ contract AccountTest is TestBase {
 
     function testRemoveBorrowError(address token) public {
         // Test
-        cheats.expectRevert(errors.accountManagerOnly());
+        cheats.expectRevert(Errors.AccountManagerOnly.selector);
         marginAccount.removeBorrow(token);
     }
 
@@ -119,7 +120,7 @@ contract AccountTest is TestBase {
 
     function testSweepToError() public {
         // Test
-        cheats.expectRevert(errors.accountManagerOnly());
+        cheats.expectRevert(Errors.AccountManagerOnly.selector);
         marginAccount.sweepTo(address(accountOwner));
     }
 }
