@@ -19,6 +19,10 @@ contract UserRegistry is Pausable, IUserRegistry {
         _;
     }
 
+    function getAccounts() external view returns (address[] memory) {
+        return accounts;
+    }
+
     function updateAccount(address account, address owner) external accountManagerOnly {
         ownerFor[account] = owner;
     }
@@ -45,10 +49,6 @@ contract UserRegistry is Pausable, IUserRegistry {
         if (index == 0) return new address[](0);
 
         return userAccounts;
-    }
-
-    function getAccounts() external view returns (address[] memory) {
-        return accounts;
     }
 
     // Admin only
