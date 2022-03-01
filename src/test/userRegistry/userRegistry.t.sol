@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {Utils} from "../utils/Utils.sol";
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IUserRegistry} from "../../interface/core/IUserRegistry.sol";
@@ -39,7 +40,7 @@ contract UserRegistryTest is TestBase {
         // Assert
         assertEq(userRegistry.ownerFor(account), owner);
         address[] memory accounts = userRegistry.getAccounts();
-        assertTrue(isPresent(accounts, account));
+        assertTrue(Utils.isPresent(accounts, account));
     }
 
     function testAddAccountError(address account, address owner) public {
@@ -97,7 +98,7 @@ contract UserRegistryTest is TestBase {
             i++
         ) {
             numberOfAccounts++;
-            assertTrue(isPresent(accounts, userAccounts[i]));
+            assertTrue(Utils.isPresent(accounts, userAccounts[i]));
         }
         assertEq(numberOfAccounts, accounts.length);
 
@@ -124,12 +125,5 @@ contract UserRegistryTest is TestBase {
 
         // Assert
         assertEq(userRegistry.accountManager(), address(accountManager));
-    }
-
-    function isPresent(address[] memory accounts, address account) internal pure returns (bool) {
-        for(uint i = 0; i < accounts.length; i++) {
-            if(accounts[i] == account) return true;
-        }
-        return false;
     }
 }
