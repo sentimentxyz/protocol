@@ -8,10 +8,9 @@ import {Errors} from "../../utils/Errors.sol";
 contract AccountTest is TestBase {
     
     IAccount public account;
-    address public owner;
+    address public owner = cheats.addr(1);
 
     function setUp() public {
-        owner = cheats.addr(1);
         setupContracts();
 
         cheats.prank(owner);
@@ -90,22 +89,22 @@ contract AccountTest is TestBase {
         account.removeBorrow(token);
     }
 
-    function testHasNoDebt() public {
+    function testHasNoDebt(address token) public {
         // Assert
         assertTrue(account.hasNoDebt());
 
         // Setup
-        testAddBorrow(address(0));
+        testAddBorrow(token);
 
         // Assert
         assertTrue(account.hasNoDebt() == false);
     }
 
-    function testSweepTo(address user) public {
+    function testSweepTo(address user, uint96 amt) public {
         // Setup
         testAddAsset(address(erc20));
-        erc20.mint(address(account), 10);
-        cheats.deal(address(account), 10);
+        erc20.mint(address(account), amt);
+        cheats.deal(address(account), amt);
 
         // Test
         cheats.prank(address(accountManager));
@@ -114,8 +113,8 @@ contract AccountTest is TestBase {
         // Assert
         assertEq(erc20.balanceOf(address(account)), 0);
         assertEq(address(account).balance, 0);
-        assertEq(erc20.balanceOf(user), 10);
-        assertEq(user.balance, 10);
+        assertEq(erc20.balanceOf(user), amt);
+        assertEq(user.balance, amt);
     }
 
     function testSweepToError(address user) public {
