@@ -7,51 +7,51 @@ import {Errors} from "../../utils/Errors.sol";
 
 contract AccountTest is TestBase {
     
-    IAccount public marginAccount;
-    address public accountOwner;
+    IAccount public account;
+    address public owner;
 
     function setUp() public {
-        accountOwner = cheats.addr(1);
+        owner = cheats.addr(1);
         setupContracts();
 
-        cheats.prank(accountOwner);
-        marginAccount = IAccount(openAccount(accountOwner));
+        cheats.prank(owner);
+        account = IAccount(openAccount(owner));
     }
 
     function testInitialize() public {
         // Test
         cheats.expectRevert(Errors.ContractAlreadyInitialized.selector);
-        marginAccount.initialize(address(accountManager));
+        account.initialize(address(accountManager));
     }
 
     function testAddAsset(address token) public {
         // Test
         cheats.prank(address(accountManager));
-        marginAccount.addAsset(token);
+        account.addAsset(token);
 
         // Assert
-        assertEq(token, marginAccount.getAssets()[0]);
+        assertEq(token, account.getAssets()[0]);
     }
 
     function testAddAssetError(address token) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        marginAccount.addAsset(token);
+        account.addAsset(token);
     }
 
     function testAddBorrow(address token) public {
         // Test
         cheats.prank(address(accountManager));
-        marginAccount.addBorrow(token);
+        account.addBorrow(token);
 
         // Assert
-        assertEq(token, marginAccount.getBorrows()[0]);
+        assertEq(token, account.getBorrows()[0]);
     }
 
     function testAddBorrowError(address token) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        marginAccount.addBorrow(token);
+        account.addBorrow(token);
     }
 
     function testRemoveAsset(address token) public {
@@ -60,16 +60,16 @@ contract AccountTest is TestBase {
 
         // Test
         cheats.prank(address(accountManager));
-        marginAccount.removeAsset(token);
+        account.removeAsset(token);
 
         // Assert
-        assertEq(0, marginAccount.getAssets().length);
+        assertEq(0, account.getAssets().length);
     }
 
     function testRemoveAssetError(address token) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        marginAccount.removeAsset(token);
+        account.removeAsset(token);
     }
 
     function testRemoveBorrow(address token) public {
@@ -78,49 +78,49 @@ contract AccountTest is TestBase {
 
         // Test
         cheats.prank(address(accountManager));
-        marginAccount.removeBorrow(token);
+        account.removeBorrow(token);
 
         // Assert
-        assertEq(0, marginAccount.getBorrows().length);
+        assertEq(0, account.getBorrows().length);
     }
 
     function testRemoveBorrowError(address token) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        marginAccount.removeBorrow(token);
+        account.removeBorrow(token);
     }
 
     function testHasNoDebt() public {
         // Assert
-        assertTrue(marginAccount.hasNoDebt());
+        assertTrue(account.hasNoDebt());
 
         // Setup
         testAddBorrow(address(0));
 
         // Assert
-        assertTrue(marginAccount.hasNoDebt() == false);
+        assertTrue(account.hasNoDebt() == false);
     }
 
-    function testSweepTo() public {
+    function testSweepTo(address user) public {
         // Setup
         testAddAsset(address(erc20));
-        erc20.mint(address(marginAccount), 10);
-        cheats.deal(address(marginAccount), 10);
+        erc20.mint(address(account), 10);
+        cheats.deal(address(account), 10);
 
         // Test
         cheats.prank(address(accountManager));
-        marginAccount.sweepTo(address(accountOwner));
+        account.sweepTo(address(user));
 
         // Assert
-        assertEq(erc20.balanceOf(address(marginAccount)), 0);
-        assertEq(address(marginAccount).balance, 0);
-        assertEq(erc20.balanceOf(accountOwner), 10);
-        assertEq(accountOwner.balance, 10);
+        assertEq(erc20.balanceOf(address(account)), 0);
+        assertEq(address(account).balance, 0);
+        assertEq(erc20.balanceOf(user), 10);
+        assertEq(user.balance, 10);
     }
 
-    function testSweepToError() public {
+    function testSweepToError(address user) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        marginAccount.sweepTo(address(accountOwner));
+        account.sweepTo(address(user));
     }
 }
