@@ -11,8 +11,8 @@ import {RiskEngine} from "../../core/RiskEngine.sol";
 import {UserRegistry} from "../../core/UserRegistry.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
+import {IOracle} from "../../interface/periphery/IOracle.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
-import {FeedAggregator} from "../../priceFeeds/FeedAggregator.sol";
 import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
 abstract contract TestBase is DSTest {
@@ -37,12 +37,9 @@ abstract contract TestBase is DSTest {
     // Rate Model
     DefaultRateModel public rateModel;
 
-    // Price Feeds
-    FeedAggregator public feedAggregator;
-
     function setupContracts() public virtual {
         setupRateModel();
-        setupPriceFeeds();
+        setupOracle();
         setupRiskEngine();
         setupBeacon();
         setupAccountFactory();
@@ -56,17 +53,17 @@ abstract contract TestBase is DSTest {
         rateModel = new DefaultRateModel();
     }
 
-    function setupPriceFeeds() private {
-        feedAggregator = new FeedAggregator(address(0));
+    function setupOracle() private {
+        // Assume oracle is deployed at address(0)
         cheats.mockCall(
-            address(feedAggregator),
-            abi.encodeWithSelector(feedAggregator.getPrice.selector),
+            address(0),
+            abi.encodeWithSelector(IOracle.getPrice.selector),
             abi.encode(1e18)
         );
     }
 
     function setupRiskEngine() private {
-        riskEngine = new RiskEngine(address(feedAggregator));
+        riskEngine = new RiskEngine(address(0));
     }
 
     function setupBeacon() private {
