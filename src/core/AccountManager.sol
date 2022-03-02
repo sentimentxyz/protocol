@@ -62,14 +62,14 @@ contract AccountManager is Pausable, IAccountManager {
         emit AccountClosed(_account, msg.sender);
     }
 
-    function depositETH(address account) external payable onlyOwner(account) {
-        account.safeTransferETH(msg.value);
+    function depositEth(address account) external payable onlyOwner(account) {
+        account.safeTransferEth(msg.value);
     }
 
-    function withdrawETH(address account, uint value) external onlyOwner(account) {
+    function withdrawEth(address account, uint value) external onlyOwner(account) {
         if(!riskEngine.isWithdrawAllowed(account, address(0), value))
             revert Errors.RiskThresholdBreached();
-        account.withdrawETH(msg.sender, value);
+        account.withdrawEth(msg.sender, value);
     }
 
     function deposit(
@@ -212,11 +212,11 @@ contract AccountManager is Pausable, IAccountManager {
         ILToken LToken = ILToken(LTokenAddressFor[token]);
         if(value == type(uint).max) value = LToken.getBorrowBalance(account);
 
-        if(token.isETH()) account.withdrawETH(address(LToken), value);
+        if(token.isEth()) account.withdrawEth(address(LToken), value);
         else account.withdraw(address(LToken), token, value);
         
         if(LToken.collectFrom(account, value)) IAccount(account).removeBorrow(token);
-        if(!token.isETH() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
+        if(!token.isEth() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
     }
 
     function _updateTokens(address account, address[] memory tokensIn, address[] memory tokensOut) internal {

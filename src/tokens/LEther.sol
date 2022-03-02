@@ -35,7 +35,7 @@ contract LEther is LToken {
     }
 
     function _transferUnderlying(address to, uint value) internal override {
-        to.safeTransferETH(value);
+        to.safeTransferEth(value);
     }
     
     receive() external payable {}

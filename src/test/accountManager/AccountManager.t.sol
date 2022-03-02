@@ -85,7 +85,7 @@ contract AccountManagerTest is TestBase {
 
     // Deposit Eth
 
-    function testdepositETHOnlyOwnerError(
+    function testDepositEthOnlyOwnerError(
         uint96 value
     ) public {
         // Setup
@@ -93,7 +93,7 @@ contract AccountManagerTest is TestBase {
 
         // Test
         cheats.expectRevert(Errors.AccountOwnerOnly.selector);
-        accountManager.depositETH{value: value}(account);
+        accountManager.depositEth{value: value}(account);
     }
 
     // Withdraw Eth
@@ -106,7 +106,7 @@ contract AccountManagerTest is TestBase {
 
         // Test
         cheats.expectRevert(Errors.AccountOwnerOnly.selector);
-        accountManager.withdrawETH(account, value);
+        accountManager.withdrawEth(account, value);
     }
 
     function testWithdrawEthRiskThresholdBreachedError(
@@ -122,7 +122,7 @@ contract AccountManagerTest is TestBase {
         // Test
         cheats.prank(owner);
         cheats.expectRevert(Errors.RiskThresholdBreached.selector);
-        accountManager.withdrawETH(account, value);
+        accountManager.withdrawEth(account, value);
     }
 
     // Deposit

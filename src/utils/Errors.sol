@@ -10,7 +10,7 @@ library Errors {
     error AccountOwnerOnly();
     error ContractNotPaused();
     error LTokenUnavailable();
-    error ETHTransferFailure();
+    error EthTransferFailure();
     error AccountManagerOnly();
     error PriceFeedUnavailable();
     error ControllerUnavailable();

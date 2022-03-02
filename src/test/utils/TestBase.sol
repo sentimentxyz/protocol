@@ -120,7 +120,7 @@ abstract contract TestBase is DSTest {
         if (token == address(0)) {
             cheats.deal(owner, amt);
             cheats.prank(owner);
-            accountManager.depositETH{value: amt}(account);
+            accountManager.depositEth{value: amt}(account);
         } else {
             erc20.mint(owner, amt);
             cheats.startPrank(owner);

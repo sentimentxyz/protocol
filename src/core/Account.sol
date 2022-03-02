@@ -71,7 +71,7 @@ contract Account is IAccount {
                 assets[i].balanceOf(address(this))
             );
         }
-        toAddress.safeTransferETH(address(this).balance);
+        toAddress.safeTransferEth(address(this).balance);
     }
 
      function _remove(address[] storage arr, address token) internal {

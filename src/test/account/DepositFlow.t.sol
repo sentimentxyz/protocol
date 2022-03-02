@@ -13,7 +13,7 @@ contract DepositFlow is TestBase {
         account = openAccount(borrower);
     }
 
-    function testDepositCollateralETH(uint96 amt) public {
+    function testDepositCollateralEth(uint96 amt) public {
         // Test
         deposit(borrower, account, address(0), amt);
 
