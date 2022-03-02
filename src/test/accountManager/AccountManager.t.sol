@@ -290,6 +290,112 @@ contract AccountManagerTest is TestBase {
         assertEq(erc20.balanceOf(account), value);
         assertEq(address(lEth).balance, value);
         assertEq(erc20.balanceOf(address(lErc20)), value);
-    } 
+    }
 
+    function testSettleOnlyOwnerError() public {
+        // Setup
+        address account = openAccount(owner);
+
+        // Test
+        cheats.expectRevert(Errors.AccountOwnerOnly.selector);
+        accountManager.settle(account);
+    }
+
+    // Admin Only
+
+    function testToggleCollateralState(address token) public {
+        // Test
+        accountManager.toggleCollateralState(token);
+
+        // Assert
+        assertTrue(accountManager.isCollateralAllowed(token));
+    }
+
+    function testToggleCollateralStateAdminOnlyError(address caller, address token) public {
+        // Test
+        cheats.prank(caller);
+        cheats.expectRevert(Errors.AdminOnly.selector);
+        accountManager.toggleCollateralState(token);
+
+        // Assert
+        assertTrue(!accountManager.isCollateralAllowed(token));
+    }
+
+    function testSetLTokenAddress(address token, address LToken) public {
+        // Test
+        accountManager.setLTokenAddress(token, LToken);
+
+        // Assert
+        assertEq(accountManager.LTokenAddressFor(token), LToken);
+    }
+
+    function testSetLTokenAddressAdminOnlyError(address caller, address token, address LToken) public {
+        // Test
+        cheats.prank(caller);
+        cheats.expectRevert(Errors.AdminOnly.selector);
+        accountManager.setLTokenAddress(token, LToken);
+
+        // Assert
+        assertEq(accountManager.LTokenAddressFor(token), address(0));
+    }
+
+    function testSetRiskEngineAddress(address _riskEngine) public {
+        // Test
+        accountManager.setRiskEngineAddress(_riskEngine);
+
+        // Assert
+        assertEq(address(accountManager.riskEngine()), _riskEngine);
+    }
+
+    function testSetRiskEngineAddressAdminOnly(address caller, address _riskEngine) public {
+        // Test
+        cheats.prank(caller);
+        cheats.expectRevert(Errors.AdminOnly.selector);
+        accountManager.setRiskEngineAddress(_riskEngine);
+    }
+
+    function testSetUserRegistryAddress(address _userRegistry) public {
+        // Test
+        accountManager.setUserRegistryAddress(_userRegistry);
+
+        // Assert
+        assertEq(address(accountManager.userRegistry()), _userRegistry);
+    }
+
+    function testSetUserRegistryAdminOnly(address caller, address _userRegistry) public {
+        // Test
+        cheats.prank(caller);
+        cheats.expectRevert(Errors.AdminOnly.selector);
+        accountManager.setUserRegistryAddress(_userRegistry);
+    }
+
+    function testSetControllerAddress(address target,address controller) public {
+        // Test
+        accountManager.setControllerAddress(target, controller);
+
+        // Assert
+        assertEq(accountManager.controllerAddrFor(target), controller);
+    }
+
+    function testSetControllerAddressAdminOnly(address caller, address target, address controller) public {
+        // Test
+        cheats.prank(caller);
+        cheats.expectRevert(Errors.AdminOnly.selector);
+        accountManager.setControllerAddress(target, controller);
+    }
+
+    function testSetAccountFactoryAddress(address _accountFactory) public {
+        // Test
+        accountManager.setAccountFactoryAddress(_accountFactory);
+
+        // Assert
+        assertEq(address(accountManager.accountFactory()), _accountFactory);
+    }
+
+    function testSetAccountFactoryAddressAdminOnly(address caller, address _accountFactory) public {
+        // Test
+        cheats.prank(caller);
+        cheats.expectRevert(Errors.AdminOnly.selector);
+        accountManager.setAccountFactoryAddress(_accountFactory);
+    }
 }
