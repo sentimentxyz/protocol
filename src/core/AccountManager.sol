@@ -62,11 +62,13 @@ contract AccountManager is Pausable, IAccountManager {
         emit AccountClosed(_account, msg.sender);
     }
 
-    function depositEth(address account) external payable onlyOwner(account) {
+    function depositETH(address account) external payable onlyOwner(account) {
         account.safeTransferETH(msg.value);
     }
 
     function withdrawETH(address account, uint value) external onlyOwner(account) {
+        if(!riskEngine.isWithdrawAllowed(account, address(0), value))
+            revert Errors.RiskThresholdBreached();
         account.withdrawETH(msg.sender, value);
     }
 
@@ -164,8 +166,10 @@ contract AccountManager is Pausable, IAccountManager {
     function settle(address account) external onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
-            uint balance = borrows[i].balanceOf(account);
-            if ( balance > 0 ) repay(account, borrows[i], balance);
+            uint balance;
+            if (borrows[i] == address(0)) balance = account.balance;
+            else balance = borrows[i].balanceOf(account);
+            if ( balance > 0 ) repay(account, borrows[i], type(uint).max);
         }
     }
 
@@ -197,6 +201,10 @@ contract AccountManager is Pausable, IAccountManager {
     function setAccountFactoryAddress(address _accountFactory) external adminOnly {
         accountFactory = IAccountFactory(_accountFactory);
         emit UpdateAccountFactoryAddress(address(accountFactory));
+    }
+
+    function getInactiveAccounts() external view returns (address[] memory) {
+        return inactiveAccounts;
     }
 
     // Internal Functions
