@@ -16,7 +16,7 @@ contract UserRegistryTest is TestBase {
 
     function testUpdateAccount(address account, address owner) public {
         // Test
-        cheats.startPrank(address(accountManager));
+        cheats.prank(address(accountManager));
         userRegistry.updateAccount(account, owner);
 
         // Assert
@@ -34,12 +34,12 @@ contract UserRegistryTest is TestBase {
 
     function testAddAccount(address account, address owner) public {
         // Test
-        cheats.startPrank(address(accountManager));
+        cheats.prank(address(accountManager));
         userRegistry.addAccount(account, owner);
 
         // Assert
         assertEq(userRegistry.ownerFor(account), owner);
-        address[] memory accounts = userRegistry.getAccounts();
+        address[] memory accounts = userRegistry.getAllAccounts();
         assertTrue(Utils.isPresent(accounts, account));
     }
 
@@ -50,17 +50,16 @@ contract UserRegistryTest is TestBase {
 
         // Assert
         assertEq(userRegistry.ownerFor(account), address(0));
-        assertEq(userRegistry.getAccounts().length, 0);
+        assertEq(userRegistry.getAllAccounts().length, 0);
     }
 
     function testCloseAccount(address account, address owner) public {
         // Setup
-        cheats.startPrank(address(accountManager));
         testAddAccount(account, owner);
 
         // Test
+        cheats.prank(address(accountManager));
         userRegistry.closeAccount(account);
-        cheats.stopPrank();
 
         // Assert
         assertEq(userRegistry.ownerFor(account), address(0));
@@ -68,9 +67,7 @@ contract UserRegistryTest is TestBase {
 
     function testCloseAccountError(address account, address owner) public {
         // Setup
-        cheats.prank(address(accountManager));
         testAddAccount(account, owner);
-        cheats.stopPrank();
 
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
@@ -80,37 +77,24 @@ contract UserRegistryTest is TestBase {
         assertEq(userRegistry.ownerFor(account), owner);
     }
 
-    function testAccountsOwnedBy(address[] memory accounts, address owner) public {
+    function testAccountsOwnedBy(address account_1, address account_2, address account_3, address owner) public {
         // Setup
         cheats.startPrank(address(accountManager));
-        for(uint i = 0; i < accounts.length; i++) {
-            testAddAccount(accounts[i], owner);
-        }
+        testAddAccount(account_1, owner);
+        testAddAccount(account_2, owner);
+        testAddAccount(account_3, owner);
 
         // Test
-        address[] memory userAccounts = userRegistry.accountsOwnedBy(owner);
+        address[] memory accounts = userRegistry.accountsOwnedBy(owner);
 
         // Assert
-        uint numberOfAccounts = 0;
-        for(
-            uint i = 0;
-            i < userAccounts.length && userAccounts[i] != address(0);
-            i++
-        ) {
-            numberOfAccounts++;
-            assertTrue(Utils.isPresent(accounts, userAccounts[i]));
-        }
-        assertEq(numberOfAccounts, accounts.length);
-
+        assertTrue(Utils.isPresent(accounts, account_1));
+        assertTrue(Utils.isPresent(accounts, account_2));
+        assertTrue(Utils.isPresent(accounts, account_3));
     }
 
     function testSetAccountManagerAddress(address _accountManager) public {
-        // Setup
-        cheats.expectEmit(true, false, false, false);
-        emit UpdateAccountManagerAddress(_accountManager);
-
         // Test
-        cheats.prank(address(this));
         userRegistry.setAccountManagerAddress(_accountManager);
 
         // Assert

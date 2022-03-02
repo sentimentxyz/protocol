@@ -19,7 +19,7 @@ contract UserRegistry is Pausable, IUserRegistry {
         _;
     }
 
-    function getAccounts() external view returns (address[] memory) {
+    function getAllAccounts() external view returns (address[] memory) {
         return accounts;
     }
 
