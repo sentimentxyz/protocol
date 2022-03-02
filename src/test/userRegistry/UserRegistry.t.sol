@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {Utils} from "../utils/Utils.sol";
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IUserRegistry} from "../../interface/core/IUserRegistry.sol";
@@ -37,10 +36,11 @@ contract UserRegistryTest is TestBase {
         cheats.prank(address(accountManager));
         userRegistry.addAccount(account, owner);
 
+        address[] memory accounts = userRegistry.accountsOwnedBy(owner);
+
         // Assert
         assertEq(userRegistry.ownerFor(account), owner);
-        address[] memory accounts = userRegistry.getAllAccounts();
-        assertTrue(Utils.isPresent(accounts, account));
+        assertEq(account, accounts[accounts.length - 1]); // Since it's always inserted at the end
     }
 
     function testAddAccountError(address account, address owner) public {
@@ -77,20 +77,19 @@ contract UserRegistryTest is TestBase {
         assertEq(userRegistry.ownerFor(account), owner);
     }
 
-    function testAccountsOwnedBy(address account_1, address account_2, address account_3, address owner) public {
+    function testAccountsOwnedBy(address[3] calldata accounts, address owner) public {
         // Setup
-        cheats.startPrank(address(accountManager));
-        testAddAccount(account_1, owner);
-        testAddAccount(account_2, owner);
-        testAddAccount(account_3, owner);
+        testAddAccount(accounts[0], owner);
+        testAddAccount(accounts[1], owner);
+        testAddAccount(accounts[2], owner);
 
         // Test
-        address[] memory accounts = userRegistry.accountsOwnedBy(owner);
+        address[] memory accountsFromRegistry = userRegistry.accountsOwnedBy(owner);
 
         // Assert
-        assertTrue(Utils.isPresent(accounts, account_1));
-        assertTrue(Utils.isPresent(accounts, account_2));
-        assertTrue(Utils.isPresent(accounts, account_3));
+        assertEq(accounts[0], accountsFromRegistry[0]);
+        assertEq(accounts[1], accountsFromRegistry[1]);
+        assertEq(accounts[2], accountsFromRegistry[2]);
     }
 
     function testSetAccountManagerAddress(address _accountManager) public {
