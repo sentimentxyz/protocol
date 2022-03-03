@@ -17,6 +17,7 @@ import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/prese
 
 abstract contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
+    uint public constant MAX_LEVERAGE = 5;
 
     // Dummy ERC20 Token
     ERC20PresetMinterPauser public erc20;
@@ -37,6 +38,7 @@ abstract contract TestBase is DSTest {
     // Rate Model
     DefaultRateModel public rateModel;
 
+    // Contract Setup Functions
     function setupContracts() public virtual {
         setupRateModel();
         setupOracle();
@@ -108,6 +110,7 @@ abstract contract TestBase is DSTest {
         accountManager.toggleCollateralState(address(erc20));
     }
 
+    // Test Helper Functions
     function openAccount(address owner) public returns (address account) {
         accountManager.openAccount(owner);
         account = userRegistry.accountsOwnedBy(owner)[0];
@@ -136,6 +139,13 @@ abstract contract TestBase is DSTest {
             erc20.mint(accountManager.LTokenAddressFor(token), amt);
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
+        }
+    }
+
+    function assertFalse(bool condition) public {
+        if (condition) {
+            emit log("Error: Assertion Failed");
+            fail();
         }
     }
 }

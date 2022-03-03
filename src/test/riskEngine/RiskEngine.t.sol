@@ -6,63 +6,47 @@ import {TestBase} from "../utils/TestBase.sol";
 
 contract RiskEngineTest is TestBase {
 
-    address owner = cheats.addr(1);
     address account;
+    address owner = cheats.addr(1);
 
     function setUp() public {
         setupContracts();
         account = openAccount(owner);
     }
 
-    function testIsBorrowAllowedNoBalance(uint96 value) public {
-        cheats.assume(value != 0);
-
-        // Test
-        bool isBorrowAllowed = riskEngine.isBorrowAllowed(account, address(erc20), value);
-
-        // Assert
-        assertTrue(!isBorrowAllowed);
-    }
-
-    function testIsBorrowAllowed(uint8 multiplier, uint96 value) public {
-        cheats.assume(value != 0);
-
+    function testIsBorrowAllowed(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        deposit(owner, account, address(erc20), value);
+        cheats.assume(depositAmt != 0);
+        cheats.assume(borrowAmt != 0);
+        deposit(owner, account, address(0), depositAmt);
 
         // Test
-        bool isBorrowAllowed = riskEngine.isBorrowAllowed(account, address(erc20), uint(multiplier) * value);
+        bool isBorrowAllowed = riskEngine.isBorrowAllowed(account, address(0), borrowAmt);
 
         // Assert
-        if (multiplier <= 4) assertTrue(isBorrowAllowed);
-        else assertTrue(!isBorrowAllowed);
+        (MAX_LEVERAGE * depositAmt > borrowAmt) ? // Max Leverage is 5x
+            assertTrue(isBorrowAllowed)
+            : assertFalse(isBorrowAllowed);
     }
 
-    function testisWithdrawAllowedNoDebt(address token, uint96 value) public {
-        // Test
-        bool isWithdrawAllowed = riskEngine.isWithdrawAllowed(account, token, value);
-
-        // Assert
-        assertTrue(isWithdrawAllowed);
-    }
-
-    function testisWithdrawAllowedDebt(uint8 divider, uint96 value) public {
-        cheats.assume(value != 0 && divider != 0);
-
+    function testIsWithdrawAllowed(uint96 depositAmt, uint96 borrowAmt, uint96 withdrawAmt) public {
         // Setup
-        deposit(owner, account, address(erc20), value);
-        borrow(owner, account, address(erc20), value);
+        cheats.assume(borrowAmt != 0);
+        cheats.assume(depositAmt > withdrawAmt);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        deposit(owner, account, address(0), depositAmt);
+        borrow(owner, account, address(0), borrowAmt);
 
         // Test
-        bool isWithdrawAllowed = riskEngine.isWithdrawAllowed(account, address(erc20), value/divider);
+        bool isWithdrawAllowed = riskEngine.isWithdrawAllowed(account, address(0), withdrawAmt);
 
         // Assert
-        if (divider < 2) assertTrue(!isWithdrawAllowed);
-        else assertTrue(isWithdrawAllowed);
+        ( (MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt) ) ?
+            assertTrue(isWithdrawAllowed)
+            : assertFalse(isWithdrawAllowed);
     }
 
     // Admin
-    
     function testSetAccountManagerAddress(address _accountManager) public {
         // Test
         riskEngine.setAccountManagerAddress(_accountManager);
