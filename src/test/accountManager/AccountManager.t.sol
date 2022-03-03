@@ -146,6 +146,9 @@ contract AccountManagerTest is TestBase {
         // Test
         cheats.prank(owner);
         accountManager.borrow(account, address(erc20), borrowAmt);
+
+        // Assert
+        assertEq(erc20.balanceOf(account), uint(depositAmt) + uint(borrowAmt));
     }
 
     function testBorrowEth(
@@ -160,6 +163,7 @@ contract AccountManagerTest is TestBase {
         // Test
         cheats.prank(owner);
         accountManager.borrow(account, address(0), borrowAmt);
+        assertEq(account.balance, uint(depositAmt) + uint(borrowAmt));
     }
 
     function testBorrowRiskThresholdError(
