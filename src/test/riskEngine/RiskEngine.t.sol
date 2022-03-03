@@ -31,7 +31,6 @@ contract RiskEngineTest is TestBase {
 
     function testIsWithdrawAllowed(uint96 depositAmt, uint96 borrowAmt, uint96 withdrawAmt) public {
         // Setup
-        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt > withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
