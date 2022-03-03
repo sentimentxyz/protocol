@@ -31,9 +31,19 @@ contract AccountManagerTest is TestBase {
         uint96 depositAmt, uint96 withdrawAmt, uint96 borrowAmt
     ) public {
         // Setup
-        cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
-        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) > borrowAmt); // Withdraw amount that breaks the above condition
+        // checks to prevent underflow
+        cheats.assume(
+            borrowAmt != 0 && depositAmt != 0 && 
+            withdrawAmt != 0 && depositAmt >= withdrawAmt
+        );
+
+        // Max Leverage is MAX_LEVERAGEx
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+
+        // Withdraw amount that breaks the above condition
+        cheats.assume(
+            (depositAmt - withdrawAmt) * MAX_LEVERAGE > borrowAmt
+        );
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(0), borrowAmt);
 
@@ -42,16 +52,30 @@ contract AccountManagerTest is TestBase {
         accountManager.withdrawEth(account, withdrawAmt);
 
         // Assert
-        assertEq(account.balance, uint(depositAmt) - uint(withdrawAmt) + uint(borrowAmt));
+        assertEq(
+            account.balance,
+            uint(depositAmt) - uint(withdrawAmt) + uint(borrowAmt)
+        );
     }
 
     function testWithdrawEthRiskThresholdBreachedError(
         uint96 depositAmt, uint96 withdrawAmt, uint96 borrowAmt
     ) public {
         // Setup
-        cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt ); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
-        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) <= borrowAmt); // Withdraw amount that breaks the above condition
+        
+        // checks to prevent underflow
+        cheats.assume(
+            borrowAmt != 0 && depositAmt != 0 &&
+            withdrawAmt != 0 && depositAmt >= withdrawAmt
+        );
+
+        // Max Leverage is MAX_LEVERAGEx
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+
+        // Withdraw amount that breaks the above condition
+        cheats.assume(
+            (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
+        );
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -94,9 +118,20 @@ contract AccountManagerTest is TestBase {
         uint96 depositAmt, uint96 withdrawAmt, uint96 borrowAmt
     ) public {
         // Setup
-        cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
-        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) > borrowAmt); // Withdraw amount that breaks the above condition
+        
+        // checks to prevent underflow
+        cheats.assume(
+            borrowAmt != 0 && depositAmt != 0 &&
+            withdrawAmt != 0 && depositAmt >= withdrawAmt
+        );
+
+        // Max Leverage is MAX_LEVERAGEx
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+
+        // Withdraw amount that breaks the above condition
+        cheats.assume(
+            (depositAmt - withdrawAmt) * MAX_LEVERAGE > borrowAmt
+        ); 
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -105,16 +140,30 @@ contract AccountManagerTest is TestBase {
         accountManager.withdraw(account, address(erc20), withdrawAmt);
 
         // Assert
-        assertEq(erc20.balanceOf(account), uint(depositAmt) - uint(withdrawAmt) + uint(borrowAmt));
+        assertEq(
+            erc20.balanceOf(account),
+            uint(depositAmt) - uint(withdrawAmt) + uint(borrowAmt)
+        );
     }
 
     function testWithdrawRiskThresholdBreachedError(
         uint96 depositAmt, uint96 withdrawAmt, uint96 borrowAmt
     ) public {
         // Setup
-        cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt ); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
-        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) <= borrowAmt); // Withdraw amount that breaks the above condition
+        
+        // checks to prevent underflow
+        cheats.assume(
+            borrowAmt != 0 && depositAmt != 0 &&
+            withdrawAmt != 0 && depositAmt >= withdrawAmt
+        );
+        
+        // Max Leverage is MAX_LEVERAGEx
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt); 
+        
+        // Withdraw amount that breaks the above condition
+        cheats.assume(
+            (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
+        ); 
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -139,7 +188,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt);
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
 
@@ -156,7 +205,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt);
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
 
@@ -171,7 +220,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) <= borrowAmt);
+        cheats.assume(depositAmt * MAX_LEVERAGE <= borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
 
@@ -186,7 +235,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) <= borrowAmt);
+        cheats.assume(depositAmt * MAX_LEVERAGE <= borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
 
@@ -240,9 +289,11 @@ contract AccountManagerTest is TestBase {
 
     // Liquidate
 
-    function testLiquidateAccountNotLiquidatableError(uint96 depositAmt, uint borrowAmt) public {
+    function testLiquidateAccountNotLiquidatableError(
+        uint96 depositAmt, uint borrowAmt
+    ) public {
         // Setup
-        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt);
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(0), borrowAmt);
 
@@ -253,7 +304,9 @@ contract AccountManagerTest is TestBase {
 
     // Approve
 
-    function testApproveOnlyOwnerError(address spender, address token, uint96 value) public {
+    function testApproveOnlyOwnerError(
+        address spender, address token, uint96 value
+    ) public {
         // Test
         cheats.expectRevert(Errors.AccountOwnerOnly.selector);
         accountManager.approve(account, token, spender, value);
@@ -296,7 +349,9 @@ contract AccountManagerTest is TestBase {
         assertTrue(accountManager.isCollateralAllowed(token));
     }
 
-    function testToggleCollateralStateAdminOnlyError(address caller, address token) public {
+    function testToggleCollateralStateAdminOnlyError(
+        address caller, address token
+    ) public {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
@@ -314,7 +369,9 @@ contract AccountManagerTest is TestBase {
         assertEq(accountManager.LTokenAddressFor(token), LToken);
     }
 
-    function testSetLTokenAddressAdminOnlyError(address caller, address token, address LToken) public {
+    function testSetLTokenAddressAdminOnlyError(
+        address caller, address token, address LToken
+    ) public {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
@@ -332,7 +389,9 @@ contract AccountManagerTest is TestBase {
         assertEq(address(accountManager.riskEngine()), _riskEngine);
     }
 
-    function testSetRiskEngineAddressAdminOnly(address caller, address _riskEngine) public {
+    function testSetRiskEngineAddressAdminOnly(
+        address caller, address _riskEngine
+    ) public {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
@@ -347,14 +406,18 @@ contract AccountManagerTest is TestBase {
         assertEq(address(accountManager.userRegistry()), _userRegistry);
     }
 
-    function testSetUserRegistryAdminOnly(address caller, address _userRegistry) public {
+    function testSetUserRegistryAdminOnly(
+        address caller, address _userRegistry
+    ) public {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
         accountManager.setUserRegistryAddress(_userRegistry);
     }
 
-    function testSetControllerAddress(address target,address controller) public {
+    function testSetControllerAddress(
+        address target,address controller
+    ) public {
         // Test
         accountManager.setControllerAddress(target, controller);
 
@@ -362,7 +425,9 @@ contract AccountManagerTest is TestBase {
         assertEq(accountManager.controllerAddrFor(target), controller);
     }
 
-    function testSetControllerAddressAdminOnly(address caller, address target, address controller) public {
+    function testSetControllerAddressAdminOnly(
+        address caller, address target, address controller
+    ) public {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
@@ -377,7 +442,9 @@ contract AccountManagerTest is TestBase {
         assertEq(address(accountManager.accountFactory()), _accountFactory);
     }
 
-    function testSetAccountFactoryAddressAdminOnly(address caller, address _accountFactory) public {
+    function testSetAccountFactoryAddressAdminOnly(
+        address caller, address _accountFactory
+    ) public {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
