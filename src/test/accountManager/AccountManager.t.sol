@@ -32,8 +32,8 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(5) > borrowAmt); // Max Leverage is 5x
-        cheats.assume((depositAmt - withdrawAmt) * uint(5) > borrowAmt); // Withdraw amount that breaks the above condition
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
+        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) > borrowAmt); // Withdraw amount that breaks the above condition
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(0), borrowAmt);
 
@@ -50,8 +50,8 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt ); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(5) > borrowAmt); // Max Leverage is 5x
-        cheats.assume((depositAmt - withdrawAmt) * uint(5) <= borrowAmt); // Withdraw amount that breaks the above condition
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
+        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) <= borrowAmt); // Withdraw amount that breaks the above condition
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -95,8 +95,8 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(5) > borrowAmt); // Max Leverage is 5x
-        cheats.assume((depositAmt - withdrawAmt) * uint(5) > borrowAmt); // Withdraw amount that breaks the above condition
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
+        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) > borrowAmt); // Withdraw amount that breaks the above condition
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -113,8 +113,8 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(borrowAmt != 0 && depositAmt != 0 && withdrawAmt != 0 && depositAmt >= withdrawAmt ); // checks to prevent underflow
-        cheats.assume(depositAmt * uint(5) > borrowAmt); // Max Leverage is 5x
-        cheats.assume((depositAmt - withdrawAmt) * uint(5) <= borrowAmt); // Withdraw amount that breaks the above condition
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt); // Max Leverage is MAX_LEVERAGEx
+        cheats.assume((depositAmt - withdrawAmt) * uint(MAX_LEVERAGE) <= borrowAmt); // Withdraw amount that breaks the above condition
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -139,7 +139,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(5) > borrowAmt);
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
 
@@ -156,7 +156,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(5) > borrowAmt);
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
 
@@ -171,7 +171,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(5) <= borrowAmt);
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) <= borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
 
@@ -186,7 +186,7 @@ contract AccountManagerTest is TestBase {
     ) public {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * uint(5) <= borrowAmt);
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) <= borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
 
@@ -242,7 +242,7 @@ contract AccountManagerTest is TestBase {
 
     function testLiquidateAccountNotLiquidatableError(uint96 depositAmt, uint borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt * uint(5) > borrowAmt);
+        cheats.assume(depositAmt * uint(MAX_LEVERAGE) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(0), borrowAmt);
 
@@ -303,7 +303,7 @@ contract AccountManagerTest is TestBase {
         accountManager.toggleCollateralState(token);
 
         // Assert
-        assertTrue(!accountManager.isCollateralAllowed(token));
+        assertFalse(accountManager.isCollateralAllowed(token));
     }
 
     function testSetLTokenAddress(address token, address LToken) public {
