@@ -6,8 +6,8 @@ import {TestBase} from "../utils/TestBase.sol";
 
 contract LTokenTest is TestBase {
     
-    address owner = cheats.addr(1);
     address account;
+    address owner = cheats.addr(1);
 
     function setUp() public {
         setupContracts();
@@ -36,7 +36,7 @@ contract LTokenTest is TestBase {
 
     function testFailLendTo(uint lendAmt, uint liquidity) public {
         // Setup
-        cheats.assume(account != address(0) &&  lendAmt > liquidity);
+        cheats.assume(lendAmt > liquidity);
         erc20.mint(address(lErc20), liquidity);
 
         // Test
@@ -44,22 +44,22 @@ contract LTokenTest is TestBase {
         lErc20.lendTo(account, lendAmt);
     }
 
-    function testLendToAccountManagerOnlyError(uint lendAmt) public {
+    function testLendToAuthError(uint lendAmt) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
         lErc20.lendTo(account, lendAmt);
     }
 
-    function testCollectFrom(
-        uint collectAmt, uint lendAmt, uint liquidity
-    ) public {
+    function testCollectFrom(uint lendAmt, uint liquidity, uint collectAmt) 
+        public
+    {
         // Setup
-        cheats.assume(account != address(0) && collectAmt <= lendAmt);
+        cheats.assume(collectAmt <= lendAmt);
         testLendTo(lendAmt, liquidity);
 
         // Test
         cheats.prank(address(accountManager));
-        bool isBorrowBalanceZero = lErc20.collectFrom(account, collectAmt);
+        lErc20.collectFrom(account, collectAmt);
 
         (
             uint principal,
@@ -67,17 +67,15 @@ contract LTokenTest is TestBase {
         ) = lErc20.borrowBalanceFor(account);
 
         // Assert
-        (lendAmt == collectAmt) ? 
-        assertTrue(isBorrowBalanceZero) : assertFalse(isBorrowBalanceZero);
         assertEq(principal, lendAmt - collectAmt);
         assertEq(interestIndex, lErc20.borrowIndex());
     }
 
-    function testFailCollectFrom(
-        uint collectAmt, uint lendAmt, uint liquidity
-    ) public {
+    function testFailCollectFrom(uint lendAmt, uint liquidity, uint collectAmt) 
+        public 
+    {
         // Setup
-        cheats.assume(account != address(0) && collectAmt > lendAmt);
+        cheats.assume(collectAmt > lendAmt);
         testLendTo(lendAmt, liquidity);
 
         // Test
@@ -85,18 +83,22 @@ contract LTokenTest is TestBase {
         lErc20.collectFrom(account, collectAmt);
     }
 
-    function testCollectFromAccountManagerOnlyError(uint lendAmt) public {
+    function testCollectFromAuthError(uint lendAmt) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
         lErc20.collectFrom(account, lendAmt);
     }
 
     function testGetBorrowBalance(
-        uint96 liquidity, uint96 borrowAmt, uint96 blockNumber
-    ) public {
+        uint96 liquidity,
+        uint96 borrowAmt,
+        uint96 delta
+    ) 
+        public 
+    {
         // Setup
         testLendTo(borrowAmt, liquidity);
-        cheats.roll(block.number + blockNumber);
+        cheats.roll(block.number + delta);
 
         // Test
         uint borrowBalance = lErc20.getBorrowBalance(account);
@@ -106,22 +108,25 @@ contract LTokenTest is TestBase {
     }
 
     function testGetExchangeRate(
-        uint96 blockNumber, uint96 liquidity, uint96 lendAmt
-    ) public {
+        uint96 lendAmt, 
+        uint96 liquidity, 
+        uint96 delta
+    ) 
+        public 
+    {
         // Setup
         testLendTo(lendAmt, liquidity);
-        cheats.roll(block.number + blockNumber);
+        cheats.roll(block.number + delta);
 
         // Test
         uint exchangeRate = lErc20.getExchangeRate();
 
         // Assert
-        if (blockNumber == 0) assertEq(exchangeRate, lErc20.exchangeRate());
-        else assertGe(exchangeRate, lErc20.exchangeRate());
+        assertGe(exchangeRate, lErc20.exchangeRate());
     }
 
     // Admin
-    function testSetAccountManagerAddress(address _accountManager) public {
+    function testSetAccountManager(address _accountManager) public {
         // Test
         lErc20.setAccountManager(_accountManager);
 
@@ -129,9 +134,12 @@ contract LTokenTest is TestBase {
         assertEq(lErc20.accountManager(), _accountManager);
     }
 
-    function testSetAccountManagerAddressAdminOnlyError(
-        address caller, address _accountManager
-    ) public {
+    function testSetAccountManagerAuthError(
+        address caller,
+        address _accountManager
+    ) 
+        public 
+    {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
@@ -149,7 +157,7 @@ contract LTokenTest is TestBase {
         assertEq(lErc20.rateModel(), _rateModel);
     }
 
-    function testSetRateModelAdminOnlyError(
+    function testSetRateModelAuthError(
         address caller, address _rateModel
     ) public {
         // Test
