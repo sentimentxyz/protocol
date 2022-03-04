@@ -9,7 +9,7 @@ import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
-import {IController} from "../interface/periphery/IController.sol";
+import {IController} from "@controller/src/core/IController.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 
@@ -154,7 +154,7 @@ contract AccountManager is Pausable, IAccountManager {
         address controller = controllerAddrFor[target];
         if(controller == address(0)) revert Errors.ControllerUnavailable();
         (isAllowed, tokensIn, tokensOut) = 
-            IController(controller).canCall(target, sig, data);
+            IController(controller).canCall(target, bytes.concat(sig, data));
         if(!isAllowed) revert Errors.FunctionCallRestricted();
         IAccount(account).exec(target, amt, bytes.concat(sig, data));
         _updateTokens(account, tokensIn, tokensOut);

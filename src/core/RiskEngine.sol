@@ -6,7 +6,7 @@ import {Ownable} from "../utils/Ownable.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
-import {IOracle} from "../interface/periphery/IOracle.sol";
+import {IOracle} from "@oracle/src/core/IOracle.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";

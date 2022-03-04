@@ -3,3 +3,5 @@
 @chainlink/=lib/chainlink/
 @openzeppelin/=lib/openzeppelin-contracts/
 @ds-test/=lib/ds-test/
+@controller/=lib/controller/
+@oracle/=lib/oracle/
