@@ -27,7 +27,9 @@ contract RiskEngine is Ownable, IRiskEngine {
         address tokenAddr, 
         uint value
     )
-    external view returns (bool) 
+        external
+        view
+        returns (bool) 
     {
         uint borrowAmt = _valueInWei(tokenAddr, value);
         return _isAccountHealthy(
@@ -41,9 +43,11 @@ contract RiskEngine is Ownable, IRiskEngine {
         address token, 
         uint value
     )
-    external view returns (bool) 
+        external
+        view
+        returns (bool) 
     {
-        if(IAccount(account).hasNoDebt()) return true;
+        if (IAccount(account).hasNoDebt()) return true;
         return _isAccountHealthy(
             _getBalance(account) - _valueInWei(token, value),
             _getBorrows(account)
@@ -74,13 +78,13 @@ contract RiskEngine is Ownable, IRiskEngine {
             totalBalance += _valueInWei(
                 assets[i], 
                 IERC20(assets[i]).balanceOf(account)
-                );
+            );
         }
         return totalBalance + account.balance;
     }
 
     function _getBorrows(address account) internal view returns (uint) {
-        if(IAccount(account).hasNoDebt()) return 0;
+        if (IAccount(account).hasNoDebt()) return 0;
         address[] memory borrows = IAccount(account).getBorrows();
         uint borrowsLen = borrows.length;
         uint totalBorrows = 0;
@@ -94,11 +98,19 @@ contract RiskEngine is Ownable, IRiskEngine {
         return totalBorrows;
     }
 
-    function _valueInWei(address token, uint value) internal view returns (uint) {
+    function _valueInWei(address token, uint value)
+        internal
+        view
+        returns (uint) 
+    {
         return oracle.getPrice(token).mul(value);
     }
 
-    function _isAccountHealthy(uint accountBalance, uint accountBorrows) internal pure returns (bool) {
+    function _isAccountHealthy(uint accountBalance, uint accountBorrows)
+        internal
+        pure
+        returns (bool) 
+    {
         return (accountBorrows == 0) ? true :
             (accountBalance.div(accountBorrows) > balanceToBorrowThreshold);
     }
@@ -108,7 +120,10 @@ contract RiskEngine is Ownable, IRiskEngine {
     }
 
     // Admin Only
-    function setAccountManagerAddress(address _accountManager) external adminOnly {
+    function setAccountManagerAddress(address _accountManager)
+        external 
+        adminOnly 
+    {
         accountManager = IAccountManager(_accountManager);
     }
 }

@@ -26,20 +26,27 @@ contract AccountManager is Pausable, IAccountManager {
     mapping(address => address) public LTokenAddressFor; // token => LToken
     mapping(address => address) public controllerAddrFor; // address => controller
 
-    constructor(address _riskEngine, address _accountFactory, address _userRegistry) Pausable(msg.sender) {
+    constructor(
+        address _riskEngine,
+        address _accountFactory,
+        address _userRegistry
+    ) 
+        Pausable(msg.sender) 
+    {
         riskEngine = IRiskEngine(_riskEngine);
         accountFactory = IAccountFactory(_accountFactory);
         userRegistry = IUserRegistry(_userRegistry);
     }
 
     modifier onlyOwner(address account) {
-        if(userRegistry.ownerFor(account) != msg.sender) revert Errors.AccountOwnerOnly();
+        if (userRegistry.ownerFor(account) != msg.sender)
+            revert Errors.AccountOwnerOnly();
         _;
     }
 
     function openAccount(address owner) external {
         address account;
-        if(inactiveAccounts.length == 0) {
+        if (inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
             IAccount(account).initialize(address(this));
             userRegistry.addAccount(account, owner);
@@ -54,8 +61,9 @@ contract AccountManager is Pausable, IAccountManager {
 
     function closeAccount(address _account) public onlyOwner(_account) {
         IAccount account = IAccount(_account);
-        if(account.activationBlock() == block.number) revert Errors.AccountDeactivationFailure();
-        if(!account.hasNoDebt()) revert Errors.OutstandingDebt();
+        if (account.activationBlock() == block.number)
+            revert Errors.AccountDeactivationFailure();
+        if (!account.hasNoDebt()) revert Errors.OutstandingDebt();
         account.sweepTo(msg.sender);
         userRegistry.closeAccount(_account);
         inactiveAccounts.push(_account);
@@ -66,69 +74,63 @@ contract AccountManager is Pausable, IAccountManager {
         account.safeTransferEth(msg.value);
     }
 
-    function withdrawEth(address account, uint value) external onlyOwner(account) {
-        if(!riskEngine.isWithdrawAllowed(account, address(0), value))
-            revert Errors.RiskThresholdBreached();
-        account.withdrawEth(msg.sender, value);
+    function withdrawETH(address account, uint value)
+        external
+        onlyOwner(account) 
+    {
+        account.withdrawETH(msg.sender, value);
     }
 
-    function deposit(
-        address account, 
-        address token,
-        uint value
-    ) 
-        external onlyOwner(account) 
+    function deposit(address account, address token, uint value) 
+        external
+        onlyOwner(account) 
     {
-        if(!isCollateralAllowed[token]) revert Errors.CollateralTypeRestricted();
-        if(token.balanceOf(account) == 0) IAccount(account).addAsset(address(token));
+        if (!isCollateralAllowed[token])
+            revert Errors.CollateralTypeRestricted();
+        if (token.balanceOf(account) == 0)
+            IAccount(account).addAsset(address(token));
         token.safeTransferFrom(msg.sender, account, value);
     }
 
-    function withdraw(
-        address account, 
-        address token, 
-        uint value
-    ) 
-        external onlyOwner(account) 
+    function withdraw(address account, address token, uint value)
+        external
+        onlyOwner(account) 
     {
-        if(!riskEngine.isWithdrawAllowed(account, token, value))
+        if (!riskEngine.isWithdrawAllowed(account, token, value))
             revert Errors.RiskThresholdBreached();
         account.withdraw(msg.sender, token, value);
-        if(token.balanceOf(account) == 0)
+        if (token.balanceOf(account) == 0)
             IAccount(account).removeAsset(token);
     }
 
-    function borrow(
-        address account, 
-        address token, 
-        uint value
-    ) 
-        external onlyOwner(account)
+    function borrow(address account, address token, uint value)
+        external
+        onlyOwner(account)
     { 
-        if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
-        if(!riskEngine.isBorrowAllowed(account, token, value)) 
+        if (LTokenAddressFor[token] == address(0))
+            revert Errors.LTokenUnavailable();
+        if (!riskEngine.isBorrowAllowed(account, token, value)) 
             revert Errors.RiskThresholdBreached();
-        if(token != address(0) && token.balanceOf(account) == 0) 
+        if (token != address(0) && token.balanceOf(account) == 0) 
             IAccount(account).addAsset(token);
-        if(ILToken(LTokenAddressFor[token]).lendTo(account, value))
+        if (ILToken(LTokenAddressFor[token]).lendTo(account, value))
             IAccount(account).addBorrow(token);
         emit Borrow(account, msg.sender, token, value);
     }
 
-    function repay(
-        address account, 
-        address token, 
-        uint value
-    ) 
-        public onlyOwner(account) 
+    function repay(address account, address token, uint value) 
+        public
+        onlyOwner(account)
     {
-        if(LTokenAddressFor[token] == address(0)) revert Errors.LTokenUnavailable();
+        if (LTokenAddressFor[token] == address(0))
+            revert Errors.LTokenUnavailable();
         _repay(account, token, value);
         emit Repay(account, msg.sender, token, value);
     }
 
     function liquidate(address account) external {
-        if(riskEngine.isAccountHealthy(account)) revert Errors.AccountNotLiquidatable();
+        if (riskEngine.isAccountHealthy(account))
+            revert Errors.AccountNotLiquidatable();
         _liquidate(account);
         emit AccountLiquidated(account, userRegistry.ownerFor(account));
     }
@@ -138,7 +140,10 @@ contract AccountManager is Pausable, IAccountManager {
         address token,
         address spender, 
         uint value
-    ) external onlyOwner(account) {
+    ) 
+        external
+        onlyOwner(account)
+    {
         account.safeApprove(token, spender, value);
     }
 
@@ -148,28 +153,30 @@ contract AccountManager is Pausable, IAccountManager {
         uint amt,
         bytes4 sig,
         bytes calldata data
-    ) external onlyOwner(account) {
+    ) 
+        external
+        onlyOwner(account) 
+    {
         bool isAllowed;
         address[] memory tokensIn;
         address[] memory tokensOut;
         
         address controller = controllerAddrFor[target];
-        if(controller == address(0)) revert Errors.ControllerUnavailable();
+        if (controller == address(0)) revert Errors.ControllerUnavailable();
         (isAllowed, tokensIn, tokensOut) = 
             IController(controller).canCall(target, sig, data);
-        if(!isAllowed) revert Errors.FunctionCallRestricted();
+        if (!isAllowed) revert Errors.FunctionCallRestricted();
         IAccount(account).exec(target, amt, bytes.concat(sig, data));
         _updateTokens(account, tokensIn, tokensOut);
-        if(!riskEngine.isAccountHealthy(account)) revert Errors.RiskThresholdBreached();
+        if (!riskEngine.isAccountHealthy(account))
+            revert Errors.RiskThresholdBreached();
     }
 
     function settle(address account) external onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
-            uint balance;
-            if (borrows[i] == address(0)) balance = account.balance;
-            else balance = borrows[i].balanceOf(account);
-            if ( balance > 0 ) repay(account, borrows[i], type(uint).max);
+            uint balance = borrows[i].balanceOf(account);
+            if (balance > 0) repay(account, borrows[i], balance);
         }
     }
 
@@ -178,7 +185,10 @@ contract AccountManager is Pausable, IAccountManager {
         isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
 
-    function setLTokenAddress(address token, address LToken) external adminOnly {
+    function setLTokenAddress(address token, address LToken)
+        external
+        adminOnly 
+    {
         LTokenAddressFor[token] = LToken;
         emit UpdateLTokenAddress(token, LToken);
     }
@@ -193,12 +203,18 @@ contract AccountManager is Pausable, IAccountManager {
         emit UpdateUserRegistryAddress(address(userRegistry));
     }
 
-    function setControllerAddress(address target, address controller) external adminOnly {
+    function setControllerAddress(address target, address controller)
+        external
+        adminOnly 
+    {
         controllerAddrFor[target] = controller;
         emit UpdateControllerAddress(target, controller);
     }
 
-    function setAccountFactoryAddress(address _accountFactory) external adminOnly {
+    function setAccountFactoryAddress(address _accountFactory)
+        external
+        adminOnly
+    {
         accountFactory = IAccountFactory(_accountFactory);
         emit UpdateAccountFactoryAddress(address(accountFactory));
     }
@@ -210,25 +226,33 @@ contract AccountManager is Pausable, IAccountManager {
     // Internal Functions
     function _repay(address account, address token, uint value) internal {
         ILToken LToken = ILToken(LTokenAddressFor[token]);
-        if(value == type(uint).max) value = LToken.getBorrowBalance(account);
+        if (value == type(uint).max) value = LToken.getBorrowBalance(account);
 
-        if(token.isEth()) account.withdrawEth(address(LToken), value);
+        if (token.isETH()) account.withdrawETH(address(LToken), value);
         else account.withdraw(address(LToken), token, value);
         
-        if(LToken.collectFrom(account, value)) IAccount(account).removeBorrow(token);
-        if(!token.isEth() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
+        if (LToken.collectFrom(account, value))
+            IAccount(account).removeBorrow(token);
+        if (!token.isETH() && IERC20(token).balanceOf(account) == 0)
+            IAccount(account).removeAsset(token);
     }
 
-    function _updateTokens(address account, address[] memory tokensIn, address[] memory tokensOut) internal {
+    function _updateTokens(
+        address account,
+        address[] memory tokensIn,
+        address[] memory tokensOut
+    ) 
+        internal 
+    {
         uint tokensInLen = tokensIn.length;
         for(uint i = 0; i < tokensInLen; ++i) {
-            if(tokensIn[i].balanceOf(account) == 0)
+            if (tokensIn[i].balanceOf(account) == 0)
                 IAccount(account).addAsset(tokensIn[i]);
         }
         
         uint tokensOutLen = tokensOut.length;
         for(uint i = 0; i < tokensOutLen; ++i) {
-            if(tokensOut[i].balanceOf(account) == 0) 
+            if (tokensOut[i].balanceOf(account) == 0) 
                 IAccount(account).removeAsset(tokensOut[i]);
         }
     }

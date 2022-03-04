@@ -15,12 +15,13 @@ contract Account is IAccount {
     address[] public borrows;
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
+        if (msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
     }
 
     function initialize(address _accountManager) external {
-        if(accountManager != address(0)) revert Errors.ContractAlreadyInitialized();
+        if (accountManager != address(0))
+            revert Errors.ContractAlreadyInitialized();
         accountManager = _accountManager;
     }
 
@@ -58,7 +59,11 @@ contract Account is IAccount {
     }
 
     function exec(address target, uint amt, bytes calldata data) 
-        external payable accountManagerOnly returns (bool, bytes memory) {
+        external
+        payable
+        accountManagerOnly
+        returns (bool, bytes memory)
+    {
         (bool success, bytes memory retData) = target.call{value: amt}(data);
         return (success, retData);
     }
@@ -78,7 +83,7 @@ contract Account is IAccount {
          uint len = arr.length;
         // Copy the last element in place of tokenAddr and pop
         for(uint i = 0; i < len; ++i) {
-            if(arr[i] == token) {
+            if (arr[i] == token) {
                 arr[i] = arr[arr.length - 1];
                 arr.pop();
                 break;

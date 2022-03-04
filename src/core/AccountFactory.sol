@@ -12,7 +12,10 @@ contract AccountFactory is IAccountFactory {
         beacon = _beacon;
     }
 
-    function create(address accountManager) external returns (address account) {
+    function create(address accountManager)
+        external
+        returns (address account) 
+    {
         account = address(new BeaconProxy(beacon, accountManager));
         emit AccountCreated(account, accountManager);
     }
