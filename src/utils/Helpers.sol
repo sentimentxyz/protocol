@@ -41,18 +41,18 @@ library Helpers {
         require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED");
     }
 
-    function safeTransferETH(address to, uint256 value) internal {
+    function safeTransferEth(address to, uint256 value) internal {
         (bool success, ) = to.call{value: value}(new bytes(0));
-        if(!success) revert Errors.ETHTransferFailure();
+        if(!success) revert Errors.EthTransferFailure();
     }
 
     function balanceOf(address token, address owner) internal view returns (uint) {
         return IERC20(token).balanceOf(owner);
     }
 
-    function withdrawETH(address account, address to, uint value) internal {
+    function withdrawEth(address account, address to, uint value) internal {
         (bool success, ) = IAccount(account).exec(to, value, new bytes(0));
-        if(!success) revert Errors.ETHTransferFailure();
+        if(!success) revert Errors.EthTransferFailure();
     }
 
     function withdraw(address account, address to, address token, uint value) internal {
@@ -67,7 +67,7 @@ library Helpers {
         require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED");
     }
 
-    function isETH(address token) internal pure returns (bool) {
+    function isEth(address token) internal pure returns (bool) {
         return token == address(0);
     }
 }

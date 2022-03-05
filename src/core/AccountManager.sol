@@ -63,11 +63,13 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     function depositEth(address account) external payable onlyOwner(account) {
-        account.safeTransferETH(msg.value);
+        account.safeTransferEth(msg.value);
     }
 
-    function withdrawETH(address account, uint value) external onlyOwner(account) {
-        account.withdrawETH(msg.sender, value);
+    function withdrawEth(address account, uint value) external onlyOwner(account) {
+        if(!riskEngine.isWithdrawAllowed(account, address(0), value))
+            revert Errors.RiskThresholdBreached();
+        account.withdrawEth(msg.sender, value);
     }
 
     function deposit(
@@ -164,8 +166,10 @@ contract AccountManager is Pausable, IAccountManager {
     function settle(address account) external onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i = 0; i < borrows.length; i++) {
-            uint balance = borrows[i].balanceOf(account);
-            if ( balance > 0 ) repay(account, borrows[i], balance);
+            uint balance;
+            if (borrows[i] == address(0)) balance = account.balance;
+            else balance = borrows[i].balanceOf(account);
+            if ( balance > 0 ) repay(account, borrows[i], type(uint).max);
         }
     }
 
@@ -199,16 +203,20 @@ contract AccountManager is Pausable, IAccountManager {
         emit UpdateAccountFactoryAddress(address(accountFactory));
     }
 
+    function getInactiveAccounts() external view returns (address[] memory) {
+        return inactiveAccounts;
+    }
+
     // Internal Functions
     function _repay(address account, address token, uint value) internal {
         ILToken LToken = ILToken(LTokenAddressFor[token]);
         if(value == type(uint).max) value = LToken.getBorrowBalance(account);
 
-        if(token.isETH()) account.withdrawETH(address(LToken), value);
+        if(token.isEth()) account.withdrawEth(address(LToken), value);
         else account.withdraw(address(LToken), token, value);
         
         if(LToken.collectFrom(account, value)) IAccount(account).removeBorrow(token);
-        if(!token.isETH() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
+        if(!token.isEth() && IERC20(token).balanceOf(account) == 0) IAccount(account).removeAsset(token);
     }
 
     function _updateTokens(address account, address[] memory tokensIn, address[] memory tokensOut) internal {

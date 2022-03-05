@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 
@@ -20,12 +22,6 @@ contract OpenCloseFlowTest is TestBase {
         assertTrue(riskEngine.isAccountHealthy(account));
         assertEq(account, userRegistry.accountsOwnedBy(user)[0]);
         assertEq(address(accountManager), IAccount(account).accountManager());
-    }
-
-    function testFailCloseInSameBlock() public {
-        // Test
-        cheats.prank(user);
-        accountManager.closeAccount(account);
     }
 
     function testClose() public {
@@ -52,5 +48,30 @@ contract OpenCloseFlowTest is TestBase {
         assertEq(account, account2);
         assertEq(account, userRegistry.accountsOwnedBy(user)[0]);
         assertEq(address(accountManager), IAccount(account).accountManager());
+    }
+
+    function testCloseAccountOutstandingDebtError(uint96 value) public {
+        // Setup
+        deposit(user, account, address(erc20), value);
+        borrow(user, account, address(erc20), value);
+        cheats.roll(block.number + 1);
+
+        // Test
+        cheats.prank(user);
+        cheats.expectRevert(Errors.OutstandingDebt.selector);
+        accountManager.closeAccount(account);
+    }
+
+    function testCloseAccountOwnerOnlyError() public {
+        // Test
+        cheats.expectRevert(Errors.AccountOwnerOnly.selector);
+        accountManager.closeAccount(account);
+    }
+
+    function testCloseAccountDeactivationError() public {
+        // Test
+        cheats.prank(user);
+        cheats.expectRevert(Errors.AccountDeactivationFailure.selector);
+        accountManager.closeAccount(account);
     }
 }

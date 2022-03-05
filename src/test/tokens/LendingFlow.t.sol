@@ -13,7 +13,7 @@ contract LendingFlowTest is TestBase {
         setupContracts();
     }
 
-    function testDepositETH(uint amt) public {
+    function testDepositEth(uint amt) public {
         // Setup
         cheats.deal(lender, amt);
 
@@ -30,9 +30,9 @@ contract LendingFlowTest is TestBase {
         );
     }
 
-    function testWithdrawETH(uint amt) public {
+    function testWithdrawEth(uint amt) public {
         // Setup
-        testDepositETH(amt);
+        testDepositEth(amt);
 
         // Test
         cheats.prank(lender);

@@ -13,7 +13,7 @@ contract BorrowFlowTest is TestBase {
         account = openAccount(borrower);
     }
 
-    function testBorrowETH(uint96 amt) public {
+    function testBorrowEth(uint96 amt) public {
         // Test
         deposit(borrower, account, address(0), amt);
         borrow(borrower, account, address(0), amt);

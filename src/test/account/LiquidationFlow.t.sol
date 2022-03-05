@@ -25,7 +25,7 @@ contract LiquidationFlowTest is TestBase {
         assertTrue(!riskEngine.isAccountHealthy(account)); // Account is now liquidatable
     }
 
-    function testLiquidationETH(uint96 amt) public {
+    function testLiquidationEth(uint96 amt) public {
         // Setup
         deposit(borrower, account, address(0), amt);
         borrow(borrower, account, address(0), amt);
