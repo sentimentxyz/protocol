@@ -59,7 +59,7 @@ contract LTokenTest is TestBase {
 
         // Test
         cheats.prank(address(accountManager));
-        lErc20.collectFrom(account, collectAmt);
+        bool isBorrowBalanceZero = lErc20.collectFrom(account, collectAmt);
 
         (
             uint principal,
@@ -69,6 +69,7 @@ contract LTokenTest is TestBase {
         // Assert
         assertEq(principal, lendAmt - collectAmt);
         assertEq(interestIndex, lErc20.borrowIndex());
+        assertTrue(isBorrowBalanceZero == (lendAmt == collectAmt));
     }
 
     function testFailCollectFrom(uint lendAmt, uint liquidity, uint collectAmt) 
@@ -157,9 +158,9 @@ contract LTokenTest is TestBase {
         assertEq(lErc20.rateModel(), _rateModel);
     }
 
-    function testSetRateModelAuthError(
-        address caller, address _rateModel
-    ) public {
+    function testSetRateModelAuthError(address caller, address _rateModel) 
+        public
+    {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
