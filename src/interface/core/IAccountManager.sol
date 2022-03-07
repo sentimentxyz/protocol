@@ -43,7 +43,6 @@ interface IAccountManager {
         address account,
         address target,
         uint amt,
-        bytes4 sig,
         bytes calldata data
     ) external;
     function approve(

@@ -153,7 +153,6 @@ contract AccountManager is Pausable, IAccountManager {
         address account, 
         address target,
         uint amt,
-        bytes4 sig,
         bytes calldata data
     ) 
         external
@@ -166,10 +165,11 @@ contract AccountManager is Pausable, IAccountManager {
         address controller = controllerAddrFor[target];
         if (controller == address(0)) revert Errors.ControllerUnavailable();
         (isAllowed, tokensIn, tokensOut) = 
-            IController(controller).canCall(target, sig, data);
+            IController(controller).canCall(target, data);
         if (!isAllowed) revert Errors.FunctionCallRestricted();
-        IAccount(account).exec(target, amt, bytes.concat(sig, data));
-        _updateTokens(account, tokensIn, tokensOut);
+        _updateTokensIn(account, tokensIn);
+        IAccount(account).exec(target, amt, data);
+        _updateTokensOut(account, tokensOut);
         if (!riskEngine.isAccountHealthy(account))
             revert Errors.RiskThresholdBreached();
     }
@@ -241,19 +241,19 @@ contract AccountManager is Pausable, IAccountManager {
             IAccount(account).removeAsset(token);
     }
 
-    function _updateTokens(
-        address account,
-        address[] memory tokensIn,
-        address[] memory tokensOut
-    ) 
-        internal 
+    function _updateTokensIn(address account, address[] memory tokensIn)
+        internal
     {
         uint tokensInLen = tokensIn.length;
         for(uint i = 0; i < tokensInLen; ++i) {
             if (tokensIn[i].balanceOf(account) == 0)
                 IAccount(account).addAsset(tokensIn[i]);
         }
-        
+    }
+
+    function _updateTokensOut(address account, address[] memory tokensOut) 
+        internal
+    {
         uint tokensOutLen = tokensOut.length;
         for(uint i = 0; i < tokensOutLen; ++i) {
             if (tokensOut[i].balanceOf(account) == 0) 
