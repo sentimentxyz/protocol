@@ -13,16 +13,18 @@ contract LEther is LToken {
         address _rateModel, 
         address _accountManager, 
         uint _initialExchangeRate
-    ) LToken(
-        msg.sender,
-        "LEther",
-        "LETH",
-        18,
-        address(0),
-        _rateModel,
-        _accountManager,
-        _initialExchangeRate
-    ) {}
+    ) 
+        LToken(
+            msg.sender,
+            "LEther",
+            "LETH",
+            18,
+            address(0),
+            _rateModel,
+            _accountManager,
+            _initialExchangeRate
+        )
+    {}
 
     /// @notice deposit ETH in exchange for LETH
     function deposit() external payable {

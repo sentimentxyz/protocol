@@ -13,7 +13,8 @@ import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IOracle} from "../../interface/periphery/IOracle.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
-import {ERC20PresetMinterPauser} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
+import {ERC20PresetMinterPauser} from
+    "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
 abstract contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
@@ -116,7 +117,14 @@ abstract contract TestBase is DSTest {
         account = userRegistry.accountsOwnedBy(owner)[0];
     }
 
-    function deposit(address owner, address account, address token, uint amt) public {
+    function deposit(
+        address owner,
+        address account,
+        address token,
+        uint amt
+    )
+        public
+    {
         if (token == address(0)) {
             cheats.deal(owner, amt);
             cheats.prank(owner);
@@ -130,7 +138,14 @@ abstract contract TestBase is DSTest {
         }
     }
 
-    function borrow(address owner, address account, address token, uint amt) public {
+    function borrow(
+        address owner,
+        address account,
+        address token,
+        uint amt
+    )
+        public
+    {
         if (token == address(0)) {
             cheats.deal(address(lEth), amt);
             cheats.prank(owner);

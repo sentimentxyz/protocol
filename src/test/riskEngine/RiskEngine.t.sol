@@ -21,7 +21,11 @@ contract RiskEngineTest is TestBase {
         deposit(owner, account, address(0), depositAmt);
 
         // Test
-        bool isBorrowAllowed = riskEngine.isBorrowAllowed(account, address(0), borrowAmt);
+        bool isBorrowAllowed = riskEngine.isBorrowAllowed(
+            account,
+            address(0),
+            borrowAmt
+        );
 
         // Assert
         (MAX_LEVERAGE * depositAmt > borrowAmt) ? // Max Leverage is 5x
@@ -29,7 +33,13 @@ contract RiskEngineTest is TestBase {
             : assertFalse(isBorrowAllowed);
     }
 
-    function testIsWithdrawAllowed(uint96 depositAmt, uint96 borrowAmt, uint96 withdrawAmt) public {
+    function testIsWithdrawAllowed(
+        uint96 depositAmt,
+        uint96 borrowAmt,
+        uint96 withdrawAmt
+    )
+        public
+    {
         // Setup
         cheats.assume(depositAmt > withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
@@ -37,12 +47,15 @@ contract RiskEngineTest is TestBase {
         borrow(owner, account, address(0), borrowAmt);
 
         // Test
-        bool isWithdrawAllowed = riskEngine.isWithdrawAllowed(account, address(0), withdrawAmt);
+        bool isWithdrawAllowed = riskEngine.isWithdrawAllowed(
+            account,
+            address(0),
+            withdrawAmt
+        );
 
         // Assert
         ( (MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt) ) ?
-            assertTrue(isWithdrawAllowed)
-            : assertFalse(isWithdrawAllowed);
+            assertTrue(isWithdrawAllowed) : assertFalse(isWithdrawAllowed);
     }
 
     // Admin
@@ -54,13 +67,21 @@ contract RiskEngineTest is TestBase {
         assertEq(address(riskEngine.accountManager()), _accountManager);
     }
 
-    function testSetAccountManagerAddressAdminOnlyError(address caller, address _accountManager) public {
+    function testSetAccountManagerAddressAdminOnlyError(
+        address caller,
+        address _accountManager
+    )
+        public
+    {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
         riskEngine.setAccountManagerAddress(_accountManager);
 
         // Assert
-        assertEq(address(riskEngine.accountManager()), address(accountManager));
+        assertEq(
+            address(riskEngine.accountManager()),
+            address(accountManager)
+        );
     }
 }

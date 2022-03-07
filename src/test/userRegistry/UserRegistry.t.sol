@@ -77,14 +77,19 @@ contract UserRegistryTest is TestBase {
         assertEq(userRegistry.ownerFor(account), owner);
     }
 
-    function testAccountsOwnedBy(address[3] calldata accounts, address owner) public {
+    function testAccountsOwnedBy(
+        address[3] calldata accounts,
+        address owner
+    ) public {
         // Setup
         testAddAccount(accounts[0], owner);
         testAddAccount(accounts[1], owner);
         testAddAccount(accounts[2], owner);
 
         // Test
-        address[] memory accountsFromRegistry = userRegistry.accountsOwnedBy(owner);
+        address[] memory accountsFromRegistry = userRegistry.accountsOwnedBy(
+            owner
+        );
 
         // Assert
         assertEq(accounts[0], accountsFromRegistry[0]);
@@ -100,7 +105,12 @@ contract UserRegistryTest is TestBase {
         assertEq(userRegistry.accountManager(), _accountManager);
     }
 
-    function testSetAccountManagerAddressError(address caller, address _accountManager) public {
+    function testSetAccountManagerAddressError(
+        address caller,
+        address _accountManager
+    )
+        public
+    {
         // Test
         cheats.expectRevert(Errors.AdminOnly.selector);
         cheats.prank(caller);

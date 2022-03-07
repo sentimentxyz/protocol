@@ -13,15 +13,36 @@ contract DefaultRateModel is IRateModel {
     uint constant C3 = 35 * 1e17; // 3.5
     uint constant BLOCKS_PER_YEAR = 2102400 * 1e18; // TODO verify
 
-    function getBorrowRate(uint deposits, uint borrows, uint reserves) external pure returns (uint) {
+    function getBorrowRate(
+        uint deposits,
+        uint borrows,
+        uint reserves
+    )
+        external
+        pure
+        returns (uint) 
+    {
         uint util = _utilization(deposits, borrows, reserves);
         return C3.mul(
-            (util.mul(C1) + util.powu(32).mul(C1) + util.powu(64).mul(C2))
+            (
+                util.mul(C1)
+                + util.powu(32).mul(C1)
+                + util.powu(64).mul(C2)
+            )
             .div(BLOCKS_PER_YEAR)
         );
     }
 
-    function _utilization(uint deposits, uint borrows, uint reserves) internal pure returns (uint) {
-        return (deposits-reserves+borrows == 0) ? 0 : borrows.div(deposits-reserves+borrows);
+    function _utilization(
+        uint deposits,
+        uint borrows,
+        uint reserves
+    )
+        internal
+        pure
+        returns (uint)
+    {
+        return (deposits - reserves + borrows == 0) ? 
+            0 : borrows.div(deposits - reserves + borrows);
     }
 }

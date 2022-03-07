@@ -7,7 +7,10 @@ abstract contract Ownable {
 
     address public admin;
 
-    event OwnershipTransferred(address indexed previousAdmin, address indexed newAdmin);
+    event OwnershipTransferred(
+        address indexed previousAdmin,
+        address indexed newAdmin
+    );
 
     constructor(address _admin) {
         admin = _admin;

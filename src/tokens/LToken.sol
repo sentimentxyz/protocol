@@ -52,7 +52,9 @@ abstract contract LToken is Pausable, ILToken {
         address _accountManager,
         uint _initialExchangeRate
 
-    ) Pausable(_admin) {
+    ) 
+        Pausable(_admin)
+    {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
@@ -85,7 +87,10 @@ abstract contract LToken is Pausable, ILToken {
         return true;
     }
 
-    function transferFrom(address from, address to, uint256 value) external returns (bool) {
+    function transferFrom(address from, address to, uint256 value)
+        external
+        returns (bool)
+    {
         allowance[from][msg.sender] -= value;
         balanceOf[from] -= value;
         balanceOf[to] += value;
@@ -94,13 +99,17 @@ abstract contract LToken is Pausable, ILToken {
     }
 
     modifier accountManagerOnly() {
-        if(msg.sender != accountManager) revert Errors.AccountManagerOnly();
+        if (msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
     }
 
     // Account Manager Functions
-    function lendTo(address account, uint value) external accountManagerOnly returns (bool) {
-        if(block.number != lastUpdated) _updateState();
+    function lendTo(address account, uint value)
+        external
+        accountManagerOnly
+        returns (bool) 
+    {
+        if (block.number != lastUpdated) _updateState();
         bool isFirstBorrow = (borrowBalanceFor[account].principal == 0);
         _transferUnderlying(account, value);
         totalBorrows += value;
@@ -109,8 +118,12 @@ abstract contract LToken is Pausable, ILToken {
         return isFirstBorrow;
     }
 
-    function collectFrom(address account, uint value) external accountManagerOnly returns (bool) {
-        if(block.number != lastUpdated) _updateState();
+    function collectFrom(address account, uint value)
+        external
+        accountManagerOnly
+        returns (bool)
+    {
+        if (block.number != lastUpdated) _updateState();
         totalBorrows -= value;
         borrowBalanceFor[account].principal -= value;
         borrowBalanceFor[account].interestIndex = borrowIndex;
@@ -128,10 +141,15 @@ abstract contract LToken is Pausable, ILToken {
     function updateState() external { _updateState(); }
 
     function getBorrowBalance(address account) external view returns (uint) {
-        return (borrowBalanceFor[account].principal == 0) ? 0 :
-                borrowBalanceFor[account].principal
-                .mul((lastUpdated == block.number) ? borrowIndex : _getBorrowIndex(_getRateFactor()))
-                .div(borrowBalanceFor[account].interestIndex);
+        return (
+            borrowBalanceFor[account].principal == 0
+        ) ?
+        0 : borrowBalanceFor[account].principal
+            .mul(
+                (lastUpdated == block.number) ?
+                    borrowIndex : _getBorrowIndex(_getRateFactor())
+            )
+            .div(borrowBalanceFor[account].interestIndex);
     }
 
     function getExchangeRate() external view returns (uint) {
@@ -156,7 +174,7 @@ abstract contract LToken is Pausable, ILToken {
 
     // TODO Is there a way to update exchangeRate without checking for zero totalSupply?
     function _updateState() internal {
-        if(lastUpdated == block.number) return;
+        if (lastUpdated == block.number) return;
 
         uint rateFactor = _getRateFactor();
         uint interestAccrued = totalBorrows.mul(rateFactor);
@@ -170,10 +188,11 @@ abstract contract LToken is Pausable, ILToken {
     }
 
     /// @notice Exchange Rate = (underlying balance + total borrow - total reserves) / total supply
-    function _getExchangeRate(
-        uint _totalBorrows,
-        uint _totalReserves
-    ) internal view returns (uint) {
+    function _getExchangeRate(uint _totalBorrows,uint _totalReserves)
+        internal
+        view
+        returns (uint)
+    {
         return (totalSupply == 0) ? exchangeRate :
             (_getBalance() + _totalBorrows - _totalReserves).div(totalSupply);
     }

@@ -9,5 +9,6 @@ interface IUserRegistry {
     function updateAccount(address account, address owner) external;
     function closeAccount(address account) external;
     function ownerFor(address account) external view returns (address);
-    function accountsOwnedBy(address user) external view returns (address[] memory);
+    function accountsOwnedBy(address user)
+        external view returns (address[] memory);
 }
