@@ -7,3 +7,9 @@
 [submodule "lib/openzeppelin-contracts"]
 	path = lib/openzeppelin-contracts
 	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib/controller"]
+	path = lib/controller
+	url = https://github.com/sentimentxyz/controller
+[submodule "lib/oracle"]
+	path = lib/oracle
+	url = https://github.com/sentimentxyz/oracle
