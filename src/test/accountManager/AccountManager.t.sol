@@ -4,6 +4,7 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
+import {IControllerFacade} from "@controller/src/core/IControllerFacade.sol";
 
 contract AccountManagerTest is TestBase {
 
@@ -398,17 +399,16 @@ contract AccountManagerTest is TestBase {
         accountManager.setUserRegistryAddress(_userRegistry);
     }
 
-    function testSetController(address target,address controller) public {
+    function testSetController(address controller) public {
         // Test
-        accountManager.setControllerAddress(target, controller);
+        accountManager.setControllerAddress(controller);
 
         // Assert
-        assertEq(accountManager.controllerAddrFor(target), controller);
+        assertEq(address(accountManager.controller()), controller);
     }
 
     function testSetControllerAuthError(
         address caller,
-        address target,
         address controller
     ) 
         public 
@@ -416,7 +416,7 @@ contract AccountManagerTest is TestBase {
         // Test
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
-        accountManager.setControllerAddress(target, controller);
+        accountManager.setControllerAddress(controller);
     }
 
     function testSetAccountFactory(address _accountFactory) public {

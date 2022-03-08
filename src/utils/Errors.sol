@@ -13,7 +13,6 @@ library Errors {
     error EthTransferFailure();
     error AccountManagerOnly();
     error PriceFeedUnavailable();
-    error ControllerUnavailable();
     error RiskThresholdBreached();
     error FunctionCallRestricted();
     error AccountNotLiquidatable();
