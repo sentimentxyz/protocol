@@ -13,6 +13,8 @@ import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IOracle} from "../../interface/periphery/IOracle.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
+import {WETHController} from "@controller/src/weth/WETHController.sol";
+import {ControllerFacade} from "@controller/src/core/ControllerFacade.sol";
 import {ERC20PresetMinterPauser} from
     "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
@@ -39,6 +41,13 @@ abstract contract TestBase is DSTest {
     // Rate Model
     DefaultRateModel public rateModel;
 
+    // Controller Contracts
+    ControllerFacade public controllerFacade;
+    WETHController public wEthController;
+
+    // Arbitrum Contracts
+    address WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+
     // Contract Setup Functions
     function setupContracts() public virtual {
         setupRateModel();
@@ -50,6 +59,7 @@ abstract contract TestBase is DSTest {
         setupAccountManager();
         setupLEther();
         setupLERC20();
+        setUpIntegrations();
     }
 
     function setupRateModel() private {
@@ -155,6 +165,16 @@ abstract contract TestBase is DSTest {
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         }
+    }
+
+    function setUpIntegrations() public {
+        controllerFacade = new ControllerFacade();
+        setUpWEthController();
+    }
+
+    function setUpWEthController() public {
+        wEthController = new WETHController(WETH);
+        accountManager.setControllerAddress(WETH, address(wEthController));
     }
 
     function assertFalse(bool condition) public {
