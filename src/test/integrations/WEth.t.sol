@@ -14,6 +14,7 @@ contract WEthIntegrationTest is TestBase {
 
     function setUp() public {
         setupContracts();
+        setUpWEthController();
         account = openAccount(user);
     }
 
@@ -51,9 +52,9 @@ contract WEthIntegrationTest is TestBase {
         assertEq(IAccount(account).getAssets().length, 0);
     }
 
-    function testWEthSigError(uint8 value) public {
+    function testWEthSigError(uint8 value, string calldata signature) public {
         // Setup
-        bytes memory data = abi.encodeWithSignature("deposi()");
+        bytes memory data = abi.encodeWithSignature(signature);
 
         // Test
         cheats.prank(user);
