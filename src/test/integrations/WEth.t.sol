@@ -52,9 +52,9 @@ contract WEthIntegrationTest is TestBase {
         assertEq(IAccount(account).getAssets().length, 0);
     }
 
-    function testWEthSigError(uint8 value, string calldata signature) public {
+    function testWEthSigError(uint8 value, bytes4 signature) public {
         // Setup
-        bytes memory data = abi.encodeWithSignature(signature);
+        bytes memory data = abi.encodeWithSelector(signature);
 
         // Test
         cheats.prank(user);
