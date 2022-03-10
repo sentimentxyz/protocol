@@ -8,8 +8,8 @@ import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
+import {IControllerFacade} from "@controller/src/core/IControllerFacade.sol";
 import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
-import {IController} from "../interface/periphery/IController.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 
@@ -19,23 +19,25 @@ contract AccountManager is Pausable, IAccountManager {
     IRiskEngine public riskEngine;
     IUserRegistry public userRegistry;
     IAccountFactory public accountFactory;
+    IControllerFacade public controller;
     
     address[] public inactiveAccounts;
     
     mapping(address => bool) public isCollateralAllowed; // tokenAddr => bool
     mapping(address => address) public LTokenAddressFor; // token => LToken
-    mapping(address => address) public controllerAddrFor; // address => controller
 
     constructor(
         address _riskEngine,
         address _accountFactory,
-        address _userRegistry
-    ) 
+        address _userRegistry,
+        address _controller
+    )
         Pausable(msg.sender) 
     {
         riskEngine = IRiskEngine(_riskEngine);
         accountFactory = IAccountFactory(_accountFactory);
         userRegistry = IUserRegistry(_userRegistry);
+        controller = IControllerFacade(_controller);
     }
 
     modifier onlyOwner(address account) {
@@ -161,11 +163,7 @@ contract AccountManager is Pausable, IAccountManager {
         bool isAllowed;
         address[] memory tokensIn;
         address[] memory tokensOut;
-        
-        address controller = controllerAddrFor[target];
-        if (controller == address(0)) revert Errors.ControllerUnavailable();
-        (isAllowed, tokensIn, tokensOut) = 
-            IController(controller).canCall(target, data);
+        (isAllowed, tokensIn, tokensOut) = controller.canCall(target, data);
         if (!isAllowed) revert Errors.FunctionCallRestricted();
         _updateTokensIn(account, tokensIn);
         IAccount(account).exec(target, amt, data);
@@ -207,12 +205,12 @@ contract AccountManager is Pausable, IAccountManager {
         emit UpdateUserRegistryAddress(address(userRegistry));
     }
 
-    function setControllerAddress(address target, address controller)
+    function setControllerAddress(address _controller)
         external
         adminOnly 
     {
-        controllerAddrFor[target] = controller;
-        emit UpdateControllerAddress(target, controller);
+        controller = IControllerFacade(_controller);
+        emit UpdateControllerAddress(address(controller));
     }
 
     function setAccountFactoryAddress(address _accountFactory)

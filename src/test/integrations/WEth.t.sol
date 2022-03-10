@@ -14,7 +14,7 @@ contract WEthIntegrationTest is TestBase {
 
     function setUp() public {
         setupContracts();
-        setUpWEthController();
+        setupWEthController();
         account = openAccount(user);
     }
 

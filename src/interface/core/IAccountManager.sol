@@ -26,10 +26,7 @@ interface IAccountManager {
         address indexed tokenAddr,
         address indexed LToken
     );
-    event UpdateControllerAddress(
-        address indexed contractAddr,
-        address indexed controller
-    );
+    event UpdateControllerAddress(address indexed controller);
 
     function openAccount(address owner) external;
     function closeAccount(address account) external;

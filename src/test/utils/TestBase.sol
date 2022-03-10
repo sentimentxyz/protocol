@@ -14,6 +14,7 @@ import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IOracle} from "../../interface/periphery/IOracle.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {WETHController} from "@controller/src/weth/WETHController.sol";
+import {ControllerFacade} from "@controller/src/core/ControllerFacade.sol";
 import {ERC20PresetMinterPauser} from
     "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
@@ -41,6 +42,7 @@ abstract contract TestBase is DSTest {
     DefaultRateModel public rateModel;
 
     // Controller Contracts
+    ControllerFacade public controller;
     WETHController public wEthController;
 
     // Arbitrum Contracts
@@ -54,6 +56,7 @@ abstract contract TestBase is DSTest {
         setupBeacon();
         setupAccountFactory();
         setupUserRegistry();
+        setupController();
         setupAccountManager();
         setupLEther();
         setupLERC20();
@@ -92,7 +95,8 @@ abstract contract TestBase is DSTest {
         accountManager = new AccountManager(
             address(riskEngine), 
             address(accountFactory), 
-            address(userRegistry)
+            address(userRegistry),
+            address(controller)
         );
         riskEngine.setAccountManagerAddress(address(accountManager));
         userRegistry.setAccountManagerAddress(address(accountManager));
@@ -116,6 +120,15 @@ abstract contract TestBase is DSTest {
         );
         accountManager.setLTokenAddress(address(erc20), address(lErc20));
         accountManager.toggleCollateralState(address(erc20));
+    }
+
+    function setupController() public {
+        controller = new ControllerFacade();
+    }
+
+    function setupWEthController() public {
+        wEthController = new WETHController(WETH);
+        controller.updateController(WETH, wEthController);
     }
 
     // Test Helper Functions
@@ -162,11 +175,6 @@ abstract contract TestBase is DSTest {
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         }
-    }
-
-    function setUpWEthController() public {
-        wEthController = new WETHController(WETH);
-        accountManager.setControllerAddress(WETH, address(wEthController));
     }
 
     function assertFalse(bool condition) public {
