@@ -13,7 +13,6 @@ import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IOracle} from "../../interface/periphery/IOracle.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
-import {WETHController} from "@controller/src/weth/WETHController.sol";
 import {ControllerFacade} from "@controller/src/core/ControllerFacade.sol";
 import {ERC20PresetMinterPauser} from
     "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
@@ -41,12 +40,8 @@ abstract contract TestBase is DSTest {
     // Rate Model
     DefaultRateModel public rateModel;
 
-    // Controller Contracts
+    // Controller
     ControllerFacade public controller;
-    WETHController public wEthController;
-
-    // Arbitrum Contracts
-    address WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
 
     // Contract Setup Functions
     function setupContracts() public virtual {
@@ -124,11 +119,6 @@ abstract contract TestBase is DSTest {
 
     function setupController() public {
         controller = new ControllerFacade();
-    }
-
-    function setupWEthController() public {
-        wEthController = new WETHController(WETH);
-        controller.updateController(WETH, wEthController);
     }
 
     // Test Helper Functions
