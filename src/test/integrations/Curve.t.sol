@@ -93,7 +93,7 @@ contract curveIntegrationTest is IntegrationTestBase {
         assertEq(IAccount(account).assets(0), USDT);
     }
 
-    function testSwapSigError(uint8 value, bytes4 signature) public {
+    function testExchangeSigError(uint8 value, bytes4 signature) public {
         // Setup
         bytes memory data = abi.encodeWithSelector(signature);
 
