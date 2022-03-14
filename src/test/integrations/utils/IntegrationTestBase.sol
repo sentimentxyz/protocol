@@ -3,13 +3,14 @@ pragma solidity ^0.8.10;
 
 import {TestBase} from "../../utils/TestBase.sol";
 import {WETHController} from "@controller/src/weth/WETHController.sol";
-import {CurveController} from "@controller/src/curve/CurveController.sol";
+import {CurveCryptoSwapController} 
+    from "@controller/src/curve/CurveCryptoSwapController.sol";
 
 contract IntegrationTestBase is TestBase {
     
     // Controller Contracts
     WETHController public wEthController;
-    CurveController public curveController;
+    CurveCryptoSwapController public curveController;
 
     // Arbitrum Contracts
     address WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
@@ -22,7 +23,7 @@ contract IntegrationTestBase is TestBase {
     }
 
     function setupCurveController() public {
-        curveController = new CurveController(controller);
+        curveController = new CurveCryptoSwapController(controller);
         controller.updateController(curveEthSwap, curveController);
         controller.toggleSwapAllowance(USDT);
     }

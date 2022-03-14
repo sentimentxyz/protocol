@@ -11,7 +11,7 @@ interface IStableSwapPool {
 }
 
 
-contract curveIntegrationTest is IntegrationTestBase {
+contract CurveIntegrationTest is IntegrationTestBase {
 
     address user = cheats.addr(1);
     address account;
