@@ -46,23 +46,23 @@ contract AccountManagerTest is TestBase {
     }
 
     // Settle
-    function testSettle(uint96 value) public {
+    function testSettle(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(value != 0);
-        deposit(owner, account, address(erc20), value);
-        deposit(owner, account, address(0), value);
-        borrow(owner, account, address(erc20), value);
-        borrow(owner, account, address(0), value);
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+        deposit(owner, account, address(0), depositAmt);
+        deposit(owner, account, address(erc20), depositAmt);
+        borrow(owner, account, address(0), borrowAmt);
+        borrow(owner, account, address(erc20), borrowAmt);
 
         // Test
         cheats.prank(owner);
         accountManager.settle(account);
 
         // Assert
-        assertEq(account.balance, value);
-        assertEq(erc20.balanceOf(account), value);
-        assertEq(address(lEth).balance, value);
-        assertEq(erc20.balanceOf(address(lErc20)), value);
+        assertEq(account.balance, depositAmt);
+        assertEq(erc20.balanceOf(account), depositAmt);
+        assertEq(address(lEth).balance, borrowAmt);
+        assertEq(erc20.balanceOf(address(lErc20)), borrowAmt);
     }
 
     function testSettleAuthError() public {
