@@ -29,12 +29,10 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public 
     {
         // Setup
-        cheats.assume(withdrawAmt != 0);
-        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt
-        );
+        ); // Ensure account is healthy after withdrawal
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(0), borrowAmt);
 
@@ -61,11 +59,9 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
-
-        // Withdraw amount that breaks the above condition
         cheats.assume(
             (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
-        );
+        ); // Ensures withdraw amt is large enough to breach the risk threshold
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -106,12 +102,10 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public 
     {
         // Setup
-        cheats.assume(withdrawAmt != 0);
-        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt
-        ); 
+        ); // Ensure account is healthy after withdrawal
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
@@ -134,18 +128,12 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public 
     {
         // Setup
-        cheats.assume(
-            borrowAmt != 0 && depositAmt != 0 &&
-            withdrawAmt != 0 && depositAmt >= withdrawAmt
-        );
-        
-        // Max Leverage is MAX_LEVERAGEx
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt); 
-        
-        // Withdraw amount that breaks the above condition
+        cheats.assume(borrowAmt != 0 &&withdrawAmt != 0);
+        cheats.assume(depositAmt >= withdrawAmt);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         cheats.assume(
             (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
-        ); 
+        ); // Ensures withdraw amt is large enough to breach the risk threshold
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
