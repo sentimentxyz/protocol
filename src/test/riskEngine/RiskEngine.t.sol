@@ -16,8 +16,6 @@ contract RiskEngineTest is TestBase {
 
     function testIsBorrowAllowed(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt != 0);
-        cheats.assume(borrowAmt != 0);
         deposit(owner, account, address(0), depositAmt);
 
         // Test
@@ -28,7 +26,7 @@ contract RiskEngineTest is TestBase {
         );
 
         // Assert
-        (MAX_LEVERAGE * depositAmt > borrowAmt) ? // Max Leverage is 5x
+        (MAX_LEVERAGE * depositAmt >= borrowAmt) ?
             assertTrue(isBorrowAllowed)
             : assertFalse(isBorrowAllowed);
     }
