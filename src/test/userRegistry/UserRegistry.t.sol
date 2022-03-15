@@ -97,7 +97,7 @@ contract UserRegistryTest is TestBase {
         assertEq(accounts[2], accountsFromRegistry[2]);
     }
 
-    function testSetAccountManagerAddress(address _accountManager) public {
+    function testSetAccountManager(address _accountManager) public {
         // Test
         userRegistry.setAccountManagerAddress(_accountManager);
 
@@ -105,7 +105,7 @@ contract UserRegistryTest is TestBase {
         assertEq(userRegistry.accountManager(), _accountManager);
     }
 
-    function testSetAccountManagerAddressError(
+    function testSetAccountManagerError(
         address caller,
         address _accountManager
     )

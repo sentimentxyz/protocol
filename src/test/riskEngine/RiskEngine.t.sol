@@ -59,7 +59,7 @@ contract RiskEngineTest is TestBase {
     }
 
     // Admin
-    function testSetAccountManagerAddress(address _accountManager) public {
+    function testSetAccountManager(address _accountManager) public {
         // Test
         riskEngine.setAccountManagerAddress(_accountManager);
 
@@ -67,7 +67,7 @@ contract RiskEngineTest is TestBase {
         assertEq(address(riskEngine.accountManager()), _accountManager);
     }
 
-    function testSetAccountManagerAddressAdminOnlyError(
+    function testSetAccountManagerAuthError(
         address caller,
         address _accountManager
     )
