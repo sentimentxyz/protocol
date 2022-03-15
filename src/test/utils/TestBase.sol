@@ -44,7 +44,7 @@ abstract contract TestBase is DSTest {
     ControllerFacade public controller;
 
     // Contract Setup Functions
-    function setupContracts() public virtual {
+    function setupContracts() internal virtual {
         setupRateModel();
         setupOracle();
         setupRiskEngine();
@@ -117,12 +117,12 @@ abstract contract TestBase is DSTest {
         accountManager.toggleCollateralState(address(erc20));
     }
 
-    function setupController() public {
+    function setupController() private {
         controller = new ControllerFacade();
     }
 
     // Test Helper Functions
-    function openAccount(address owner) public returns (address account) {
+    function openAccount(address owner) internal returns (address account) {
         accountManager.openAccount(owner);
         account = userRegistry.accountsOwnedBy(owner)[0];
     }
@@ -133,7 +133,7 @@ abstract contract TestBase is DSTest {
         address token,
         uint amt
     )
-        public
+        internal
     {
         if (token == address(0)) {
             cheats.deal(owner, amt);
@@ -154,7 +154,7 @@ abstract contract TestBase is DSTest {
         address token,
         uint amt
     )
-        public
+        internal
     {
         if (token == address(0)) {
             cheats.deal(address(lEth), amt);
