@@ -23,8 +23,8 @@ contract AccountManagerDepositWithdrawTest is TestBase {
     // Withdraw Eth
     function testWithdrawEth(
         uint96 depositAmt,
-        uint96 withdrawAmt,
-        uint96 borrowAmt
+        uint96 borrowAmt,
+        uint96 withdrawAmt
     ) 
         public 
     {
@@ -49,21 +49,20 @@ contract AccountManagerDepositWithdrawTest is TestBase {
 
     function testWithdrawEthRiskEngineError(
         uint96 depositAmt,
-        uint96 withdrawAmt,
-        uint96 borrowAmt
+        uint96 borrowAmt,
+        uint96 withdrawAmt
     ) 
         public 
     {
         // Setup
-        cheats.assume(withdrawAmt != 0);
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         cheats.assume(
             (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
         ); // Ensures withdraw amt is large enough to breach the risk threshold
-        deposit(owner, account, address(erc20), depositAmt);
-        borrow(owner, account, address(erc20), borrowAmt);
+        deposit(owner, account, address(0), depositAmt);
+        borrow(owner, account, address(0), borrowAmt);
 
         // Test
         cheats.prank(owner);
@@ -96,8 +95,8 @@ contract AccountManagerDepositWithdrawTest is TestBase {
     // Withdraw ERC20
     function testWithdraw(
         uint96 depositAmt, 
-        uint96 withdrawAmt, 
-        uint96 borrowAmt
+        uint96 borrowAmt,
+        uint96 withdrawAmt
     ) 
         public 
     {
@@ -122,13 +121,13 @@ contract AccountManagerDepositWithdrawTest is TestBase {
 
     function testWithdrawRiskEngineError(
         uint96 depositAmt,
-        uint96 withdrawAmt,
-        uint96 borrowAmt
+        uint96 borrowAmt,
+        uint96 withdrawAmt
     ) 
         public 
     {
         // Setup
-        cheats.assume(borrowAmt != 0 &&withdrawAmt != 0);
+        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         cheats.assume(
