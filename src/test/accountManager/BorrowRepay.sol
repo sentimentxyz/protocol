@@ -15,7 +15,6 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrow(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt != 0 && borrowAmt != 0);
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
@@ -30,7 +29,6 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt != 0 && borrowAmt != 0);
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
@@ -49,7 +47,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * MAX_LEVERAGE <= borrowAmt);
+        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
 
@@ -67,7 +65,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(depositAmt * MAX_LEVERAGE <= borrowAmt);
+        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
 
@@ -84,8 +82,11 @@ contract AccountManagerBorrowRepayTest is TestBase {
     }
 
     function testBorrowLTokenUnavailableError(
-        address token, uint96 value
-    ) public {
+        address token,
+        uint96 value
+    )
+        public 
+    {
         // Setup
         cheats.assume(token != address(0));
 
@@ -103,8 +104,11 @@ contract AccountManagerBorrowRepayTest is TestBase {
     }
 
     function testRepayLTokenUnavailableError(
-        address token, uint96 value
-    ) public {
+        address token,
+        uint96 value
+    )
+        public
+    {
         // Setup
         cheats.assume(token != address(0));
 
