@@ -13,31 +13,45 @@ contract RepayFlowTest is TestBase {
         account = openAccount(borrower);
     }
 
-    function testRepayEth(uint96 amt) public {
+    function testRepayEth(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt) 
+        public 
+    {
         // Setup
-        deposit(borrower, account, address(0), amt);
-        borrow(borrower, account, address(0), amt);
+        cheats.assume(borrowAmt > repayAmt);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        deposit(borrower, account, address(0), depositAmt);
+        borrow(borrower, account, address(0), borrowAmt);
 
         // Test
         cheats.prank(borrower);
-        accountManager.repay(account, address(0), amt);
+        accountManager.repay(account, address(0), repayAmt);
 
         // Assert
-        assertEq(riskEngine.getBalance(account), amt);
-        assertEq(riskEngine.getBorrows(account), 0);
+        assertEq(
+            riskEngine.getBalance(account), 
+            uint(depositAmt) + borrowAmt - repayAmt
+        );
+        assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }
 
-    function testRepayERC20(uint96 amt) public {
+    function testRepayERC20(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt) 
+        public
+    {
         // Setup
-        deposit(borrower, account, address(erc20), amt);
-        borrow(borrower, account, address(erc20), amt);
+        cheats.assume(borrowAmt > repayAmt);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        deposit(borrower, account, address(erc20), depositAmt);
+        borrow(borrower, account, address(erc20), borrowAmt);
 
         // Test
         cheats.prank(borrower);
-        accountManager.repay(account, address(erc20), amt);
+        accountManager.repay(account, address(erc20), repayAmt);
 
         // Assert
-        assertEq(riskEngine.getBalance(account), amt);
-        assertEq(riskEngine.getBorrows(account), 0);
+        assertEq(
+            riskEngine.getBalance(account), 
+            uint(depositAmt) + borrowAmt - repayAmt
+        );
+        assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }
 }
