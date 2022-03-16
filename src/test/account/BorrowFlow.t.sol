@@ -13,27 +13,32 @@ contract BorrowFlowTest is TestBase {
         account = openAccount(borrower);
     }
 
-    function testBorrowEth(uint96 amt) public {
+    function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Test
-        deposit(borrower, account, address(0), amt);
-        borrow(borrower, account, address(0), amt);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        deposit(borrower, account, address(0), depositAmt);
+        borrow(borrower, account, address(0), borrowAmt);
 
         // Assert
         assertEq(address(lEth).balance, 0);
-        assertEq(account.balance, uint(2) * amt);
+        assertEq(account.balance, uint(depositAmt) + borrowAmt);
         assertTrue(!IAccount(account).hasNoDebt());
-        assertEq(lEth.getBorrowBalance(address(account)), amt);
+        assertEq(lEth.getBorrowBalance(address(account)), borrowAmt);
     }
 
-    function testBorrowERC20(uint96 amt) public {
+    function testBorrowERC20(uint96 depositAmt, uint96 borrowAmt) public {
         // Test
-        deposit(borrower, account, address(erc20), amt);
-        borrow(borrower, account, address(erc20), amt);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        deposit(borrower, account, address(erc20), depositAmt);
+        borrow(borrower, account, address(erc20), borrowAmt);
 
         // Assert
         assertTrue(!IAccount(account).hasNoDebt());
         assertEq(erc20.balanceOf(address(lErc20)), 0);
-        assertEq(lErc20.getBorrowBalance(address(account)), amt);
-        assertEq(erc20.balanceOf(address(account)), uint(2) * amt);
+        assertEq(lErc20.getBorrowBalance(address(account)), borrowAmt);
+        assertEq(
+            erc20.balanceOf(address(account)), 
+            uint(depositAmt) + borrowAmt
+        );
     }
 }

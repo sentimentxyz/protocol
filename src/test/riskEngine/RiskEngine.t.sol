@@ -16,8 +16,6 @@ contract RiskEngineTest is TestBase {
 
     function testIsBorrowAllowed(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt != 0);
-        cheats.assume(borrowAmt != 0);
         deposit(owner, account, address(0), depositAmt);
 
         // Test
@@ -28,7 +26,7 @@ contract RiskEngineTest is TestBase {
         );
 
         // Assert
-        (MAX_LEVERAGE * depositAmt > borrowAmt) ? // Max Leverage is 5x
+        (MAX_LEVERAGE * depositAmt >= borrowAmt) ?
             assertTrue(isBorrowAllowed)
             : assertFalse(isBorrowAllowed);
     }
@@ -59,7 +57,7 @@ contract RiskEngineTest is TestBase {
     }
 
     // Admin
-    function testSetAccountManagerAddress(address _accountManager) public {
+    function testSetAccountManager(address _accountManager) public {
         // Test
         riskEngine.setAccountManagerAddress(_accountManager);
 
@@ -67,7 +65,7 @@ contract RiskEngineTest is TestBase {
         assertEq(address(riskEngine.accountManager()), _accountManager);
     }
 
-    function testSetAccountManagerAddressAdminOnlyError(
+    function testSetAccountManagerAuthError(
         address caller,
         address _accountManager
     )

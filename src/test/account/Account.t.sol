@@ -12,8 +12,6 @@ contract AccountTest is TestBase {
 
     function setUp() public {
         setupContracts();
-
-        cheats.prank(owner);
         account = IAccount(openAccount(owner));
     }
 
