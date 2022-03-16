@@ -17,12 +17,12 @@ contract IntegrationTestBase is TestBase {
     address curveEthSwap = 0x960ea3e3C7FB317332d990873d354E18d7645590;
     address USDT = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
 
-    function setupWEthController() public {
+    function setupWEthController() internal {
         wEthController = new WETHController(WETH);
         controller.updateController(WETH, wEthController);
     }
 
-    function setupCurveController() public {
+    function setupCurveController() internal {
         curveController = new CurveCryptoSwapController(controller);
         controller.updateController(curveEthSwap, curveController);
         controller.toggleSwapAllowance(USDT);
