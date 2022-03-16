@@ -14,7 +14,7 @@ contract IntegrationTestBase is TestBase {
     address constant USDT = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
 
     function setupWethController() internal {
-        wEthController = new WETHController(address(WETH));
-        controller.updateController(address(WETH), wEthController);
+        wEthController = new WETHController(WETH);
+        controller.updateController(WETH, wEthController);
     }
 }
