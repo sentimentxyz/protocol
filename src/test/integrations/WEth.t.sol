@@ -7,13 +7,13 @@ import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 
-contract WEthIntegrationTest is IntegrationTestBase {
+contract WethIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
 
     function setUp() public {
         setupContracts();
-        setupWEthController();
+        setupWethController();
         account = openAccount(user);
     }
 
@@ -49,7 +49,7 @@ contract WEthIntegrationTest is IntegrationTestBase {
         assertEq(IAccount(account).getAssets().length, 0);
     }
 
-    function testWEthSigError(uint96 amt, bytes4 sig) public {
+    function testWethSigError(uint96 amt, bytes4 sig) public {
         // Setup
         bytes memory data = abi.encodeWithSelector(sig);
 

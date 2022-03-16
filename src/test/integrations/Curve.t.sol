@@ -22,7 +22,7 @@ contract CurveIntegrationTest is IntegrationTestBase {
 
     function setUp() public {
         setupContracts();
-        setupWEthController();
+        setupWethController();
         setupCurveController();
         account = openAccount(user);
     }
