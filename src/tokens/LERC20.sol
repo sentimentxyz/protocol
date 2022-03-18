@@ -15,21 +15,18 @@ contract LERC20 is LToken {
         bytes32 _symbol, 
         uint8 _decimals,
         address _underlying,
-        address _rateModel,
-        address _accountManager,
-        uint _initialExchangeRate
+        uint _initialExchangeRate,
+        address _registry
     ) 
         LToken(
-            msg.sender,
             _name,
             _symbol,
-            _decimals,
             _underlying,
-            _rateModel,
-            _accountManager,
-            _initialExchangeRate
-        )
-    {}
+            _decimals,
+            _initialExchangeRate,
+            msg.sender,
+            _registry
+        ) {}
 
     // Lender Functions
     /// @param value underlying token amount to be deposited

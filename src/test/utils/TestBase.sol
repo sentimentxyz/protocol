@@ -70,15 +70,14 @@ contract TestBase is DSTest {
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(address(rateModel), address(accountManager), 1);
+        lEth = new LEther(uint(1), address(registry));
         lErc20 = new LERC20(
             "LERC20Test",
             "LERC20",
-            1,
+            uint8(18),
             address(erc20),
-            address(rateModel), 
-            address(accountManager),
-            1
+            uint(1),
+            address(registry)
         );
     }
 
@@ -97,6 +96,8 @@ contract TestBase is DSTest {
     function initialize() private {
         riskEngine.initialize();
         accountManager.initialize();
+        lEth.initialize();
+        lErc20.initialize();
     }
 
     function mock() private {
