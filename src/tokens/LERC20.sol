@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {LToken} from "./LToken.sol";
 import {Helpers} from "../utils/Helpers.sol";
+import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LERC20 is LToken {

@@ -210,17 +210,6 @@ abstract contract LToken is Pausable, ILToken {
         emit Transfer(from, address(0), value);
     }
 
-    // Admin-only functions
-    function setAccountManager(address _accountManager) external adminOnly {
-        accountManager = _accountManager;
-        emit UpdateAccountManagerAddress(accountManager);
-    }
-
-    function setRateModel(address _rateModel) external adminOnly {
-        rateModel = _rateModel;
-        emit UpdateRateModelAddress(address(rateModel));
-    }
-
     /// @notice transfers underlying token to specified address
     /// @param treasury address to transfer underlying token
     /// @param value amount of underlying token to transfer

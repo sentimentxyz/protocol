@@ -126,47 +126,21 @@ contract LTokenTest is TestBase {
         assertGe(exchangeRate, lErc20.exchangeRate());
     }
 
-    // Admin
-    function testSetAccountManager(address _accountManager) public {
-        // Test
-        lErc20.setAccountManager(_accountManager);
+    // function testInitialize() public {
+    //     // Setup
+    //     assertEq(address(registry), address(lErc20.registry()));
 
-        // Assert
-        assertEq(lErc20.accountManager(), _accountManager);
-    }
+    //     // Test
+    //     accountManager.initialize();
 
-    function testSetAccountManagerAuthError(
-        address caller,
-        address _accountManager
-    ) 
-        public 
-    {
-        // Test
-        cheats.prank(caller);
-        cheats.expectRevert(Errors.AdminOnly.selector);
-        lErc20.setAccountManager(_accountManager);
+    //     // Assert
+    //     assertEq(address(rateModel), address(lErc20.rateModel()));
+    //     assertEq(address(accountManager), address(lErc20.accountManager()));
+    // }
 
-        // Assert
-        assertEq(lErc20.accountManager(), address(accountManager));
-    }
-
-    function testSetRateModel(address _rateModel) public {
-        // Test
-        lErc20.setRateModel(_rateModel);
-
-        // Assert
-        assertEq(lErc20.rateModel(), _rateModel);
-    }
-
-    function testSetRateModelAuthError(address caller, address _rateModel) 
-        public
-    {
-        // Test
-        cheats.prank(caller);
-        cheats.expectRevert(Errors.AdminOnly.selector);
-        lErc20.setRateModel(_rateModel);
-
-        // Assert
-        assertEq(lErc20.rateModel(), address(rateModel));
-    }
+    // function testInitializeAuthError(address caller) public {
+    //     cheats.prank(caller);
+    //     cheats.expectRevert(Errors.AdminOnly.selector);
+    //     accountManager.initialize();
+    // }
 }

@@ -28,11 +28,11 @@ interface IAccountManager {
     );
     event UpdateControllerAddress(address indexed controller);
 
+    function initialize() external;
     function openAccount(address owner) external;
     function closeAccount(address account) external;
     function getInactiveAccounts() external view returns (address[] memory);
     function repay(address account, address token, uint value) external;
-    function LTokenAddressFor(address token) external view returns (address);
     function borrow(address account, address token, uint value) external;
     function deposit(address account, address token, uint value) external;
     function withdraw(address account, address token, uint value) external;

@@ -10,7 +10,6 @@ contract Registry is Ownable, IRegistry {
     bytes32 private constant CONTROLLER = 'CONTROLLER';
     bytes32 private constant RATE_MODEL = 'RATE_MODEL';
     bytes32 private constant RISK_ENGINE = 'RISK_ENGINE';
-    bytes32 private constant USER_REGISTRY = 'USER_REGISTRY'; 
     bytes32 private constant ACCOUNT_FACTORY = 'ACCOUNT_FACTORY';
     bytes32 private constant ACCOUNT_MANAGER = 'ACCOUNT_MANAGER';
 

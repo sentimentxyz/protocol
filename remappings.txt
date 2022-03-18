@@ -1,6 +1,7 @@
 @uniswap/=lib/
+@oracle/=lib/oracle/
+@ds-test/=lib/ds-test/
 @prb-math/=lib/prb-math/
 @chainlink/=lib/chainlink/
-@openzeppelin/=lib/openzeppelin-contracts/
-@ds-test/=lib/ds-test/
 @controller/=lib/controller/
+@openzeppelin/=lib/openzeppelin-contracts/
