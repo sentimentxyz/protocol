@@ -7,9 +7,9 @@ import {Pausable} from "../utils/Pausable.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
+import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IControllerFacade} from "@controller/src/core/IControllerFacade.sol";
-import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 
@@ -17,7 +17,7 @@ contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
     IRiskEngine public riskEngine;
-    IUserRegistry public userRegistry;
+    IRegistry public registry;
     IAccountFactory public accountFactory;
     IControllerFacade public controller;
     
@@ -29,19 +29,19 @@ contract AccountManager is Pausable, IAccountManager {
     constructor(
         address _riskEngine,
         address _accountFactory,
-        address _userRegistry,
+        address _registry,
         address _controller
     )
         Pausable(msg.sender) 
     {
         riskEngine = IRiskEngine(_riskEngine);
         accountFactory = IAccountFactory(_accountFactory);
-        userRegistry = IUserRegistry(_userRegistry);
+        registry = IRegistry(_registry);
         controller = IControllerFacade(_controller);
     }
 
     modifier onlyOwner(address account) {
-        if (userRegistry.ownerFor(account) != msg.sender)
+        if (registry.ownerFor(account) != msg.sender)
             revert Errors.AccountOwnerOnly();
         _;
     }
@@ -51,11 +51,11 @@ contract AccountManager is Pausable, IAccountManager {
         if (inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
             IAccount(account).initialize(address(this));
-            userRegistry.addAccount(account, owner);
+            registry.addAccount(account, owner);
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
-            userRegistry.updateAccount(account, owner);
+            registry.updateAccount(account, owner);
         }
         IAccount(account).activate();
         emit AccountAssigned(account, owner);
@@ -67,7 +67,7 @@ contract AccountManager is Pausable, IAccountManager {
             revert Errors.AccountDeactivationFailure();
         if (!account.hasNoDebt()) revert Errors.OutstandingDebt();
         account.sweepTo(msg.sender);
-        userRegistry.closeAccount(_account);
+        registry.closeAccount(_account);
         inactiveAccounts.push(_account);
         emit AccountClosed(_account, msg.sender);
     }
@@ -136,7 +136,7 @@ contract AccountManager is Pausable, IAccountManager {
         if (riskEngine.isAccountHealthy(account))
             revert Errors.AccountNotLiquidatable();
         _liquidate(account);
-        emit AccountLiquidated(account, userRegistry.ownerFor(account));
+        emit AccountLiquidated(account, registry.ownerFor(account));
     }
 
     function approve(
@@ -200,9 +200,9 @@ contract AccountManager is Pausable, IAccountManager {
         emit UpdateRiskEngineAddress(address(riskEngine));
     }
 
-    function setUserRegistryAddress(address _userRegistry) external adminOnly {
-        userRegistry = IUserRegistry(_userRegistry);
-        emit UpdateUserRegistryAddress(address(userRegistry));
+    function setUserRegistryAddress(address _registry) external adminOnly {
+        registry = IRegistry(_registry);
+        emit UpdateUserRegistryAddress(_registry);
     }
 
     function setControllerAddress(address _controller)

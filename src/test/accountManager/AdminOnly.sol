@@ -76,12 +76,12 @@ contract AccountManagerAdminOnlyTest is TestBase {
         accountManager.setRiskEngineAddress(_riskEngine);
     }
 
-    function testSetUserRegistryAddress(address _userRegistry) public {
+    function testSetUserRegistryAddress(address _registry) public {
         // Test
-        accountManager.setUserRegistryAddress(_userRegistry);
+        accountManager.setUserRegistryAddress(_registry);
 
         // Assert
-        assertEq(address(accountManager.userRegistry()), _userRegistry);
+        assertEq(address(accountManager.registry()), _registry);
     }
 
     function testSetUserRegistryAuthError(

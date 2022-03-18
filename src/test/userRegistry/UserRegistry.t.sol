@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
-import {IUserRegistry} from "../../interface/core/IUserRegistry.sol";
+import {IRegistry} from "../../interface/core/IRegistry.sol";
 
 contract UserRegistryTest is TestBase {
 
@@ -16,41 +16,41 @@ contract UserRegistryTest is TestBase {
     function testUpdateAccount(address account, address owner) public {
         // Test
         cheats.prank(address(accountManager));
-        userRegistry.updateAccount(account, owner);
+        registry.updateAccount(account, owner);
 
         // Assert
-        assertEq(userRegistry.ownerFor(account), owner);
+        assertEq(registry.ownerFor(account), owner);
     }
 
     function testUpdateAccountError(address account, address owner) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        userRegistry.updateAccount(account, owner);
+        registry.updateAccount(account, owner);
 
         // Assert
-        assertEq(userRegistry.ownerFor(account), address(0));
+        assertEq(registry.ownerFor(account), address(0));
     }
 
     function testAddAccount(address account, address owner) public {
         // Test
         cheats.prank(address(accountManager));
-        userRegistry.addAccount(account, owner);
+        registry.addAccount(account, owner);
 
-        address[] memory accounts = userRegistry.accountsOwnedBy(owner);
+        address[] memory accounts = registry.accountsOwnedBy(owner);
 
         // Assert
-        assertEq(userRegistry.ownerFor(account), owner);
+        assertEq(registry.ownerFor(account), owner);
         assertEq(account, accounts[accounts.length - 1]); // Since it's always inserted at the end
     }
 
     function testAddAccountError(address account, address owner) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        userRegistry.addAccount(account, owner);
+        registry.addAccount(account, owner);
 
         // Assert
-        assertEq(userRegistry.ownerFor(account), address(0));
-        assertEq(userRegistry.getAllAccounts().length, 0);
+        assertEq(registry.ownerFor(account), address(0));
+        assertEq(registry.getAllAccounts().length, 0);
     }
 
     function testCloseAccount(address account, address owner) public {
@@ -59,10 +59,10 @@ contract UserRegistryTest is TestBase {
 
         // Test
         cheats.prank(address(accountManager));
-        userRegistry.closeAccount(account);
+        registry.closeAccount(account);
 
         // Assert
-        assertEq(userRegistry.ownerFor(account), address(0));
+        assertEq(registry.ownerFor(account), address(0));
     }
 
     function testCloseAccountError(address account, address owner) public {
@@ -71,10 +71,10 @@ contract UserRegistryTest is TestBase {
 
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        userRegistry.closeAccount(account);
+        registry.closeAccount(account);
 
         // Assert
-        assertEq(userRegistry.ownerFor(account), owner);
+        assertEq(registry.ownerFor(account), owner);
     }
 
     function testAccountsOwnedBy(
@@ -87,36 +87,11 @@ contract UserRegistryTest is TestBase {
         testAddAccount(accounts[2], owner);
 
         // Test
-        address[] memory accountsFromRegistry = userRegistry.accountsOwnedBy(
-            owner
-        );
+        address[] memory accountsFromRegistry = registry.accountsOwnedBy(owner);
 
         // Assert
         assertEq(accounts[0], accountsFromRegistry[0]);
         assertEq(accounts[1], accountsFromRegistry[1]);
         assertEq(accounts[2], accountsFromRegistry[2]);
-    }
-
-    function testSetAccountManager(address _accountManager) public {
-        // Test
-        userRegistry.setAccountManagerAddress(_accountManager);
-
-        // Assert
-        assertEq(userRegistry.accountManager(), _accountManager);
-    }
-
-    function testSetAccountManagerError(
-        address caller,
-        address _accountManager
-    )
-        public
-    {
-        // Test
-        cheats.expectRevert(Errors.AdminOnly.selector);
-        cheats.prank(caller);
-        userRegistry.setAccountManagerAddress(_accountManager);
-
-        // Assert
-        assertEq(userRegistry.accountManager(), address(accountManager));
     }
 }

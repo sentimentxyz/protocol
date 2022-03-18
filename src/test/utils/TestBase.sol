@@ -7,8 +7,8 @@ import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
 import {LERC20} from "../../tokens/LERC20.sol";
 import {LEther} from "../../tokens/LEther.sol";
+import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
-import {UserRegistry} from "../../core/UserRegistry.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IOracle} from "../../interface/periphery/IOracle.sol";
@@ -30,7 +30,7 @@ abstract contract TestBase is DSTest {
 
     // Core Contracts
     RiskEngine public riskEngine;
-    UserRegistry public userRegistry;
+    Registry public registry;
     AccountManager public accountManager;
 
     // Account Factory
@@ -50,7 +50,6 @@ abstract contract TestBase is DSTest {
         setupRiskEngine();
         setupBeacon();
         setupAccountFactory();
-        setupUserRegistry();
         setupController();
         setupAccountManager();
         setupLEther();
@@ -82,19 +81,16 @@ abstract contract TestBase is DSTest {
         accountFactory = new AccountFactory(address(beacon));
     }
 
-    function setupUserRegistry() private {
-        userRegistry = new UserRegistry();
-    }
-
     function setupAccountManager() private {
+        registry = new Registry();
         accountManager = new AccountManager(
             address(riskEngine), 
             address(accountFactory), 
-            address(userRegistry),
+            address(registry),
             address(controller)
         );
         riskEngine.setAccountManagerAddress(address(accountManager));
-        userRegistry.setAccountManagerAddress(address(accountManager));
+        registry.setAddress('ACCOUNT_MANAGER', address(accountManager));
     }
 
     function setupLEther() private {
@@ -124,7 +120,7 @@ abstract contract TestBase is DSTest {
     // Test Helper Functions
     function openAccount(address owner) internal returns (address account) {
         accountManager.openAccount(owner);
-        account = userRegistry.accountsOwnedBy(owner)[0];
+        account = registry.accountsOwnedBy(owner)[0];
     }
 
     function deposit(

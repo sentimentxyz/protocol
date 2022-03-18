@@ -20,7 +20,7 @@ contract OpenCloseFlowTest is TestBase {
         assertEq(riskEngine.getBalance(account), 0);
         assertEq(riskEngine.getBorrows(account), 0);
         assertTrue(riskEngine.isAccountHealthy(account));
-        assertEq(account, userRegistry.accountsOwnedBy(user)[0]);
+        assertEq(account, registry.accountsOwnedBy(user)[0]);
         assertEq(address(accountManager), IAccount(account).accountManager());
     }
 
@@ -33,7 +33,7 @@ contract OpenCloseFlowTest is TestBase {
         accountManager.closeAccount(account);
 
         // Assert
-        assertTrue(userRegistry.accountsOwnedBy(user).length == 0);
+        assertTrue(registry.accountsOwnedBy(user).length == 0);
         assertEq(address(accountManager), IAccount(account).accountManager());
     }
 
@@ -46,7 +46,7 @@ contract OpenCloseFlowTest is TestBase {
 
         // Assert
         assertEq(account, account2);
-        assertEq(account, userRegistry.accountsOwnedBy(user)[0]);
+        assertEq(account, registry.accountsOwnedBy(user)[0]);
         assertEq(address(accountManager), IAccount(account).accountManager());
     }
 
