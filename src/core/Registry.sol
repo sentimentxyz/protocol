@@ -77,11 +77,9 @@ contract Registry is Ownable, IRegistry {
         accountManagerOnly 
     {
         ownerFor[account] = owner;
-        emit AccountAssigned(account, owner);
     }
 
     function closeAccount(address account) external accountManagerOnly {
-        emit AccountClosed(account, ownerFor[account]);
         ownerFor[account] = address(0);
     }
 
