@@ -5,10 +5,7 @@ import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IRegistry} from "../../interface/core/IRegistry.sol";
 
-contract UserRegistryTest is TestBase {
-
-    event UpdateAccountManagerAddress(address indexed accountManager);
-
+contract RegistryTest is TestBase {
     function setUp() public {
         setupContracts();
     }
