@@ -126,21 +126,21 @@ contract LTokenTest is TestBase {
         assertGe(exchangeRate, lErc20.exchangeRate());
     }
 
-    // function testInitialize() public {
-    //     // Setup
-    //     assertEq(address(registry), address(lErc20.registry()));
+    function testInitialize() public {
+        // Setup
+        assertEq(address(registry), address(lErc20.registry()));
 
-    //     // Test
-    //     accountManager.initialize();
+        // Test
+        accountManager.initialize();
 
-    //     // Assert
-    //     assertEq(address(rateModel), address(lErc20.rateModel()));
-    //     assertEq(address(accountManager), address(lErc20.accountManager()));
-    // }
+        // Assert
+        assertEq(address(rateModel), address(lErc20.rateModel()));
+        assertEq(address(accountManager), address(lErc20.accountManager()));
+    }
 
-    // function testInitializeAuthError(address caller) public {
-    //     cheats.prank(caller);
-    //     cheats.expectRevert(Errors.AdminOnly.selector);
-    //     accountManager.initialize();
-    // }
+    function testInitializeAuthError(address caller) public {
+        cheats.prank(caller);
+        cheats.expectRevert(Errors.AdminOnly.selector);
+        accountManager.initialize();
+    }
 }
