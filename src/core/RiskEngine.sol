@@ -15,8 +15,8 @@ import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 contract RiskEngine is Ownable, IRiskEngine {
     using PRBMathUD60x18 for uint;
 
+    IRegistry public immutable registry;
     IOracle public oracle;
-    IRegistry public registry;
     IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 

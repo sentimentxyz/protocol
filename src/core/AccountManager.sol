@@ -16,7 +16,7 @@ import {IAccountManager} from "../interface/core/IAccountManager.sol";
 contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
-    IRegistry public registry;
+    IRegistry public immutable registry;
     IRiskEngine public riskEngine;
     IControllerFacade public controller;
     IAccountFactory public accountFactory;
