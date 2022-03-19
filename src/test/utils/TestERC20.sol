@@ -18,5 +18,4 @@ contract TestERC20 is ERC20 {
         require(msg.sender == admin, "AdminOnly");
         _mint(to, amount);
     }
-
 }
