@@ -34,29 +34,38 @@ contract Registry is Ownable, IRegistry {
         addressFor[id] = _address;
     }
 
-    function addLToken(address underlying, address lToken) external adminOnly {
-        LTokenList.push(lToken);
+    function setLToken(address underlying, address lToken) external adminOnly {
+        if (LTokenFor[underlying] == address(0)) { // Add new LToken
+            require(lToken != address(0));
+            LTokenList.push(lToken);
+        } else if (lToken == address(0)) { // Remove existing LToken
+            removeFromLTokenList(LTokenFor[underlying]);
+        } else { // Update existing LToken
+            updateLTokenList(LTokenFor[underlying], lToken);
+        }
         LTokenFor[underlying] = lToken;
     }
 
-    function updateLToken(address underlying, address lToken) 
-        external
-        adminOnly
-    {
-        if(lToken == address(0)) removeFromLTokenList(LTokenFor[underlying]);
-        LTokenFor[underlying] = lToken;
+    // Array manipulation functions
+    function updateLTokenList(address lToken, address newLToken) internal {
+        uint len = LTokenList.length;
+        for(uint i; i < len; ++i) {
+            if(LTokenList[i] == lToken) {
+                LTokenList[i] = newLToken;
+                break;
+            }
+        }
     }
 
     function removeFromLTokenList(address token) internal {
         uint len = LTokenList.length;
         // Copy the last element in place of token and pop
-        for(uint i; i < len;) {
+        for(uint i; i < len; ++i) {
             if (LTokenList[i] == token) {
                 LTokenList[i] = LTokenList[len - 1];
                 LTokenList.pop();
                 break;
             }
-            unchecked { ++i; }
         }
     }
 

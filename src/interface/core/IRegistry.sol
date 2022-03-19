@@ -9,8 +9,7 @@ interface IRegistry {
     function LTokenFor(address underlying) external view returns (address);
 
     function setAddress(bytes32 id, address _address) external;
-    function addLToken(address underlying, address lToken) external;
-    function updateLToken(address underlying, address lToken) external;
+    function setLToken(address underlying, address lToken) external;
 
     function addAccount(address account, address owner) external;
     function updateAccount(address account, address owner) external;
