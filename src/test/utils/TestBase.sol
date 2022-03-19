@@ -89,8 +89,8 @@ contract TestBase is DSTest {
         registry.setAddress('ACCOUNT_FACTORY', address(accountFactory));
         registry.setAddress('ACCOUNT_MANAGER', address(accountManager));
 
-        registry.addLToken(address(0), address(lEth));
-        registry.addLToken(address(erc20), address(lErc20));
+        registry.setLToken(address(0), address(lEth));
+        registry.setLToken(address(erc20), address(lErc20));
     }
 
     function initialize() private {
