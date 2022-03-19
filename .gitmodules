@@ -13,3 +13,6 @@
 [submodule "lib/controller"]
 	path = lib/controller
 	url = https://github.com/sentimentxyz/controller
+[submodule "lib/solmate"]
+	path = lib/solmate
+	url = https://github.com/rari-capital/solmate
