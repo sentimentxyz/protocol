@@ -19,7 +19,7 @@ import {ERC20PresetMinterPauser} from
 
 import {console} from "../utils/console.sol";
 
-contract TestBase is DSTest {
+abstract contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
@@ -70,14 +70,14 @@ contract TestBase is DSTest {
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(uint(1), address(registry));
+        lEth = new LEther(address(registry), uint(1));
         lErc20 = new LERC20(
             "LERC20Test",
             "LERC20",
             uint8(18),
             address(erc20),
-            uint(1),
-            address(registry)
+            address(registry),
+            uint(1)
         );
     }
 

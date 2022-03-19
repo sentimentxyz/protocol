@@ -11,21 +11,21 @@ contract LERC20 is LToken {
     using PRBMathUD60x18 for uint;
     
     constructor(
-        bytes32 _name, 
-        bytes32 _symbol, 
+        string memory _name, 
+        string memory _symbol, 
         uint8 _decimals,
         address _underlying,
-        uint _initialExchangeRate,
-        address _registry
+        address _registry,
+        uint _initialExchangeRate
     ) 
         LToken(
             _name,
             _symbol,
-            _underlying,
             _decimals,
-            _initialExchangeRate,
+            _underlying,
+            _registry,
             msg.sender,
-            _registry
+            _initialExchangeRate
         ) {}
 
     // Lender Functions
