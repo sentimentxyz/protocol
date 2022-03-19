@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {TestERC20} from "./TestERC20.sol";
 import {CheatCodes} from "./CheatCodes.sol";
 import {DSTest} from "@ds-test/src/test.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
@@ -14,17 +15,13 @@ import {AccountFactory} from "../../core/AccountFactory.sol";
 import {OracleFacade} from "@oracle/src/core/OracleFacade.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {ControllerFacade} from "@controller/src/core/ControllerFacade.sol";
-import {ERC20PresetMinterPauser} from
-    "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
-
-import {console} from "../utils/console.sol";
 
 abstract contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
     // Dummy ERC20 Token
-    ERC20PresetMinterPauser erc20;
+    TestERC20 erc20;
 
     // LTokens
     LEther lEth;
@@ -51,7 +48,7 @@ abstract contract TestBase is DSTest {
     // Contract Setup Functions
     function setupContracts() internal virtual {
         // Deploy Dummy ERC20
-        erc20 = new ERC20PresetMinterPauser("TestERC20", "TEST");
+        erc20 = new TestERC20("TestERC20", "TEST", uint8(18));
 
         deploy();
         register();
