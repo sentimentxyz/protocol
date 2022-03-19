@@ -7,124 +7,112 @@ import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
 import {LERC20} from "../../tokens/LERC20.sol";
 import {LEther} from "../../tokens/LEther.sol";
+import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
-import {UserRegistry} from "../../core/UserRegistry.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
-import {IOracle} from "../../interface/periphery/IOracle.sol";
+import {OracleFacade} from "@oracle/src/core/OracleFacade.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {ControllerFacade} from "@controller/src/core/ControllerFacade.sol";
 import {ERC20PresetMinterPauser} from
     "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetMinterPauser.sol";
 
-abstract contract TestBase is DSTest {
+import {console} from "../utils/console.sol";
+
+contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
-    uint public constant MAX_LEVERAGE = 5;
+    uint constant MAX_LEVERAGE = 5;
 
     // Dummy ERC20 Token
-    ERC20PresetMinterPauser public erc20;
+    ERC20PresetMinterPauser erc20;
 
     // LTokens
-    LEther public lEth;
-    LERC20 public lErc20;
+    LEther lEth;
+    LERC20 lErc20;
 
     // Core Contracts
-    RiskEngine public riskEngine;
-    UserRegistry public userRegistry;
-    AccountManager public accountManager;
+    RiskEngine riskEngine;
+    Registry registry;
+    AccountManager accountManager;
 
     // Account Factory
-    Beacon public beacon;
-    AccountFactory public accountFactory;
+    Beacon beacon;
+    AccountFactory accountFactory;
 
     // Rate Model
-    DefaultRateModel public rateModel;
+    DefaultRateModel rateModel;
 
     // Controller
-    ControllerFacade public controller;
+    ControllerFacade controller;
+
+    // Oracle
+    OracleFacade oracle;
 
     // Contract Setup Functions
     function setupContracts() internal virtual {
-        setupRateModel();
-        setupOracle();
-        setupRiskEngine();
-        setupBeacon();
-        setupAccountFactory();
-        setupUserRegistry();
-        setupController();
-        setupAccountManager();
-        setupLEther();
-        setupLERC20();
-    }
-
-    function setupRateModel() private {
-        rateModel = new DefaultRateModel();
-    }
-
-    function setupOracle() private {
-        // Assume oracle is deployed at address(0)
-        cheats.mockCall(
-            address(0),
-            abi.encodeWithSelector(IOracle.getPrice.selector),
-            abi.encode(1e18)
-        );
-    }
-
-    function setupRiskEngine() private {
-        riskEngine = new RiskEngine(address(0));
-    }
-
-    function setupBeacon() private {
-        beacon = new Beacon(address(new Account()));
-    }
-
-    function setupAccountFactory() private {
-        accountFactory = new AccountFactory(address(beacon));
-    }
-
-    function setupUserRegistry() private {
-        userRegistry = new UserRegistry();
-    }
-
-    function setupAccountManager() private {
-        accountManager = new AccountManager(
-            address(riskEngine), 
-            address(accountFactory), 
-            address(userRegistry),
-            address(controller)
-        );
-        riskEngine.setAccountManagerAddress(address(accountManager));
-        userRegistry.setAccountManagerAddress(address(accountManager));
-    }
-
-    function setupLEther() private {
-        lEth = new LEther(address(rateModel), address(accountManager), 1);
-        accountManager.setLTokenAddress(address(0), address(lEth));
-    }
-
-    function setupLERC20() private {
+        // Deploy Dummy ERC20
         erc20 = new ERC20PresetMinterPauser("TestERC20", "TEST");
+
+        deploy();
+        register();
+        initialize();
+        mock();
+    }
+
+    function deploy() private {
+        registry = new Registry();
+        oracle = new OracleFacade();
+        rateModel = new DefaultRateModel();
+        controller = new ControllerFacade();
+        riskEngine = new RiskEngine(registry);
+        accountManager = new AccountManager(registry);
+        
+        beacon = new Beacon(address(new Account()));
+        accountFactory = new AccountFactory(address(beacon));
+
+        lEth = new LEther(uint(1), address(registry));
         lErc20 = new LERC20(
             "LERC20Test",
             "LERC20",
-            1,
+            uint8(18),
             address(erc20),
-            address(rateModel),
-            address(accountManager),
-            1
+            uint(1),
+            address(registry)
         );
-        accountManager.setLTokenAddress(address(erc20), address(lErc20));
-        accountManager.toggleCollateralState(address(erc20));
     }
 
-    function setupController() private {
-        controller = new ControllerFacade();
+    function register() private {
+        registry.setAddress('ORACLE', address(oracle));
+        registry.setAddress('CONTROLLER', address(controller));
+        registry.setAddress('RATE_MODEL', address(rateModel));
+        registry.setAddress('RISK_ENGINE', address(riskEngine));
+        registry.setAddress('ACCOUNT_FACTORY', address(accountFactory));
+        registry.setAddress('ACCOUNT_MANAGER', address(accountManager));
+
+        registry.setLToken(address(0), address(lEth));
+        registry.setLToken(address(erc20), address(lErc20));
+    }
+
+    function initialize() private {
+        riskEngine.initialize();
+        accountManager.initialize();
+        lEth.initialize();
+        lErc20.initialize();
+    }
+
+    function mock() private {
+        // Mock Oracle to return 1e18 for all calls
+        cheats.mockCall(
+            address(oracle),
+            abi.encodeWithSelector(OracleFacade.getPrice.selector),
+            abi.encode(1e18)
+        );
     }
 
     // Test Helper Functions
     function openAccount(address owner) internal returns (address account) {
         accountManager.openAccount(owner);
-        account = userRegistry.accountsOwnedBy(owner)[0];
+        account = registry.accountsOwnedBy(owner)[0];
     }
 
     function deposit(
@@ -161,7 +149,7 @@ abstract contract TestBase is DSTest {
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         } else {
-            erc20.mint(accountManager.LTokenAddressFor(token), amt);
+            erc20.mint(registry.LTokenFor(token), amt);
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         }

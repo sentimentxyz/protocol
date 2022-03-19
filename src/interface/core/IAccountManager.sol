@@ -18,21 +18,11 @@ interface IAccountManager {
         uint value
     );
 
-    // AdminOnly Events
-    event UpdateRiskEngineAddress(address indexed riskEngine);
-    event UpdateUserRegistryAddress(address indexed userRegistry);
-    event UpdateAccountFactoryAddress(address indexed accountFactory);
-    event UpdateLTokenAddress(
-        address indexed tokenAddr,
-        address indexed LToken
-    );
-    event UpdateControllerAddress(address indexed controller);
-
+    function initialize() external;
     function openAccount(address owner) external;
     function closeAccount(address account) external;
     function getInactiveAccounts() external view returns (address[] memory);
     function repay(address account, address token, uint value) external;
-    function LTokenAddressFor(address token) external view returns (address);
     function borrow(address account, address token, uint value) external;
     function deposit(address account, address token, uint value) external;
     function withdraw(address account, address token, uint value) external;

@@ -5,12 +5,15 @@ import {Errors} from "../utils/Errors.sol";
 import {Helpers} from "../utils/Helpers.sol";
 import {Pausable} from "../utils/Pausable.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
+import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 abstract contract LToken is Pausable, ILToken {
     using Helpers for address;
     using PRBMathUD60x18 for uint;
+
+    IRegistry public immutable registry;
 
     // Token Metadata
     bytes32 public immutable name;
@@ -43,15 +46,13 @@ abstract contract LToken is Pausable, ILToken {
     mapping(address => mapping(address => uint256)) public allowance;
 
     constructor(
-        address _admin,
         bytes32 _name,
         bytes32 _symbol,
-        uint8 _decimals,
         address _underlying,
-        address _rateModel,
-        address _accountManager,
-        uint _initialExchangeRate
-
+        uint8 _decimals,
+        uint _initialExchangeRate,
+        address _admin,
+        address _registry
     ) 
         Pausable(_admin)
     {
@@ -61,8 +62,12 @@ abstract contract LToken is Pausable, ILToken {
         underlying = _underlying;
         exchangeRate = _initialExchangeRate * 1e18;
         borrowIndex = 1e18;
-        rateModel = _rateModel;
-        accountManager = _accountManager;
+        registry = IRegistry(_registry);
+    }
+
+    function initialize() external adminOnly {
+        rateModel = registry.addressFor('RATE_MODEL');
+        accountManager = registry.addressFor('ACCOUNT_MANAGER');
     }
 
     // Virtual Functions
@@ -208,17 +213,6 @@ abstract contract LToken is Pausable, ILToken {
         balanceOf[from] -= value;
         totalSupply -= value;
         emit Transfer(from, address(0), value);
-    }
-
-    // Admin-only functions
-    function setAccountManager(address _accountManager) external adminOnly {
-        accountManager = _accountManager;
-        emit UpdateAccountManagerAddress(accountManager);
-    }
-
-    function setRateModel(address _rateModel) external adminOnly {
-        rateModel = _rateModel;
-        emit UpdateRateModelAddress(address(rateModel));
     }
 
     /// @notice transfers underlying token to specified address

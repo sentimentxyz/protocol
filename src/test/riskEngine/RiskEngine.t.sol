@@ -56,30 +56,21 @@ contract RiskEngineTest is TestBase {
             assertTrue(isWithdrawAllowed) : assertFalse(isWithdrawAllowed);
     }
 
-    // Admin
-    function testSetAccountManager(address _accountManager) public {
+    function testInitialize() public {
+        // Setup
+        assertEq(address(registry), address(riskEngine.registry()));
+
         // Test
-        riskEngine.setAccountManagerAddress(_accountManager);
+        riskEngine.initialize();
 
         // Assert
-        assertEq(address(riskEngine.accountManager()), _accountManager);
+        assertEq(address(oracle), address(riskEngine.oracle()));
+        assertEq(address(accountManager), address(riskEngine.accountManager()));
     }
 
-    function testSetAccountManagerAuthError(
-        address caller,
-        address _accountManager
-    )
-        public
-    {
-        // Test
+    function testInitializeAuthError(address caller) public {
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
-        riskEngine.setAccountManagerAddress(_accountManager);
-
-        // Assert
-        assertEq(
-            address(riskEngine.accountManager()),
-            address(accountManager)
-        );
+        riskEngine.initialize();
     }
 }

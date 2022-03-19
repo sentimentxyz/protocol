@@ -7,41 +7,34 @@ import {Pausable} from "../utils/Pausable.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
+import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IControllerFacade} from "@controller/src/core/IControllerFacade.sol";
-import {IUserRegistry} from "../interface/core/IUserRegistry.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 
 contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
+    IRegistry public immutable registry;
     IRiskEngine public riskEngine;
-    IUserRegistry public userRegistry;
-    IAccountFactory public accountFactory;
     IControllerFacade public controller;
+    IAccountFactory public accountFactory;
     
     address[] public inactiveAccounts;
-    
-    mapping(address => bool) public isCollateralAllowed; // tokenAddr => bool
-    mapping(address => address) public LTokenAddressFor; // token => LToken
 
-    constructor(
-        address _riskEngine,
-        address _accountFactory,
-        address _userRegistry,
-        address _controller
-    )
-        Pausable(msg.sender) 
-    {
-        riskEngine = IRiskEngine(_riskEngine);
-        accountFactory = IAccountFactory(_accountFactory);
-        userRegistry = IUserRegistry(_userRegistry);
-        controller = IControllerFacade(_controller);
+    constructor(IRegistry _registry) Pausable(msg.sender) {
+        registry = _registry;
+    }
+
+    function initialize() external adminOnly {
+        riskEngine = IRiskEngine(registry.addressFor('RISK_ENGINE'));
+        controller = IControllerFacade(registry.addressFor('CONTROLLER'));
+        accountFactory = IAccountFactory(registry.addressFor('ACCOUNT_FACTORY'));
     }
 
     modifier onlyOwner(address account) {
-        if (userRegistry.ownerFor(account) != msg.sender)
+        if (registry.ownerFor(account) != msg.sender)
             revert Errors.AccountOwnerOnly();
         _;
     }
@@ -51,11 +44,11 @@ contract AccountManager is Pausable, IAccountManager {
         if (inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
             IAccount(account).initialize(address(this));
-            userRegistry.addAccount(account, owner);
+            registry.addAccount(account, owner);
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];
             inactiveAccounts.pop();
-            userRegistry.updateAccount(account, owner);
+            registry.updateAccount(account, owner);
         }
         IAccount(account).activate();
         emit AccountAssigned(account, owner);
@@ -67,7 +60,7 @@ contract AccountManager is Pausable, IAccountManager {
             revert Errors.AccountDeactivationFailure();
         if (!account.hasNoDebt()) revert Errors.OutstandingDebt();
         account.sweepTo(msg.sender);
-        userRegistry.closeAccount(_account);
+        registry.closeAccount(_account);
         inactiveAccounts.push(_account);
         emit AccountClosed(_account, msg.sender);
     }
@@ -89,7 +82,7 @@ contract AccountManager is Pausable, IAccountManager {
         external
         onlyOwner(account) 
     {
-        if (!isCollateralAllowed[token])
+        if (registry.LTokenFor(token) == address(0))
             revert Errors.CollateralTypeRestricted();
         if (token.balanceOf(account) == 0)
             IAccount(account).addAsset(address(token));
@@ -111,13 +104,13 @@ contract AccountManager is Pausable, IAccountManager {
         external
         onlyOwner(account)
     { 
-        if (LTokenAddressFor[token] == address(0))
+        if (registry.LTokenFor(token) == address(0))
             revert Errors.LTokenUnavailable();
         if (!riskEngine.isBorrowAllowed(account, token, value)) 
             revert Errors.RiskThresholdBreached();
         if (token != address(0) && token.balanceOf(account) == 0) 
             IAccount(account).addAsset(token);
-        if (ILToken(LTokenAddressFor[token]).lendTo(account, value))
+        if (ILToken(registry.LTokenFor(token)).lendTo(account, value))
             IAccount(account).addBorrow(token);
         emit Borrow(account, msg.sender, token, value);
     }
@@ -126,7 +119,7 @@ contract AccountManager is Pausable, IAccountManager {
         public
         onlyOwner(account)
     {
-        if (LTokenAddressFor[token] == address(0))
+        if (registry.LTokenFor(token) == address(0))
             revert Errors.LTokenUnavailable();
         _repay(account, token, value);
         emit Repay(account, msg.sender, token, value);
@@ -136,7 +129,7 @@ contract AccountManager is Pausable, IAccountManager {
         if (riskEngine.isAccountHealthy(account))
             revert Errors.AccountNotLiquidatable();
         _liquidate(account);
-        emit AccountLiquidated(account, userRegistry.ownerFor(account));
+        emit AccountLiquidated(account, registry.ownerFor(account));
     }
 
     function approve(
@@ -182,52 +175,13 @@ contract AccountManager is Pausable, IAccountManager {
         }
     }
 
-    // Admin-Only
-    function toggleCollateralState(address token) external adminOnly {
-        isCollateralAllowed[token] = !isCollateralAllowed[token];
-    }
-
-    function setLTokenAddress(address token, address LToken)
-        external
-        adminOnly 
-    {
-        LTokenAddressFor[token] = LToken;
-        emit UpdateLTokenAddress(token, LToken);
-    }
-
-    function setRiskEngineAddress(address _riskEngine) external adminOnly {
-        riskEngine = IRiskEngine(_riskEngine);
-        emit UpdateRiskEngineAddress(address(riskEngine));
-    }
-
-    function setUserRegistryAddress(address _userRegistry) external adminOnly {
-        userRegistry = IUserRegistry(_userRegistry);
-        emit UpdateUserRegistryAddress(address(userRegistry));
-    }
-
-    function setControllerAddress(address _controller)
-        external
-        adminOnly 
-    {
-        controller = IControllerFacade(_controller);
-        emit UpdateControllerAddress(address(controller));
-    }
-
-    function setAccountFactoryAddress(address _accountFactory)
-        external
-        adminOnly
-    {
-        accountFactory = IAccountFactory(_accountFactory);
-        emit UpdateAccountFactoryAddress(address(accountFactory));
-    }
-
     function getInactiveAccounts() external view returns (address[] memory) {
         return inactiveAccounts;
     }
 
     // Internal Functions
     function _repay(address account, address token, uint value) internal {
-        ILToken LToken = ILToken(LTokenAddressFor[token]);
+        ILToken LToken = ILToken(registry.LTokenFor(token));
         if (value == type(uint).max) value = LToken.getBorrowBalance(account);
 
         if (token.isEth()) account.withdrawEth(address(LToken), value);

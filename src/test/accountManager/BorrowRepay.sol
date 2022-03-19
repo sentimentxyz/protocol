@@ -17,7 +17,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         // Setup
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
-        erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
+        erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
         // Test
         cheats.prank(owner);
@@ -31,7 +31,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         // Setup
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
-        cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
+        cheats.deal(registry.LTokenFor(address(0)), borrowAmt);
 
         // Test
         cheats.prank(owner);
@@ -49,7 +49,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
         cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
         deposit(owner, account, address(erc20), depositAmt);
-        erc20.mint(accountManager.LTokenAddressFor(address(erc20)), borrowAmt);
+        erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
         // Test
         cheats.prank(owner);
@@ -67,7 +67,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
         cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
         deposit(owner, account, address(0), depositAmt);
-        cheats.deal(accountManager.LTokenAddressFor(address(0)), borrowAmt);
+        cheats.deal(registry.LTokenFor(address(0)), borrowAmt);
 
         // Test
         cheats.prank(owner);

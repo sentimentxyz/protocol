@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {LToken} from "./LToken.sol";
 import {Helpers} from "../utils/Helpers.sol";
+import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
 contract LEther is LToken {
@@ -10,19 +11,17 @@ contract LEther is LToken {
     using PRBMathUD60x18 for uint;
     
     constructor(
-        address _rateModel, 
-        address _accountManager, 
-        uint _initialExchangeRate
+        uint _initialExchangeRate,
+        address _registry
     ) 
         LToken(
-            msg.sender,
             "LEther",
             "LETH",
-            18,
             address(0),
-            _rateModel,
-            _accountManager,
-            _initialExchangeRate
+            uint8(18),
+            _initialExchangeRate,
+            msg.sender,
+            _registry
         )
     {}
 
