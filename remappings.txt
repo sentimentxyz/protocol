@@ -1,5 +1,6 @@
 @uniswap/=lib/
 @oracle/=lib/oracle/
+@solmate/=lib/solmate/
 @ds-test/=lib/ds-test/
 @prb-math/=lib/prb-math/
 @chainlink/=lib/chainlink/

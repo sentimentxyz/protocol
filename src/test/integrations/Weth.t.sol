@@ -2,9 +2,9 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../../utils/Errors.sol";
+import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 
 contract WethIntegrationTest is IntegrationTestBase {

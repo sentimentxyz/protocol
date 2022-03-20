@@ -4,12 +4,12 @@
 [submodule "lib/prb-math"]
 	path = lib/prb-math
 	url = https://github.com/paulrberg/prb-math
-[submodule "lib/openzeppelin-contracts"]
-	path = lib/openzeppelin-contracts
-	url = https://github.com/OpenZeppelin/openzeppelin-contracts
 [submodule "lib/oracle"]
 	path = lib/oracle
 	url = https://github.com/sentimentxyz/oracle
 [submodule "lib/controller"]
 	path = lib/controller
 	url = https://github.com/sentimentxyz/controller
+[submodule "lib/solmate"]
+	path = lib/solmate
+	url = https://github.com/rari-capital/solmate

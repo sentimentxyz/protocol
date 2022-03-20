@@ -2,24 +2,22 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
-import {Helpers} from "../utils/Helpers.sol";
 import {Pausable} from "../utils/Pausable.sol";
+import {ERC20} from "@solmate/src/tokens/ERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
 import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
 
-abstract contract LToken is Pausable, ILToken {
-    using Helpers for address;
+
+abstract contract LToken is Pausable, ERC20, ILToken {
     using PRBMathUD60x18 for uint;
 
+    // Privileged addresses
+    address public rateModel;
+    address public underlying;
+    address public accountManager;
     IRegistry public immutable registry;
-
-    // Token Metadata
-    bytes32 public immutable name;
-    bytes32 public immutable symbol;
-    address public immutable underlying;
-    uint8 public immutable decimals;
 
     // Market State Variables
     uint public exchangeRate;
@@ -36,29 +34,18 @@ abstract contract LToken is Pausable, ILToken {
     }
     mapping(address => BorrowSnapshot) public borrowBalanceFor;
 
-    // Privileged addresses
-    address public rateModel;
-    address public accountManager;
-
-    // ERC20 accounting
-    uint256 public totalSupply;
-    mapping(address => uint256) public balanceOf;
-    mapping(address => mapping(address => uint256)) public allowance;
-
     constructor(
-        bytes32 _name,
-        bytes32 _symbol,
-        address _underlying,
+        string memory _name,
+        string memory _symbol,
         uint8 _decimals,
-        uint _initialExchangeRate,
+        address _underlying,
+        address _registry,
         address _admin,
-        address _registry
+        uint _initialExchangeRate
     ) 
         Pausable(_admin)
+        ERC20(_name, _symbol, _decimals)
     {
-        name = _name;
-        symbol = _symbol;
-        decimals = _decimals;
         underlying = _underlying;
         exchangeRate = _initialExchangeRate * 1e18;
         borrowIndex = 1e18;
@@ -76,32 +63,6 @@ abstract contract LToken is Pausable, ILToken {
 
     /// @notice Total amount of underlying assets held by this contract
     function _getBalance() internal view virtual returns (uint);
-
-
-    // ERC20 Functions
-    function approve(address spender, uint256 value) external returns (bool) {
-        allowance[msg.sender][spender] = value;
-        emit Approval(msg.sender, spender, value);
-        return true;
-    }
-
-    function transfer(address to, uint256 value) external returns (bool) {
-        balanceOf[msg.sender] -= value;
-        balanceOf[to] += value;
-        emit Transfer(msg.sender, to, value);
-        return true;
-    }
-
-    function transferFrom(address from, address to, uint256 value)
-        external
-        returns (bool)
-    {
-        allowance[from][msg.sender] -= value;
-        balanceOf[from] -= value;
-        balanceOf[to] += value;
-        emit Transfer(from, to, value);
-        return true;
-    }
 
     modifier accountManagerOnly() {
         if (msg.sender != accountManager) revert Errors.AccountManagerOnly();
@@ -200,19 +161,6 @@ abstract contract LToken is Pausable, ILToken {
     {
         return (totalSupply == 0) ? exchangeRate :
             (_getBalance() + _totalBorrows - _totalReserves).div(totalSupply);
-    }
-
-    // Internal ERC20 Functions
-    function _mint(address to, uint256 value) internal {
-        balanceOf[to] += value;
-        totalSupply += value;
-        emit Transfer(address(0), to, value);
-    }
-
-    function _burn(address from, uint256 value) internal {
-        balanceOf[from] -= value;
-        totalSupply -= value;
-        emit Transfer(from, address(0), value);
     }
 
     /// @notice transfers underlying token to specified address

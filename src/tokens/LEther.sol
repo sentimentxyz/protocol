@@ -11,17 +11,17 @@ contract LEther is LToken {
     using PRBMathUD60x18 for uint;
     
     constructor(
-        uint _initialExchangeRate,
-        address _registry
+        address _registry,
+        uint _initialExchangeRate
     ) 
         LToken(
             "LEther",
             "LETH",
-            address(0),
             uint8(18),
-            _initialExchangeRate,
+            address(0),
+            _registry,
             msg.sender,
-            _registry
+            _initialExchangeRate
         )
     {}
 
