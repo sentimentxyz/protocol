@@ -46,10 +46,6 @@ contract Registry is Ownable, IRegistry {
         LTokenFor[underlying] = lToken;
     }
 
-    function getLTokens() external view returns(address[] memory) {
-        return LTokenList;
-    }
-
     // Array manipulation functions
     function updateLTokenList(address lToken, address newLToken) internal {
         uint len = LTokenList.length;
@@ -99,6 +95,10 @@ contract Registry is Ownable, IRegistry {
 
     function getAllAccounts() external view returns (address[] memory) {
         return accounts;
+    }
+
+    function getAllLTokens() external view returns(address[] memory) {
+        return LTokenList;
     }
 
     function accountsOwnedBy(address user)
