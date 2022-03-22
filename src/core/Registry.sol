@@ -97,6 +97,10 @@ contract Registry is Ownable, IRegistry {
         return accounts;
     }
 
+    function getAllLTokens() external view returns(address[] memory) {
+        return LTokenList;
+    }
+
     function accountsOwnedBy(address user)
         external
         view

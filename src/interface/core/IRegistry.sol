@@ -6,6 +6,8 @@ interface IRegistry {
 
     function addressFor(bytes32 id) external view returns (address);
     function ownerFor(address account) external view returns (address);
+
+    function getAllLTokens() external view returns (address[] memory);
     function LTokenFor(address underlying) external view returns (address);
 
     function setAddress(bytes32 id, address _address) external;
