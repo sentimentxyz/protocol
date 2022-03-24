@@ -1,105 +1,110 @@
 #!/bin/bash
+set -e
 
 RPC_URL=<RPC_URL>
 PRIVATE_KEY=<PRIVATE_KEY>
+
+# Since we use relative paths, cd into the script's directory before running it
 PATH_TO_SRC=../src
 PATH_TO_LIB=../lib
+
+forge build --force # Compile everything
 
 #
 # Deploy Contracts
 #
 
-# TestERC20
-forge_create | $PATH_TO_SRC/test/utils/TestERC20.sol:TestERC20 \
---constructor-args "TestERC20" "TEST" 18
+deploy() {
+    if (($# > 1))
+    then
+        local path=$1
+        shift
+        { forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $path \
+        --constructor-args $@ | grep "Deployed to:" | cut -d" " -f3; } || exit $?
+    else
+        { forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $1 \
+        | grep "Deployed to:" | cut -d" " -f3; } || exit $?
+    fi
+}
 
-# Registry
-forge_create | $PATH_TO_SRC/core/Registry.sol:Registry
+ERC20=$(deploy ${PATH_TO_SRC}/test/utils/TestERC20.sol:TestERC20 \
+    "TestERC20" "TEST" 18)
+echo "ERC20: ${ERC20}"
 
-# Rate Model
-forge_create | $PATH_TO_SRC/core/DefaultRateModel.sol:DefaultRateModel
+REGISTRY=$(deploy ${PATH_TO_SRC}/core/Registry.sol:Registry)
+echo "Registry: ${REGISTRY}"
 
-# Risk Engine
-forge_create | $PATH_TO_SRC/core/RiskEngine.sol:RiskEngine \
---constructor-args $REGISTRY
+RATE_MODEL=$(deploy ${PATH_TO_SRC}/core/DefaultRateModel.sol:DefaultRateModel)
+echo "Rate Model: ${RATE_MODEL}"
 
-# Account Manager
-forge_create | $PATH_TO_SRC/core/AccountManager.sol:AccountManager \
---constructor-args $REGISTRY
+RISK_ENGINE=$(deploy ${PATH_TO_SRC}/core/RiskEngine.sol:RiskEngine ${REGISTRY})
+echo "Risk Engine: ${RISK_ENGINE}"
 
-# Account
-forge_create | $PATH_TO_SRC/core/Account.sol:Account
+ACCOUNT_MANAGER=$(deploy ${PATH_TO_SRC}/core/AccountManager.sol:AccountManager \
+    ${REGISTRY})
+echo "Account Manager: ${ACCOUNT_MANAGER}"
 
-# Beacon
-forge_create | $PATH_TO_SRC/proxy/Beacon.sol:Beacon \
---constructor-args $ACCOUNT
+ACCOUNT=$(deploy ${PATH_TO_SRC}/core/Account.sol:Account)
+echo "Account: ${ACCOUNT}"
 
-# Account Factory
-forge_create | $PATH_TO_SRC/core/AccountFactory.sol:AccountFactory \
---constructor-args $BEACON
+BEACON=$(deploy ${PATH_TO_SRC}/proxy/Beacon.sol:Beacon ${ACCOUNT})
+echo "Beacon: ${BEACON}"
 
-# LEther
-forge_create | $PATH_TO_SRC/tokens/LEther.sol:LEther \
---constructor-args $REGISTRY 1
+ACCOUNT_FACTORY=$(deploy ${PATH_TO_SRC}/core/AccountFactory.sol:AccountFactory \
+    ${BEACON})
+echo "Account Factory: ${ACCOUNT_FACTORY}"
 
-# LERC20
-forge_create | $PATH_TO_SRC/tokens/LERC20.sol:LERC20 \
---constructor-args "LTestERC20" "LERC20" 18 $ERC20 $REGISTRY 1
+LETHER=$(deploy ${PATH_TO_SRC}/tokens/LEther.sol:LEther ${REGISTRY} 1)
+echo "LEther: ${LETHER}"
 
-# Oracle
-forge_create | $PATH_TO_LIB/oracle/src/core/OracleFacade.sol:OracleFacade
+LERC20=$(deploy ${PATH_TO_SRC}/tokens/LERC20.sol:LERC20 \
+    "LTestERC20" "LERC20" 18 ${ERC20} ${REGISTRY} 1)
+echo "LERC20: ${LERC20}"
 
-# Controller
-forge_create | $PATH_TO_LIB/controller/src/core/ControllerFacade.sol:ControllerFacade
+ORACLE=$(deploy ${PATH_TO_LIB}/oracle/src/core/OracleFacade.sol:OracleFacade)
+echo "Oracle: ${ORACLE}"
+
+CONTROLLER=$(deploy \ ${PATH_TO_LIB}/controller/src/core/ControllerFacade.sol:ControllerFacade)
+echo "Controller: ${CONTROLLER}"
 
 #
 # Register Contracts
 #
-registry_setAddress "ORACLE" $ORACLE
-registry_setAddress "CONTROLLER" $CONTROLLER
-registry_setAddress "RATE_MODEL" $RATE_MODEL
-registry_setAddress "RISK_ENGINE" $RISK_ENGINE
-registry_setAddress "ACCOUNT_FACTORY" $ACCOUNT_FACTORY
-registry_setAddress "ACCOUNT_MANAGER" $ACCOUNT_MANAGER
+
+setAddress() {
+    local registryKey
+    registryKey=$(cast --from-utf8 $1 | cast --to-bytes32) || exit $?
+    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $REGISTRY \
+    "setAddress(bytes32, address)" $registryKey $2
+    echo "Successfully registered $2 as $1 with key ${registryKey}"
+}
+
+setAddress "ORACLE" $ORACLE
+setAddress "CONTROLLER" $CONTROLLER
+setAddress "RATE_MODEL" $RATE_MODEL
+setAddress "RISK_ENGINE" $RISK_ENGINE
+setAddress "ACCOUNT_FACTORY" $ACCOUNT_FACTORY
+setAddress "ACCOUNT_MANAGER" $ACCOUNT_MANAGER
+
+setLToken() {
+    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $REGISTRY \
+    "setLToken(address, address)" $1 $2
+    echo "Successfully set up LToken contract $2 for underlying token $1"
+}
+
+setLToken 0x0000000000000000000000000000000000000000 $LETHER
+setLToken $ERC20 $LERC20
 
 #
-# Set LTokens
+# Initialize Contracts
 #
-registry_setLToken 0x0000000000000000000000000000000000000000 $LETH
-registry_setLToken $ERC20 $LERC20
 
-#
-# Initialize
-#
+initialize() {
+    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $1 "initialize()"
+    echo "Successfully Initialized $1"
+}
+
 initialize $RISK_ENGINE
 initialize $ACCOUNT_MANAGER
-initialize $LETH
+initialize $LETHER
 initialize $LERC20
-
-#
-# Helper Functions
-#
-
-forge_create () {
-    forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY
-}
-
-string_to_bytes32 () {
-    cast --from-utf8 $1 | cast --to-bytes32
-}
-
-cast_send () {
-    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $REGISTRY
-}
-
-registry_setAddress () {
-    cast_send | "setAddress(bytes32, address)" $(string_to_bytes32 $1) $2
-}
-
-registry_setLToken () {
-    cast_send | "setLToken(address, address)" $1 $2
-}
-
-initialize () {
-    cast_send | "initialize()" $1
-}
