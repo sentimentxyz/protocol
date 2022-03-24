@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -eo pipefail
 
 RPC_URL=<RPC_URL>
 PRIVATE_KEY=<PRIVATE_KEY>
@@ -15,16 +15,21 @@ forge build --force # Compile everything
 #
 
 deploy() {
+    # stdout from forge create
+    local output
+
     if (($# > 1))
     then
-        local path=$1
+        local path=$1 # path to contract
         shift
-        { forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $path \
-        --constructor-args $@ | grep "Deployed to:" | cut -d" " -f3; } || exit $?
+        output=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $path \
+        --constructor-args $@) 
     else
-        { forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $1 \
-        | grep "Deployed to:" | cut -d" " -f3; } || exit $?
+        output=$(forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY $1)
     fi
+
+    # Extract deployed address from stdout
+    echo $output | grep "Deployed to:" | cut -d" " -f10
 }
 
 ERC20=$(deploy ${PATH_TO_SRC}/test/utils/TestERC20.sol:TestERC20 \
@@ -33,6 +38,8 @@ echo "ERC20: ${ERC20}"
 
 REGISTRY=$(deploy ${PATH_TO_SRC}/core/Registry.sol:Registry)
 echo "Registry: ${REGISTRY}"
+
+forge create --rpc-url $RPC_URL --private-key $PRIVATE_KEY ${PATH_TO_SRC}/core/Registry.sol:Registry
 
 RATE_MODEL=$(deploy ${PATH_TO_SRC}/core/DefaultRateModel.sol:DefaultRateModel)
 echo "Rate Model: ${RATE_MODEL}"
