@@ -81,7 +81,7 @@ echo "Controller: ${CONTROLLER}"
 setAddress() {
     local registryKey
     registryKey=$(cast --from-utf8 $1 | cast --to-bytes32) || exit $?
-    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $REGISTRY \
+    cast send --legacy --rpc-url $RPC_URL --private-key $PRIVATE_KEY $REGISTRY \
     "setAddress(bytes32, address)" $registryKey $2
     echo "Successfully registered $2 as $1 with key ${registryKey}"
 }
@@ -94,7 +94,7 @@ setAddress "ACCOUNT_FACTORY" $ACCOUNT_FACTORY
 setAddress "ACCOUNT_MANAGER" $ACCOUNT_MANAGER
 
 setLToken() {
-    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $REGISTRY \
+    cast send --legacy --rpc-url $RPC_URL --private-key $PRIVATE_KEY $REGISTRY \
     "setLToken(address, address)" $1 $2
     echo "Successfully set up LToken contract $2 for underlying token $1"
 }
@@ -107,7 +107,7 @@ setLToken $ERC20 $LERC20
 #
 
 initialize() {
-    cast send --rpc-url $RPC_URL --private-key $PRIVATE_KEY $1 "initialize()"
+    cast send --legacy --rpc-url $RPC_URL --private-key $PRIVATE_KEY $1 "initialize()"
     echo "Successfully Initialized $1"
 }
 
