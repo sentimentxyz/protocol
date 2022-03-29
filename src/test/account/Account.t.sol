@@ -100,7 +100,7 @@ contract AccountTest is TestBase {
 
     function testSweepTo(address user, uint96 amt) public {
         // Setup
-        cheats.assume(amt != 0);
+        cheats.assume(amt != 0 && !isContract(user));
         testAddAsset(address(erc20));
         erc20.mint(address(account), amt);
         cheats.deal(address(account), amt);
@@ -112,8 +112,8 @@ contract AccountTest is TestBase {
         // Assert
         assertEq(erc20.balanceOf(address(account)), 0);
         assertEq(address(account).balance, 0);
-        assertEq(erc20.balanceOf(user), amt);
-        assertEq(user.balance, amt);
+        assertEq(erc20.balanceOf(address(user)), amt);
+        assertEq(address(user).balance, amt);
     }
 
     function testSweepToError(address user) public {

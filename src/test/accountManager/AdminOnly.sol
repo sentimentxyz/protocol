@@ -23,6 +23,7 @@ contract AccountManagerAdminOnlyTest is TestBase {
     }
 
     function testInitializeAuthError(address caller) public {
+        cheats.assume(!isContract(caller));
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
         accountManager.initialize();

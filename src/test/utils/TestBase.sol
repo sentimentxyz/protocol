@@ -158,4 +158,8 @@ abstract contract TestBase is DSTest {
             fail();
         }
     }
+
+    function isContract(address _contract) internal view returns (bool size) {
+        assembly { size := gt(extcodesize(_contract), 0x0) }
+    }
 }
