@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
+import {console} from "../utils/console.sol";
 
 contract AccountManagerBorrowRepayTest is TestBase {
     address account;
@@ -88,7 +89,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         public 
     {
         // Setup
-        cheats.assume(token != address(0));
+        cheats.assume(token != address(0) && !isContract(token));
 
         // Test
         cheats.prank(owner);

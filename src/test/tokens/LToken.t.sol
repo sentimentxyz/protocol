@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
+import {console} from "../utils/console.sol";
 
 contract LTokenTest is TestBase {
     
@@ -139,8 +140,9 @@ contract LTokenTest is TestBase {
     }
 
     function testInitializeAuthError(address caller) public {
+        cheats.assume(caller != lErc20.admin());
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
-        accountManager.initialize();
+        lErc20.initialize();
     }
 }
