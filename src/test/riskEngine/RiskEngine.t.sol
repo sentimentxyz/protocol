@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
+import {console} from "../utils/console.sol";
 
 contract RiskEngineTest is TestBase {
 
@@ -69,6 +70,7 @@ contract RiskEngineTest is TestBase {
     }
 
     function testInitializeAuthError(address caller) public {
+        cheats.assume(caller != riskEngine.admin());
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
         riskEngine.initialize();
