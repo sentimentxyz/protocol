@@ -5,8 +5,6 @@ import {Errors} from "../../utils/Errors.sol";
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
-import {CurveCryptoSwapController} 
-    from "@controller/src/curve/CurveCryptoSwapController.sol";
 
 interface IStableSwapPool {    
     function get_dy(uint256, uint256, uint256) external view returns (uint256);
@@ -16,21 +14,12 @@ interface IStableSwapPool {
 contract CurveIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
-    address constant tricryptoPool = 0x960ea3e3C7FB317332d990873d354E18d7645590;
-
-    CurveCryptoSwapController curveController;
 
     function setUp() public {
         setupContracts();
         setupWethController();
         setupCurveController();
         account = openAccount(user);
-    }
-
-    function setupCurveController() private {
-        curveController = new CurveCryptoSwapController(controller);
-        controller.updateController(tricryptoPool, curveController);
-        controller.toggleSwapAllowance(USDT);
     }
 
     function testSwapWethUsdt(uint64 amt) public {
@@ -87,19 +76,8 @@ contract CurveIntegrationTest is IntegrationTestBase {
             amt
         );
 
-        // Encode Calldata
-        bytes memory data = abi.encodeWithSignature(
-            "exchange(uint256,uint256,uint256,uint256,bool)",
-            uint256(2), // WETH
-            uint256(0), // USDT
-            amt,
-            minValue,
-            true
-        );
-
         // Test
-        cheats.prank(user);
-        accountManager.exec(account, tricryptoPool, amt, data);
+        swapEthUsdt(amt, account, user);
 
         // Assert
         assertEq(account.balance, 0);

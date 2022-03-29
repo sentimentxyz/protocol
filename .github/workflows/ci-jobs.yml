@@ -25,5 +25,5 @@ jobs:
         run: forge test --no-match-contract Integration
       
       - name: Run Integration tests
-        run: forge test --match-contract Integration --fork-url https://arb1.arbitrum.io/rpc
+        run: forge test --match-contract Integration --fork-url https://rpc.ankr.com/eth
         

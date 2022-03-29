@@ -3,18 +3,44 @@ pragma solidity ^0.8.10;
 
 import {TestBase} from "../../utils/TestBase.sol";
 import {WETHController} from "@controller/src/weth/WETHController.sol";
+import {CurveCryptoSwapController} 
+    from "@controller/src/curve/CurveCryptoSwapController.sol";
 
 contract IntegrationTestBase is TestBase {
     
     // Controller Contracts
-    WETHController public wEthController;
+    WETHController wEthController;
+    CurveCryptoSwapController curveController;
 
-    // Arbitrum Contracts
-    address constant WETH = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
-    address constant USDT = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
+    // Ethereum Contracts
+    address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    address constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
+    address constant tricryptoPool = 0xD51a44d3FaE010294C616388b506AcdA1bfAAE46;
 
     function setupWethController() internal {
         wEthController = new WETHController(WETH);
         controller.updateController(WETH, wEthController);
+    }
+
+    function setupCurveController() internal {
+        curveController = new CurveCryptoSwapController(controller);
+        controller.updateController(tricryptoPool, curveController);
+        controller.toggleSwapAllowance(USDT);
+    }
+
+    function swapEthUsdt(uint amt, address account, address owner) internal {
+        // Encode Calldata
+        bytes memory data = abi.encodeWithSignature(
+            "exchange(uint256,uint256,uint256,uint256,bool)",
+            uint256(2), // WETH
+            uint256(0), // USDT
+            amt,
+            0,
+            true
+        );
+
+        // Swap
+        cheats.prank(owner);
+        accountManager.exec(account, tricryptoPool, amt, data);
     }
 }
