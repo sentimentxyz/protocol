@@ -111,7 +111,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(token != address(0));
+        cheats.assume(token != address(0) && !isContract(token));
 
         // Test
         cheats.prank(owner);
