@@ -131,7 +131,7 @@ abstract contract LToken is Pausable, ERC20, ILToken {
     // Rate Factor = Block Delta * Interest Rate Per Block
     function _getRateFactor() internal view returns (uint) {
         return (block.number - lastUpdated).fromUint()
-            .mul(IRateModel(rateModel).getBorrowRate(_getBalance(), totalBorrows, totalReserves));
+            .mul(IRateModel(rateModel).getBorrowRatePerBlock(_getBalance(), totalBorrows, totalReserves));
     }
 
     function _getBorrowIndex(uint rateFactor) internal view returns (uint) {
