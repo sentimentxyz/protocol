@@ -33,7 +33,7 @@ contract OpenCloseFlowTest is TestBase {
         accountManager.closeAccount(account);
 
         // Assert
-        assertTrue(registry.accountsOwnedBy(user).length == 0);
+        assertTrue(registry.accountsOwnedBy(user)[0] == address(0));
         assertEq(address(accountManager), IAccount(account).accountManager());
     }
 

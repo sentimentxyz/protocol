@@ -104,9 +104,9 @@ contract Registry is Ownable, IRegistry {
     function accountsOwnedBy(address user)
         external
         view
-        returns (address[] memory) 
+        returns (address[] memory userAccounts) 
     {
-        address[] memory userAccounts = new address[](accounts.length);
+        userAccounts = new address[](accounts.length);
         uint index = 0;
         for (uint i = 0; i < accounts.length; i++) {
             if (ownerFor[accounts[i]] == user) {
@@ -114,8 +114,5 @@ contract Registry is Ownable, IRegistry {
                 index++;
             }
         }
-
-        if (index == 0) return new address[](0); // TODO why is this required?
-        return userAccounts;
     }
 }
