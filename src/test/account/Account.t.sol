@@ -100,6 +100,7 @@ contract AccountTest is TestBase {
 
     function testSweepTo(address user, uint96 amt) public {
         // Setup
+        cheats.assume(amt != 0);
         testAddAsset(address(erc20));
         erc20.mint(address(account), amt);
         cheats.deal(address(account), amt);
