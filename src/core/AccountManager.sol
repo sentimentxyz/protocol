@@ -156,7 +156,8 @@ contract AccountManager is Pausable, IAccountManager {
         bool isAllowed;
         address[] memory tokensIn;
         address[] memory tokensOut;
-        (isAllowed, tokensIn, tokensOut) = controller.canCall(target, data);
+        (isAllowed, tokensIn, tokensOut) = 
+            controller.canCall(target, (amt > 0), data);
         if (!isAllowed) revert Errors.FunctionCallRestricted();
         _updateTokensIn(account, tokensIn);
         IAccount(account).exec(target, amt, data);
