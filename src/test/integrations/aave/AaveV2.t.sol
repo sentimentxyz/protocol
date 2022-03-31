@@ -36,7 +36,7 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
         account = openAccount(user);
     }
 
-    function testDepositWEth(uint64 amt) public {
+    function testDepositWeth(uint64 amt) public {
         cheats.assume(amt > 1e8 gwei);
         // Setup
         deposit(user, account, address(0), amt);
@@ -59,13 +59,13 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
         cheats.stopPrank();
 
         // Assert
-        assertGe(IERC20(aWeth).balanceOf(account), amt);
+        assertEq(IERC20(aWeth).balanceOf(account), amt);
         assertEq(IAccount(account).assets(0), aWeth);
     }
 
-    function testWithdrawWEth(uint64 amt) public {
+    function testWithdrawWeth(uint64 amt) public {
         // Setup
-        testDepositWEth(amt);
+        testDepositWeth(amt);
 
         // Encode call data
         bytes memory data = abi.encodeWithSignature(
@@ -81,8 +81,8 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
         cheats.stopPrank();
 
         // Assert
-        assertGe(IERC20(aWeth).balanceOf(account), 0);
-        assertGe(IERC20(WETH).balanceOf(account), amt);
+        assertEq(IERC20(aWeth).balanceOf(account), 0);
+        assertEq(IERC20(WETH).balanceOf(account), amt);
         assertEq(IAccount(account).assets(0), WETH);
     }
 

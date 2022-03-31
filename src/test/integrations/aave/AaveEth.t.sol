@@ -46,7 +46,7 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
         accountManager.exec(account, aaveWethGateway, amt, data);
 
         // Assert
-        assertGe(IERC20(aWeth).balanceOf(account), amt);
+        assertEq(IERC20(aWeth).balanceOf(account), amt);
         assertEq(IAccount(account).assets(0), aWeth);
     }
     
@@ -68,8 +68,8 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
         accountManager.exec(account, aaveWethGateway, 0, data);
 
         // Assert
-        assertGe(IERC20(aWeth).balanceOf(account), 0);
-        assertGe(account.balance, amt);
+        assertEq(IERC20(aWeth).balanceOf(account), 0);
+        assertEq(account.balance, amt);
         assertEq(IAccount(account).getAssets().length, 0);
     }
 }
