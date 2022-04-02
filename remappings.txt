@@ -1,0 +1,8 @@
+@oracle/=lib/oracle/
+@solmate/=lib/solmate/
+@ds-test/=lib/ds-test/
+@prb-math/=lib/prb-math/
+@chainlink/=lib/chainlink/
+@controller/=lib/controller/
+@openzeppelin/=lib/openzeppelin-contracts/
+@byteslib/=lib/controller/lib/solidity-bytes-utils/
