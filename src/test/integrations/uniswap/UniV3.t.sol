@@ -5,8 +5,8 @@ import {console} from "../../utils/console.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
-import {ISwapRouterV3} from "@controller/src/uniswap/ISwapRouterV3.sol";
-import {UniV3Controller} from "@controller/src/uniswap/UniV3Controller.sol";
+import {ISwapRouterV3} from "controller/uniswap/ISwapRouterV3.sol";
+import {UniV3Controller} from "controller/uniswap/UniV3Controller.sol";
 
 contract UniV3IntegrationTest is IntegrationTestBase {
     address account;
