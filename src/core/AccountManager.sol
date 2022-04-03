@@ -9,7 +9,7 @@ import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
-import {IControllerFacade} from "@controller/src/core/IControllerFacade.sol";
+import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 

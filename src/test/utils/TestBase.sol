@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {TestERC20} from "./TestERC20.sol";
 import {CheatCodes} from "./CheatCodes.sol";
-import {DSTest} from "@ds-test/src/test.sol";
+import {DSTest} from "ds-test/test.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
 import {LERC20} from "../../tokens/LERC20.sol";
@@ -12,9 +12,9 @@ import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
-import {OracleFacade} from "@oracle/src/core/OracleFacade.sol";
+import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
-import {ControllerFacade} from "@controller/src/core/ControllerFacade.sol";
+import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
 abstract contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);

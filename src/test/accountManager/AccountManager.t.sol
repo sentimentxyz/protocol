@@ -4,7 +4,7 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
-import {IControllerFacade} from "@controller/src/core/IControllerFacade.sol";
+import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 
 contract AccountManagerTest is TestBase {
     address account;
