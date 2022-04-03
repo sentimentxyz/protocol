@@ -6,7 +6,7 @@ import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
 import {console} from "../utils/console.sol";
-import {CompoundController} from "@controller/src/compound/CompoundController.sol";
+import {CompoundController} from "controller/compound/CompoundController.sol";
 import {CurveIntegrationTest} from "./Curve.t.sol";
 
 interface ICERC20 {

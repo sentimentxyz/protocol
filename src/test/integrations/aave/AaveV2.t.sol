@@ -5,9 +5,9 @@ import {Errors} from "../../../utils/Errors.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
-import {AaveV2Controller} from "@controller/src/aave/AaveV2Controller.sol";
+import {AaveV2Controller} from "controller/aave/AaveV2Controller.sol";
 import {IProtocolDataProvider}
-    from "@controller/src/aave/IProtocolDataProvider.sol";
+    from "controller/aave/IProtocolDataProvider.sol";
 
 contract AaveV2IntegrationTest is IntegrationTestBase {
     address account;

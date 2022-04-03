@@ -5,7 +5,7 @@ import {Errors} from "../../../utils/Errors.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
-import {AaveEthController} from "@controller/src/aave/AaveEthController.sol";
+import {AaveEthController} from "controller/aave/AaveEthController.sol";
 
 contract AaveEthIntegrationTest is IntegrationTestBase {
     address account;
