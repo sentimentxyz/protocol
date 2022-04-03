@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {TestBase} from "../utils/TestBase.sol";
-import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 contract LendingFlowTest is TestBase {
     using PRBMathUD60x18 for uint;

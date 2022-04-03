@@ -2,9 +2,9 @@
 pragma solidity ^0.8.10;
 
 import {TestBase} from "../../utils/TestBase.sol";
-import {WETHController} from "@controller/src/weth/WETHController.sol";
+import {WETHController} from "controller/weth/WETHController.sol";
 import {CurveCryptoSwapController} 
-    from "@controller/src/curve/CurveCryptoSwapController.sol";
+    from "controller/curve/CurveCryptoSwapController.sol";
 
 contract IntegrationTestBase is TestBase {
     

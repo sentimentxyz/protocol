@@ -1,8 +1,6 @@
-@uniswap/=lib/
-@oracle/=lib/oracle/
-@solmate/=lib/solmate/
-@ds-test/=lib/ds-test/
-@prb-math/=lib/prb-math/
-@chainlink/=lib/chainlink/
-@controller/=lib/controller/
-@openzeppelin/=lib/openzeppelin-contracts/
+controller/=lib/controller/src/
+ds-test/=lib/ds-test/src/
+oracle/=lib/oracle/src/
+prb-math/=lib/prb-math/contracts/
+solidity-bytes-utils/=lib/controller/lib/solidity-bytes-utils/contracts/
+solmate/=lib/solmate/src/

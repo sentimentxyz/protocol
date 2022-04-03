@@ -10,7 +10,7 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IOracle} from "../interface/periphery/IOracle.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
-import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 contract RiskEngine is Ownable, IRiskEngine {
     using PRBMathUD60x18 for uint;

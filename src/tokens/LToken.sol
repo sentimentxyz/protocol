@@ -3,11 +3,11 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
 import {Pausable} from "../utils/Pausable.sol";
-import {ERC20} from "@solmate/src/tokens/ERC20.sol";
+import {ERC20} from "solmate/tokens/ERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
-import {PRBMathUD60x18} from "@prb-math/contracts/PRBMathUD60x18.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 
 abstract contract LToken is Pausable, ERC20, ILToken {
