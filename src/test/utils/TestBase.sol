@@ -95,6 +95,8 @@ abstract contract TestBase is DSTest {
         accountManager.initialize();
         lEth.initialize('RATE_MODEL');
         lErc20.initialize('RATE_MODEL');
+
+        accountManager.toggleCollateralStatus(address(erc20));
     }
 
     function mock() private {
