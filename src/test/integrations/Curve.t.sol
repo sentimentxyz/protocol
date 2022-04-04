@@ -10,7 +10,6 @@ interface IStableSwapPool {
     function get_dy(uint256, uint256, uint256) external view returns (uint256);
 }
 
-
 contract CurveIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
@@ -83,6 +82,73 @@ contract CurveIntegrationTest is IntegrationTestBase {
         assertEq(account.balance, 0);
         assertEq(IAccount(account).assets(0), USDT);
         assertGe(IERC20(USDT).balanceOf(account), minValue);
+    }
+
+    function testDepositEth(uint64 amt) public {
+        // Setup
+        cheats.assume(amt > 1e8 gwei); // min exchange amt 0.1 eth
+        deposit(user, account, address(0), amt);
+
+        // Wrap Eth
+        cheats.prank(user);
+        accountManager.exec(
+            account,
+            WETH,
+            amt,
+            abi.encodeWithSignature("deposit()")
+        );
+
+        // Encode Calldata 
+        bytes memory data = abi.encodeWithSignature(
+            "add_liquidity(uint256[3],uint256)",
+            [0, 0, amt],
+            0
+        );
+
+        cheats.startPrank(user);
+        accountManager.approve(account, WETH, tricryptoPool, amt);
+        accountManager.exec(account, tricryptoPool, 0, data);
+        cheats.stopPrank();
+
+        assertTrue(IERC20(crv3crypto).balanceOf(account) > 0);
+        assertEq(IAccount(account).assets(0), crv3crypto);
+    }
+
+    function testWithdrawEth(uint64 amt) public {
+        testDepositEth(amt);
+
+        bytes memory data = abi.encodeWithSignature(
+            "remove_liquidity(uint256,uint256[3])",
+            IERC20(crv3crypto).balanceOf(account),
+            [0, 0, 1]
+        );
+
+        cheats.startPrank(user);
+        accountManager.approve(account, crv3crypto, tricryptoPool, amt);
+        accountManager.exec(account, tricryptoPool, 0, data);
+        
+        
+        assertTrue(IERC20(WETH).balanceOf(account) > 0);
+        assertEq(IAccount(account).assets(0), WETH);
+    }
+
+    function testWithdrawOnlyEth(uint64 amt) public {
+        testDepositEth(amt);
+
+        bytes memory data = abi.encodeWithSignature(
+            "remove_liquidity_one_coin(uint256,uint256,uint256)",
+            IERC20(crv3crypto).balanceOf(account),
+            2,
+            1
+        );
+
+        cheats.startPrank(user);
+        accountManager.approve(account, crv3crypto, tricryptoPool, amt);
+        accountManager.exec(account, tricryptoPool, 0, data);
+        
+        
+        assertTrue(IERC20(WETH).balanceOf(account) > 0);
+        assertEq(IAccount(account).assets(0), WETH);
     }
 
     function testSwapSigError(uint64 amt, bytes4 sig) public {
