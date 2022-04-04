@@ -22,6 +22,7 @@ contract AccountManager is Pausable, IAccountManager {
     IAccountFactory public accountFactory;
     
     address[] public inactiveAccounts;
+    mapping(address => bool) public isCollateralAllowed;
 
     constructor(IRegistry _registry) Pausable(msg.sender) {
         registry = _registry;
@@ -82,7 +83,7 @@ contract AccountManager is Pausable, IAccountManager {
         external
         onlyOwner(account) 
     {
-        if (registry.LTokenFor(token) == address(0))
+        if (!isCollateralAllowed[token]) 
             revert Errors.CollateralTypeRestricted();
         if (token.balanceOf(account) == 0)
             IAccount(account).addAsset(address(token));
@@ -224,6 +225,10 @@ contract AccountManager is Pausable, IAccountManager {
             _repay(_account, accountBorrows[i], type(uint).max);
         }
         account.sweepTo(msg.sender);
+    }
+
+    function toggleCollateralStatus(address token) external adminOnly {
+        isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
 
     receive() external payable {}
