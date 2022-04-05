@@ -6,19 +6,13 @@ import {Ownable} from "../utils/Ownable.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 
 contract Registry is Ownable, IRegistry {
-    bytes32 private constant ORACLE = 'ORACLE';
-    bytes32 private constant CONTROLLER = 'CONTROLLER';
-    bytes32 private constant RATE_MODEL = 'RATE_MODEL';
-    bytes32 private constant RISK_ENGINE = 'RISK_ENGINE';
-    bytes32 private constant ACCOUNT_FACTORY = 'ACCOUNT_FACTORY';
-    bytes32 private constant ACCOUNT_MANAGER = 'ACCOUNT_MANAGER';
 
     address[] public accounts;
     address[] public LTokenList;
 
     mapping(address => address) public ownerFor;
     mapping(address => address) public LTokenFor;
-    mapping(bytes32 => address) public addressFor;
+    mapping(string => address) public addressFor;
 
     constructor() Ownable(msg.sender) {}
 
@@ -30,7 +24,7 @@ contract Registry is Ownable, IRegistry {
     
     // Account Registry Functions
 
-    function setAddress(bytes32 id, address _address) external adminOnly {
+    function setAddress(string calldata id, address _address) external adminOnly {
         addressFor[id] = _address;
     }
 
