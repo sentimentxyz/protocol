@@ -31,6 +31,19 @@ contract Registry is Ownable, IRegistry {
     {
         if (addressFor[id] == address(0)) contractNames.push(id);
         addressFor[id] = _address;
+
+        if (_address == address(0)) {
+            uint len = contractNames.length;
+            for(uint i; i < len; ++i) {
+                if (keccak256(abi.encodePacked((contractNames[i]))) == 
+                    keccak256(abi.encodePacked(id))) 
+                {
+                    contractNames[i] = contractNames[len - 1];
+                    contractNames.pop();
+                    break;
+                }
+            }
+        }
     }
 
     function setLToken(address underlying, address lToken) external adminOnly {
