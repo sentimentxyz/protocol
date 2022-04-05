@@ -89,27 +89,7 @@ contract CurveIntegrationTest is IntegrationTestBase {
         cheats.assume(amt > 1e8 gwei); // min exchange amt 0.1 eth
         deposit(user, account, address(0), amt);
 
-        // Wrap Eth
-        cheats.prank(user);
-        accountManager.exec(
-            account,
-            WETH,
-            amt,
-            abi.encodeWithSignature("deposit()")
-        );
-
-        // Encode Calldata 
-        bytes memory data = abi.encodeWithSignature(
-            "add_liquidity(uint256[3],uint256)",
-            [0, 0, amt],
-            0
-        );
-
-        // Test
-        cheats.startPrank(user);
-        accountManager.approve(account, WETH, tricryptoPool, amt);
-        accountManager.exec(account, tricryptoPool, 0, data);
-        cheats.stopPrank();
+        depositCurveLiquidity(account, amt, user);
 
         // Assert
         assertTrue(IERC20(crv3crypto).balanceOf(account) > 0);
