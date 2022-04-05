@@ -7,6 +7,7 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 
 contract Registry is Ownable, IRegistry {
 
+    string[] public contractNames;
     address[] public accounts;
     address[] public LTokenList;
 
@@ -25,7 +26,11 @@ contract Registry is Ownable, IRegistry {
     // Account Registry Functions
 
     function setAddress(string calldata id, address _address) external adminOnly {
-        addressFor[id] = _address;
+        if (addressFor[id] != address(0)) addressFor[id] = _address;
+        else {
+            addressFor[id] = _address;
+            contractNames.push(id);
+        }
     }
 
     function setLToken(address underlying, address lToken) external adminOnly {
@@ -86,6 +91,10 @@ contract Registry is Ownable, IRegistry {
     }
 
     // View Functions
+
+    function getAllContractNames() external view returns(string[] memory) {
+        return contractNames;
+    }
 
     function getAllAccounts() external view returns (address[] memory) {
         return accounts;

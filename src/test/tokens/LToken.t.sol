@@ -143,6 +143,6 @@ contract LTokenTest is TestBase {
         cheats.assume(caller != lErc20.admin());
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
-        lErc20.initialize();
+        lErc20.initialize('RATE_MODEL');
     }
 }
