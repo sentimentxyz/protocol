@@ -25,12 +25,12 @@ contract Registry is Ownable, IRegistry {
     
     // Account Registry Functions
 
-    function setAddress(string calldata id, address _address) external adminOnly {
-        if (addressFor[id] != address(0)) addressFor[id] = _address;
-        else {
-            addressFor[id] = _address;
-            contractNames.push(id);
-        }
+    function setAddress(string calldata id, address _address) 
+        external 
+        adminOnly 
+    {
+        if (addressFor[id] == address(0)) contractNames.push(id);
+        addressFor[id] = _address;
     }
 
     function setLToken(address underlying, address lToken) external adminOnly {
