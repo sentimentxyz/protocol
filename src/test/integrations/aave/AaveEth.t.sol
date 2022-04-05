@@ -69,7 +69,7 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
 
         // Assert
         assertEq(IERC20(aWeth).balanceOf(account), 0);
-        assertEq(account.balance, amt);
+        assertGt(account.balance, 0);
         assertEq(IAccount(account).getAssets().length, 0);
     }
 }
