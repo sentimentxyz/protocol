@@ -51,4 +51,29 @@ contract IntegrationTestBase is TestBase {
         cheats.prank(owner);
         accountManager.exec(account, WETH, amt, data);
     }
+
+    function depositCurveLiquidity(address account, uint amt, address owner)
+        internal
+    {
+        cheats.prank(owner);
+        accountManager.exec(
+            account,
+            WETH,
+            amt,
+            abi.encodeWithSignature("deposit()")
+        );
+
+        // Encode Calldata 
+        bytes memory data = abi.encodeWithSignature(
+            "add_liquidity(uint256[3],uint256)",
+            [0, 0, amt],
+            0
+        );
+
+        // Test
+        cheats.startPrank(owner);
+        accountManager.approve(account, WETH, tricryptoPool, amt);
+        accountManager.exec(account, tricryptoPool, 0, data);
+        cheats.stopPrank();
+    }
 }
