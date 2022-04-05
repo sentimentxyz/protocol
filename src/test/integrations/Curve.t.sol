@@ -105,36 +105,43 @@ contract CurveIntegrationTest is IntegrationTestBase {
             0
         );
 
+        // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH, tricryptoPool, amt);
         accountManager.exec(account, tricryptoPool, 0, data);
         cheats.stopPrank();
 
+        // Assert
         assertTrue(IERC20(crv3crypto).balanceOf(account) > 0);
         assertEq(IAccount(account).assets(0), crv3crypto);
     }
 
     function testWithdrawEth(uint64 amt) public {
+        // Setup
         testDepositEth(amt);
 
+        // Encode calldata
         bytes memory data = abi.encodeWithSignature(
             "remove_liquidity(uint256,uint256[3])",
             IERC20(crv3crypto).balanceOf(account),
             [0, 0, 1]
         );
 
+        // Test
         cheats.startPrank(user);
         accountManager.approve(account, crv3crypto, tricryptoPool, amt);
         accountManager.exec(account, tricryptoPool, 0, data);
         
-        
+        // Assert
         assertTrue(IERC20(WETH).balanceOf(account) > 0);
         assertEq(IAccount(account).assets(0), WETH);
     }
 
     function testWithdrawOnlyEth(uint64 amt) public {
+        // Setup
         testDepositEth(amt);
 
+        // Encode calldata
         bytes memory data = abi.encodeWithSignature(
             "remove_liquidity_one_coin(uint256,uint256,uint256)",
             IERC20(crv3crypto).balanceOf(account),
@@ -142,11 +149,12 @@ contract CurveIntegrationTest is IntegrationTestBase {
             1
         );
 
+        // Test
         cheats.startPrank(user);
         accountManager.approve(account, crv3crypto, tricryptoPool, amt);
         accountManager.exec(account, tricryptoPool, 0, data);
         
-        
+        // Assert
         assertTrue(IERC20(WETH).balanceOf(account) > 0);
         assertEq(IAccount(account).assets(0), WETH);
     }
