@@ -52,8 +52,8 @@ abstract contract LToken is Pausable, ERC20, ILToken {
         registry = IRegistry(_registry);
     }
 
-    function initialize() external adminOnly {
-        rateModel = registry.addressFor('RATE_MODEL');
+    function initialize(string calldata _rateModel) external adminOnly {
+        rateModel = registry.addressFor(_rateModel);
         accountManager = registry.addressFor('ACCOUNT_MANAGER');
     }
 

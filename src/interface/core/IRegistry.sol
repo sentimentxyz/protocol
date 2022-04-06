@@ -4,13 +4,13 @@ pragma solidity ^0.8.10;
 interface IRegistry {
     event AccountCreated(address indexed account, address indexed owner);
 
-    function addressFor(bytes32 id) external view returns (address);
+    function addressFor(string calldata id) external view returns (address);
     function ownerFor(address account) external view returns (address);
 
     function getAllLTokens() external view returns (address[] memory);
     function LTokenFor(address underlying) external view returns (address);
 
-    function setAddress(bytes32 id, address _address) external;
+    function setAddress(string calldata id, address _address) external;
     function setLToken(address underlying, address lToken) external;
 
     function addAccount(address account, address owner) external;

@@ -93,8 +93,8 @@ abstract contract TestBase is DSTest {
     function initialize() private {
         riskEngine.initialize();
         accountManager.initialize();
-        lEth.initialize();
-        lErc20.initialize();
+        lEth.initialize('RATE_MODEL');
+        lErc20.initialize('RATE_MODEL');
     }
 
     function mock() private {
