@@ -47,6 +47,9 @@ abstract contract TestBase is DSTest {
 
     // Contract Setup Functions
     function setupContracts() internal virtual {
+        // Log block number
+        emit log_uint(block.number);
+        
         // Deploy Dummy ERC20
         erc20 = new TestERC20("TestERC20", "TEST", uint8(18));
 
