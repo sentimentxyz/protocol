@@ -23,32 +23,30 @@ contract Registry is Ownable, IRegistry {
         _;
     }
     
-    // Account Registry Functions
+    // Contract Registry Functions
 
     function setAddress(string calldata id, address _address) 
         external 
         adminOnly 
     {
+        if (_address == address(0)) revert Errors.ZeroAddress();
         if (addressFor[id] == address(0)) keys.push(id);
         addressFor[id] = _address;
-
-        if (_address == address(0)) {
-            removeStringFromList(id);
-        }
     }
 
-    function removeStringFromList(string calldata str) internal {
+    function removeAddress(string calldata id) external adminOnly {
         uint len = keys.length;
+        bytes32 keyHash = keccak256(abi.encodePacked(id));
         for(uint i; i < len; ++i) {
-            if (keccak256(abi.encodePacked((keys[i]))) == 
-                keccak256(abi.encodePacked(str))) 
-            {
+            if (keyHash == keccak256(abi.encodePacked((keys[i])))) {
                 keys[i] = keys[len - 1];
                 keys.pop();
                 break;
             }
         }
     }
+
+    // LToken Registry Functions
 
     function setLToken(address underlying, address lToken) external adminOnly {
         if (LTokenFor[underlying] == address(0)) { // Add new LToken
