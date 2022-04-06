@@ -113,7 +113,7 @@ contract AccountTest is TestBase {
         assertEq(erc20.balanceOf(address(account)), 0);
         assertEq(address(account).balance, 0);
         assertEq(erc20.balanceOf(address(user)), amt);
-        assertEq(address(user).balance, amt);
+        assertGe(address(user).balance, amt);
     }
 
     function testSweepToError(address user) public {
