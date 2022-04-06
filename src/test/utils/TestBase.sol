@@ -47,6 +47,9 @@ abstract contract TestBase is DSTest {
 
     // Contract Setup Functions
     function setupContracts() internal virtual {
+        // Log block number
+        emit log_uint(block.number);
+        
         // Deploy Dummy ERC20
         erc20 = new TestERC20("TestERC20", "TEST", uint8(18));
 
@@ -95,6 +98,8 @@ abstract contract TestBase is DSTest {
         accountManager.initialize();
         lEth.initialize('RATE_MODEL');
         lErc20.initialize('RATE_MODEL');
+
+        accountManager.toggleCollateralStatus(address(erc20));
     }
 
     function mock() private {
