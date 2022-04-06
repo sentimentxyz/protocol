@@ -7,7 +7,7 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 
 contract Registry is Ownable, IRegistry {
 
-    string[] public contractNames;
+    string[] public keys;
     address[] public accounts;
     address[] public LTokenList;
 
@@ -29,19 +29,23 @@ contract Registry is Ownable, IRegistry {
         external 
         adminOnly 
     {
-        if (addressFor[id] == address(0)) contractNames.push(id);
+        if (addressFor[id] == address(0)) keys.push(id);
         addressFor[id] = _address;
 
         if (_address == address(0)) {
-            uint len = contractNames.length;
-            for(uint i; i < len; ++i) {
-                if (keccak256(abi.encodePacked((contractNames[i]))) == 
-                    keccak256(abi.encodePacked(id))) 
-                {
-                    contractNames[i] = contractNames[len - 1];
-                    contractNames.pop();
-                    break;
-                }
+            removeStringFromList(id);
+        }
+    }
+
+    function removeStringFromList(string calldata str) internal {
+        uint len = keys.length;
+        for(uint i; i < len; ++i) {
+            if (keccak256(abi.encodePacked((keys[i]))) == 
+                keccak256(abi.encodePacked(str))) 
+            {
+                keys[i] = keys[len - 1];
+                keys.pop();
+                break;
             }
         }
     }
@@ -105,8 +109,8 @@ contract Registry is Ownable, IRegistry {
 
     // View Functions
 
-    function getAllContractNames() external view returns(string[] memory) {
-        return contractNames;
+    function getAllkeys() external view returns(string[] memory) {
+        return keys;
     }
 
     function getAllAccounts() external view returns (address[] memory) {
