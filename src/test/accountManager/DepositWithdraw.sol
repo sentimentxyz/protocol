@@ -87,7 +87,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public
     {
         // Test
-        cheats.assume(token != address(0));
+        cheats.assume(token != address(0) && !isContract(token));
         cheats.prank(owner);
         cheats.expectRevert(Errors.CollateralTypeRestricted.selector);
         accountManager.deposit(account, token, value);
