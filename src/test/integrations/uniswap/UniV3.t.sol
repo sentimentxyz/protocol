@@ -35,7 +35,7 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     
     function testMultiCallExactOutputSingleEthUSDT(uint64 amt) public {
         // Setup
-        uint256 amtOut = 340 * 1e6; // 340 USD
+        uint256 amtOut = 100 * 1e6; // 100 USD
         cheats.assume(amt > 1e8 gwei);
         deposit(user, account, address(0), amt);
         
@@ -156,7 +156,7 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     // Swap ERC20 - ERC20 (ExactOutput)
 
     function testExactOutputSingleWETHUSDT(uint64 amt) public {
-        uint256 amtOut = 340 * 1e6; // 340 USD
+        uint256 amtOut = 100 * 1e6; // 100 USD
         
         // Setup
         cheats.assume(amt > 1e8 gwei);
