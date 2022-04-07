@@ -96,6 +96,7 @@ contract Registry is Ownable, IRegistry {
                 index++;
             }
         }
+        assembly { mstore(userAccounts, index) }
     }
 
     // Helper functions
