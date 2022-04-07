@@ -26,7 +26,7 @@ contract IntegrationTestBase is TestBase {
     function setupCurveController() internal {
         curveController = new CurveCryptoSwapController(controller);
         controller.updateController(tricryptoPool, curveController);
-        controller.toggleSwapAllowance(USDT);
+        controller.toggleTokenAllowance(USDT);
     }
 
     function swapEthUsdt(uint amt, address account, address owner) internal {
