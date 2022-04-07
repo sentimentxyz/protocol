@@ -26,7 +26,7 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
             IProtocolDataProvider(aaveDataProvider)
         );
         controller.updateController(lendingPool, aaveController);
-        controller.toggleSwapAllowance(aWeth);
+        controller.toggleTokenAllowance(aWeth);
     }
 
     function setUp() public {
