@@ -161,7 +161,9 @@ contract AccountManager is Pausable, IAccountManager {
             controller.canCall(target, (amt > 0), data);
         if (!isAllowed) revert Errors.FunctionCallRestricted();
         _updateTokensIn(account, tokensIn);
-        IAccount(account).exec(target, amt, data);
+        (bool success,) = IAccount(account).exec(target, amt, data);
+        if (!success)
+            revert Errors.AccountInteractionFailure(account, target, amt, data);
         _updateTokensOut(account, tokensOut);
         if (!riskEngine.isAccountHealthy(account))
             revert Errors.RiskThresholdBreached();
