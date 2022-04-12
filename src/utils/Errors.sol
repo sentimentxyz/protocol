@@ -19,4 +19,5 @@ library Errors {
     error CollateralTypeRestricted();
     error ContractAlreadyInitialized();
     error AccountDeactivationFailure();
+    error AccountInteractionFailure(address, address, uint, bytes);
 }

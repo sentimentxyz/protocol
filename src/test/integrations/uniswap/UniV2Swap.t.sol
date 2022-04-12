@@ -33,7 +33,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
     // All swaps are between ETH / USDT or WETH / USDT
 
-    function testSwapExactTokensForTokens(uint96 amt) public {
+    function testSwapExactTokensForTokens(uint64 amt) public {
         // WETH -> USDT
 
         // Setup
@@ -57,7 +57,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
         assertGe(IERC20(USDT).balanceOf(account), 0);
     }
 
-    function testSwapTokensForExactTokens(uint96 amt) public {
+    function testSwapTokensForExactTokens(uint64 amt) public {
         // WETH -> USDT
         uint amountOut = 1000 * 1e6; // 1k USDC
 
@@ -82,7 +82,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
         assertEq(IERC20(USDT).balanceOf(account), amountOut);
     }
 
-    function testSwapExactEthForTokens(uint96 amt) public {
+    function testSwapExactEthForTokens(uint64 amt) public {
         // ETH -> USDT
 
         // Setup
@@ -105,7 +105,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
         assertGt(IERC20(USDT).balanceOf(account), 0);
     }
 
-    function testSwapEthForExactTokens(uint96 amt) public {
+    function testSwapEthForExactTokens(uint64 amt) public {
         // ETH -> USDT
         uint amountOut = 1000 * 1e6; // 1k USDC
 
@@ -129,7 +129,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
         assertEq(IERC20(USDT).balanceOf(account), amountOut);
     }
 
-    function testSwapExactTokensForEth(uint96 amt) public {
+    function testSwapExactTokensForEth(uint64 amt) public {
         // USDT -> ETH
 
         // Setup
@@ -154,7 +154,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
         assertEq(IERC20(USDT).balanceOf(account), 0);
     }
 
-    function testSwapTokensForExactEth(uint96 amt) public {
+    function testSwapTokensForExactEth(uint64 amt) public {
         // USDT -> ETH
         uint amountOut = 1 ether;
 
