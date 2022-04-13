@@ -40,7 +40,7 @@ contract AccountManager is Pausable, IAccountManager {
         _;
     }
 
-    function openAccount(address owner) external {
+    function openAccount(address owner) whenNotPaused external {
         address account;
         if (inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
@@ -66,7 +66,12 @@ contract AccountManager is Pausable, IAccountManager {
         emit AccountClosed(_account, msg.sender);
     }
 
-    function depositEth(address account) external payable onlyOwner(account) {
+    function depositEth(address account) 
+        whenNotPaused
+        external
+        payable
+        onlyOwner(account)
+    {
         account.safeTransferEth(msg.value);
     }
 
@@ -79,7 +84,8 @@ contract AccountManager is Pausable, IAccountManager {
         account.withdrawEth(msg.sender, value);
     }
 
-    function deposit(address account, address token, uint value) 
+    function deposit(address account, address token, uint value)
+        whenNotPaused
         external
         onlyOwner(account) 
     {
@@ -102,6 +108,7 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     function borrow(address account, address token, uint value)
+        whenNotPaused
         external
         onlyOwner(account)
     { 
@@ -150,7 +157,7 @@ contract AccountManager is Pausable, IAccountManager {
         address target,
         uint amt,
         bytes calldata data
-    ) 
+    )
         external
         onlyOwner(account) 
     {

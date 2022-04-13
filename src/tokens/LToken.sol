@@ -71,6 +71,7 @@ abstract contract LToken is Pausable, ERC20, ILToken {
 
     // Account Manager Functions
     function lendTo(address account, uint value)
+        whenNotPaused
         external
         accountManagerOnly
         returns (bool) 
