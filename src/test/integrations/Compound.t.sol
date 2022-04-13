@@ -2,12 +2,12 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../../utils/Errors.sol";
+import {CurveIntegrationTest} from "./Curve.t.sol";
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
+import {CTokenOracle} from "oracle/compound/CTokenOracle.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
-import {console} from "../utils/console.sol";
 import {CompoundController} from "controller/compound/CompoundController.sol";
-import {CurveIntegrationTest} from "./Curve.t.sol";
 
 interface ICERC20 {
     function exchangeRateCurrent() external returns (uint);
@@ -16,21 +16,26 @@ interface ICERC20 {
 contract CompoundIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
-
-    // Ethereum CToken Addresses
+    
     address constant cEth = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address constant cUSDT = 0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9;
-    
+
+    CTokenOracle cTokenOracle;
     CompoundController compoundController;
 
     function setupCompoundController() internal {
         compoundController = new CompoundController();
         controller.updateController(cEth, compoundController);
         controller.updateController(cUSDT, compoundController);
+        
+        cTokenOracle = new CTokenOracle(oracle, cEth);
+        oracle.setOracle(cEth, cTokenOracle);
+        oracle.setOracle(cUSDT, cTokenOracle);
     }
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupCompoundController();
         setupCurveController();
         account = openAccount(user);

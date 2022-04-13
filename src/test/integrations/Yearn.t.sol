@@ -3,6 +3,7 @@ pragma solidity ^0.8.11;
 
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
+import {YTokenOracle} from "oracle/yearn/YTokenOracle.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
 import {YearnVaultController} from "controller/yearn/YearnController.sol";
 
@@ -13,14 +14,19 @@ contract YearnIntegrationTest is IntegrationTestBase {
     address yearnVault = 0xE537B5cc158EB71037D4125BDD7538421981E6AA;
 
     YearnVaultController yearnController;
+    YTokenOracle yTokenOracle;
 
     function setupYearnController() internal {
         yearnController = new YearnVaultController();
         controller.updateController(yearnVault, yearnController);
+        
+        yTokenOracle = new YTokenOracle(oracle);  
+        oracle.setOracle(yearnVault, yTokenOracle);
     }
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupCurveController();
         setupYearnController();
         setupWethController();
