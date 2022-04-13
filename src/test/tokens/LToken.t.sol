@@ -24,15 +24,11 @@ contract LTokenTest is TestBase {
         cheats.prank(address(accountManager));
         bool isFirstBorrow = lErc20.lendTo(account, lendAmt);
 
-        (
-            uint principal,
-            uint interestIndex
-        ) = lErc20.borrowBalanceFor(account);
+        uint borrowBalance = lErc20.getBorrowBalance(account);
 
         // Assert
         assertTrue(isFirstBorrow);
-        assertEq(principal, lendAmt);
-        assertEq(interestIndex, lErc20.borrowIndex());
+        assertEq(borrowBalance, lendAmt);
     }
 
     function testFailLendTo(uint lendAmt, uint liquidity) public {
@@ -62,14 +58,10 @@ contract LTokenTest is TestBase {
         cheats.prank(address(accountManager));
         bool isBorrowBalanceZero = lErc20.collectFrom(account, collectAmt);
 
-        (
-            uint principal,
-            uint interestIndex
-        ) = lErc20.borrowBalanceFor(account);
+        uint borrowBalance = lErc20.getBorrowBalance(account);
 
         // Assert
-        assertEq(principal, lendAmt - collectAmt);
-        assertEq(interestIndex, lErc20.borrowIndex());
+        assertEq(borrowBalance, lendAmt - collectAmt);
         assertTrue(isBorrowBalanceZero == (lendAmt == collectAmt));
     }
 
@@ -107,24 +99,6 @@ contract LTokenTest is TestBase {
 
         // Assert
         assertGe(borrowBalance, borrowAmt);
-    }
-
-    function testGetExchangeRate(
-        uint96 lendAmt, 
-        uint96 liquidity, 
-        uint96 delta
-    ) 
-        public 
-    {
-        // Setup
-        testLendTo(lendAmt, liquidity);
-        cheats.roll(block.number + delta);
-
-        // Test
-        uint exchangeRate = lErc20.getExchangeRate();
-
-        // Assert
-        assertGe(exchangeRate, lErc20.exchangeRate());
     }
 
     function testInitialize() public {

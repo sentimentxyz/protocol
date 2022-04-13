@@ -1,13 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {DSTest} from "ds-test/test.sol";
 import {TestERC20} from "./TestERC20.sol";
 import {CheatCodes} from "./CheatCodes.sol";
-import {DSTest} from "ds-test/test.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
-import {LERC20} from "../../tokens/LERC20.sol";
 import {LEther} from "../../tokens/LEther.sol";
+import {LToken} from "../../tokens/LToken.sol";
+import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
@@ -16,7 +17,7 @@ import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
-abstract contract TestBase is DSTest {
+contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
@@ -25,7 +26,7 @@ abstract contract TestBase is DSTest {
 
     // LTokens
     LEther lEth;
-    LERC20 lErc20;
+    LToken lErc20;
 
     // Core Contracts
     RiskEngine riskEngine;
@@ -44,6 +45,8 @@ abstract contract TestBase is DSTest {
 
     // Oracle
     OracleFacade oracle;
+
+    address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
 
     // Contract Setup Functions
     function setupContracts() internal virtual {
@@ -70,15 +73,8 @@ abstract contract TestBase is DSTest {
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(address(registry), uint(1));
-        lErc20 = new LERC20(
-            "LERC20Test",
-            "LERC20",
-            uint8(18),
-            address(erc20),
-            address(registry),
-            uint(1)
-        );
+        lEth = new LEther(ERC20(WETH), "LEther", "LETH", registry, 0);
+        lErc20 = new LToken(erc20, "LTestERC20", "LERC20", registry, 0);
     }
 
     function register() private {

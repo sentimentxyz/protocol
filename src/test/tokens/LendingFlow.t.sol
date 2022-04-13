@@ -19,24 +19,22 @@ contract LendingFlowTest is TestBase {
 
         // Test
         cheats.prank(lender);
-        lEth.deposit{value: amt}();
+        lEth.depositEth{value: amt}();
 
         // Asserts
         assertEq(lender.balance, 0);
         assertEq(address(lEth).balance, amt);
-        assertGe(
-            lEth.balanceOf(lender).mul(lEth.exchangeRate()),
-            amt
-        );
+        assertGe(lEth.convertToAssets(lEth.balanceOf(lender)), amt);
     }
 
     function testWithdrawEth(uint amt) public {
         // Setup
         testDepositEth(amt);
+        uint shares = lEth.balanceOf(lender);
 
         // Test
         cheats.prank(lender);
-        lEth.withdraw(amt);
+        lEth.redeemEth(shares);
         
         // Asserts
         assertEq(lender.balance, amt);
@@ -51,25 +49,23 @@ contract LendingFlowTest is TestBase {
         // Test
         cheats.startPrank(lender);
         erc20.approve(address(lErc20), type(uint).max);
-        lErc20.deposit(amt);
+        lErc20.deposit(amt, lender);
         cheats.stopPrank();
 
         // Asserts
         assertEq(erc20.balanceOf(lender), 0);
         assertEq(erc20.balanceOf(address(lErc20)), amt);
-        assertGe(
-            lErc20.balanceOf(lender).mul(lEth.exchangeRate()),
-            amt
-        );
+        assertGe(lErc20.convertToAssets(lErc20.balanceOf(lender)), amt);
     }
 
     function testWithdrawERC20(uint amt) public {
         // Setup
         testDepositERC20(amt);
+        uint shares = lErc20.balanceOf(lender);
 
         // Test
         cheats.prank(lender);
-        lErc20.withdraw(amt);
+        lErc20.redeem(shares, lender, lender);
 
         // Asserts
         assertEq(erc20.balanceOf(lender), amt);
