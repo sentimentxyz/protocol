@@ -40,7 +40,7 @@ contract AccountManager is Pausable, IAccountManager {
         _;
     }
 
-    function openAccount(address owner) external {
+    function openAccount(address owner) external whenNotPaused {
         address account;
         if (inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
@@ -66,7 +66,12 @@ contract AccountManager is Pausable, IAccountManager {
         emit AccountClosed(_account, msg.sender);
     }
 
-    function depositEth(address account) external payable onlyOwner(account) {
+    function depositEth(address account) 
+        external
+        payable
+        whenNotPaused
+        onlyOwner(account)
+    {
         account.safeTransferEth(msg.value);
     }
 
@@ -79,9 +84,10 @@ contract AccountManager is Pausable, IAccountManager {
         account.withdrawEth(msg.sender, value);
     }
 
-    function deposit(address account, address token, uint value) 
+    function deposit(address account, address token, uint value)
         external
-        onlyOwner(account) 
+        whenNotPaused
+        onlyOwner(account)
     {
         if (!isCollateralAllowed[token]) 
             revert Errors.CollateralTypeRestricted();
@@ -103,6 +109,7 @@ contract AccountManager is Pausable, IAccountManager {
 
     function borrow(address account, address token, uint value)
         external
+        whenNotPaused
         onlyOwner(account)
     { 
         if (registry.LTokenFor(token) == address(0))
@@ -150,7 +157,7 @@ contract AccountManager is Pausable, IAccountManager {
         address target,
         uint amt,
         bytes calldata data
-    ) 
+    )
         external
         onlyOwner(account) 
     {

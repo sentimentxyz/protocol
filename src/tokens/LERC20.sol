@@ -30,7 +30,7 @@ contract LERC20 is LToken {
 
     // Lender Functions
     /// @param value underlying token amount to be deposited
-    function deposit(uint value) external {
+    function deposit(uint value) external whenNotPaused {
         _updateState();
         underlying.safeTransferFrom(msg.sender, address(this), value);
         _mint(msg.sender, value.div(exchangeRate));

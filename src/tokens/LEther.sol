@@ -26,7 +26,7 @@ contract LEther is LToken {
     {}
 
     /// @notice deposit ETH in exchange for LETH
-    function deposit() external payable {
+    function deposit() external payable whenNotPaused {
         _updateState();
         _mint(msg.sender, msg.value.div(exchangeRate));
     }
