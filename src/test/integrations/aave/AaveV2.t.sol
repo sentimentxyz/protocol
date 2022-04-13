@@ -2,6 +2,7 @@
 pragma solidity ^0.8.11;
 
 import {Errors} from "../../../utils/Errors.sol";
+import {ATokenOracle} from "oracle/aave/ATokenOracle.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
@@ -18,9 +19,13 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
     address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
     address aDai = 0x028171bCA77440897B824Ca71D1c56caC55b68A3;
     
+    ATokenOracle aTokenOracle;
     AaveV2Controller aaveController;
 
     function setupAaveController() internal {
+        aTokenOracle = new ATokenOracle(oracle);
+        oracle.setOracle(aWeth, aTokenOracle);
+        
         aaveController = new AaveV2Controller(
             controller, 
             IProtocolDataProvider(aaveDataProvider)
@@ -31,6 +36,7 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupAaveController();
         setupWethController();
         account = openAccount(user);

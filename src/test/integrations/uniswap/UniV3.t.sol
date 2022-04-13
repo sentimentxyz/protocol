@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.11;
 
-import {console} from "../../utils/console.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
@@ -25,6 +24,7 @@ contract UniV3IntegrationTest is IntegrationTestBase {
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupUniV3Controller();
         setupCurveController();
         setupWethController();

@@ -2,6 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
+import {UniV2LpOracle} from "oracle/uniswap/UniV2LPOracle.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
 import {UniV2Controller} from "controller/uniswap/UniV2Controller.sol";
 
@@ -11,17 +12,22 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
 
     address constant UNIV2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address constant WETH_USDT_LP = 0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852;
+    
     UniV2Controller uniV2Controller;
+    UniV2LpOracle uniLPOracle;
     
     function setupUniV2Controller() private {
         uniV2Controller = new UniV2Controller(controller);
         controller.updateController(UNIV2_ROUTER, uniV2Controller);
-        controller.toggleTokenAllowance(WETH);
         controller.toggleTokenAllowance(WETH_USDT_LP);
+        
+        uniLPOracle = new UniV2LpOracle(oracle);
+        oracle.setOracle(WETH_USDT_LP, uniLPOracle);
     }
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupUniV2Controller();
         setupWethController();
         setupCurveController();

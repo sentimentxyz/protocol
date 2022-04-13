@@ -16,6 +16,7 @@ contract CurveIntegrationTest is IntegrationTestBase {
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupWethController();
         setupCurveController();
         account = openAccount(user);

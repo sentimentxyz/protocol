@@ -25,6 +25,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupUniV2Controller();
         setupWethController();
         setupCurveController();

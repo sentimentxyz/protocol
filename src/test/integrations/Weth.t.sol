@@ -13,6 +13,7 @@ contract WethIntegrationTest is IntegrationTestBase {
 
     function setUp() public {
         setupContracts();
+        setupOracles();
         setupWethController();
         account = openAccount(user);
     }
