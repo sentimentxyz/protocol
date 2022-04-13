@@ -3,40 +3,42 @@ pragma solidity ^0.8.10;
 
 import {LToken} from "./LToken.sol";
 import {Helpers} from "../utils/Helpers.sol";
+import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
+
+interface IWETH {
+    function withdraw(uint) external;
+    function deposit() external payable;
+}
 
 contract LEther is LToken {
     using Helpers for address;
     using PRBMathUD60x18 for uint;
     
     constructor(
-        address _registry,
-        uint _initialExchangeRate
-    ) 
-        LToken(
-            "LEther",
-            "LETH",
-            uint8(18),
-            address(0),
-            _registry,
-            msg.sender,
-            _initialExchangeRate
-        )
-    {}
+        ERC20 _asset, 
+        string memory _name, 
+        string memory _symbol,
+        IRegistry _registry,
+        uint _reserveFactor
+    ) LToken(_asset, _name, _symbol, _registry, _reserveFactor) {}
 
-    /// @notice deposit ETH in exchange for LETH
-    function deposit() external payable whenNotPaused {
-        _updateState();
-        _mint(msg.sender, msg.value.div(exchangeRate));
+    function depositEth() external payable {
+        uint assets = msg.value;
+        uint shares = previewDeposit(assets);
+        require(shares != 0, "ZERO_SHARES");
+        IWETH(address(asset)).deposit{value: assets}();
+        _mint(msg.sender, shares);
+        emit Deposit(msg.sender, msg.sender, assets, shares);
     }
 
-    function _getBalance() internal view override returns (uint) {
-        return address(this).balance;
-    }
-
-    function _transferUnderlying(address to, uint value) internal override {
-        to.safeTransferEth(value);
+    function redeemEth(uint shares) external {
+        uint assets = previewRedeem(shares);
+        _burn(msg.sender, shares);
+        emit Withdraw(msg.sender, msg.sender, msg.sender, assets, shares);
+        IWETH(address(asset)).withdraw(assets);
+        msg.sender.safeTransferEth(assets);
     }
     
     receive() external payable {}
