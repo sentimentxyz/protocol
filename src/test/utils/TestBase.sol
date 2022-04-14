@@ -9,6 +9,7 @@ import {Account} from "../../core/Account.sol";
 import {LEther} from "../../tokens/LEther.sol";
 import {LToken} from "../../tokens/LToken.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
+import {WETH} from "solmate/tokens/WETH.sol";
 import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
@@ -23,6 +24,7 @@ contract TestBase is DSTest {
 
     // Dummy ERC20 Token
     TestERC20 erc20;
+    WETH weth;
 
     // LTokens
     LEther lEth;
@@ -46,8 +48,6 @@ contract TestBase is DSTest {
     // Oracle
     OracleFacade oracle;
 
-    address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
-
     // Contract Setup Functions
     function setupContracts() internal virtual {
         // Log block number
@@ -55,6 +55,7 @@ contract TestBase is DSTest {
         
         // Deploy Dummy ERC20
         erc20 = new TestERC20("TestERC20", "TEST", uint8(18));
+        weth = new WETH();
 
         deploy();
         register();
@@ -73,7 +74,7 @@ contract TestBase is DSTest {
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(ERC20(WETH), "LEther", "LETH", registry, 0);
+        lEth = new LEther(weth, "LEther", "LETH", registry, 0);
         lErc20 = new LToken(erc20, "LTestERC20", "LERC20", registry, 0);
     }
 

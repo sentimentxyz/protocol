@@ -23,6 +23,7 @@ contract IntegrationTestBase is TestBase {
     ChainlinkOracle chainlinkOracle;
 
     // Ethereum Contracts
+    address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address constant tricryptoPool = 0xD51a44d3FaE010294C616388b506AcdA1bfAAE46;
     address constant crv3crypto = 0xc4AD29ba4B3c580e6D59105FFf484999997675Ff;
