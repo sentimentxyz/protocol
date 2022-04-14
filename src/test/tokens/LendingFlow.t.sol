@@ -15,6 +15,7 @@ contract LendingFlowTest is TestBase {
 
     function testDepositEth(uint amt) public {
         // Setup
+        cheats.assume(amt != 0);
         cheats.deal(lender, amt);
 
         // Test
@@ -23,7 +24,7 @@ contract LendingFlowTest is TestBase {
 
         // Asserts
         assertEq(lender.balance, 0);
-        assertEq(address(lEth).balance, amt);
+        assertEq(weth.balanceOf(address(lEth)), amt);
         assertGe(lEth.convertToAssets(lEth.balanceOf(lender)), amt);
     }
 
