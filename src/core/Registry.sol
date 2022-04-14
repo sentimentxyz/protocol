@@ -23,6 +23,11 @@ contract Registry is Ownable, IRegistry {
         _;
     }
 
+    function initialize(address _admin) external {
+        if (admin != address(0)) revert Errors.ContractAlreadyInitialized();
+        admin = _admin;
+    }
+
     function setAddress(string calldata id, address _address) 
         external 
         adminOnly 

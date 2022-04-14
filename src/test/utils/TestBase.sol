@@ -4,18 +4,22 @@ pragma solidity ^0.8.10;
 import {Test} from "forge-std/Test.sol";
 import {TestERC20} from "./TestERC20.sol";
 import {CheatCodes} from "./CheatCodes.sol";
+import {Proxy} from "../../proxy/Proxy.sol";
+import {WETH} from "solmate/tokens/WETH.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
 import {LEther} from "../../tokens/LEther.sol";
 import {LToken} from "../../tokens/LToken.sol";
+import {ILToken} from "../../interface/tokens/ILToken.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {WETH} from "solmate/tokens/WETH.sol";
 import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
+import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
-import {OracleFacade} from "oracle/core/OracleFacade.sol";
+import {IRegistry} from "../../interface/core/IRegistry.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
+import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
 contract TestBase is Test {
@@ -32,8 +36,12 @@ contract TestBase is Test {
 
     // Core Contracts
     RiskEngine riskEngine;
-    Registry registry;
-    AccountManager accountManager;
+    
+    Registry registryImplementation;
+    IRegistry registry;
+
+    AccountManager accountManagerImplementation;
+    IAccountManager accountManager;
 
     // Account Factory
     Beacon beacon;
@@ -64,12 +72,24 @@ contract TestBase is Test {
     }
 
     function deploy() private {
-        registry = new Registry();
+        // Registry deployment
+        registryImplementation = new Registry();
+        registry = IRegistry(
+            address(new Proxy(address(registryImplementation)))
+        );
+        registry.initialize(address(this));
+        
         oracle = new OracleFacade();
         rateModel = new DefaultRateModel();
         controller = new ControllerFacade();
         riskEngine = new RiskEngine(registry);
-        accountManager = new AccountManager(registry);
+        
+        // Account Manager deployment
+        accountManagerImplementation = new AccountManager(registry);
+        accountManager = IAccountManager(
+            address(new Proxy(address(accountManagerImplementation)))
+        );
+        accountManager.initialize(address(this), registry);
         
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
@@ -91,10 +111,10 @@ contract TestBase is Test {
     }
 
     function initialize() private {
-        riskEngine.initialize();
-        accountManager.initialize();
-        lEth.initialize('RATE_MODEL');
-        lErc20.initialize('RATE_MODEL');
+        riskEngine.initializeDependencies();
+        accountManager.initializeDependencies();
+        lEth.initializeDependencies('RATE_MODEL');
+        lErc20.initializeDependencies('RATE_MODEL');
 
         accountManager.toggleCollateralStatus(address(erc20));
     }

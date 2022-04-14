@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {LToken} from "./LToken.sol";
 import {Helpers} from "../utils/Helpers.sol";
+import {Errors} from "../utils/Errors.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";

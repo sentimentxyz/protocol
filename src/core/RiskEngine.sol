@@ -7,7 +7,7 @@ import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
-import {IOracle} from "../interface/periphery/IOracle.sol";
+import {IOracle} from "oracle/core/IOracle.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
@@ -24,7 +24,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         registry = _registry;
     }
 
-    function initialize() external adminOnly {
+    function initializeDependencies() external adminOnly {
         oracle = IOracle(registry.addressFor('ORACLE'));
         accountManager = IAccountManager(registry.addressFor('ACCOUNT_MANAGER'));
     } 

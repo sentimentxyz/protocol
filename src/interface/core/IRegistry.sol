@@ -4,6 +4,8 @@ pragma solidity ^0.8.10;
 interface IRegistry {
     event AccountCreated(address indexed account, address indexed owner);
 
+    function initialize(address) external;
+
     function addressFor(string calldata id) external view returns (address);
     function ownerFor(address account) external view returns (address);
 

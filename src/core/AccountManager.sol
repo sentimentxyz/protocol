@@ -9,14 +9,14 @@ import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
-import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
+import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 
 contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
-    IRegistry public immutable registry;
+    IRegistry public registry;
     IRiskEngine public riskEngine;
     IControllerFacade public controller;
     IAccountFactory public accountFactory;
@@ -28,7 +28,13 @@ contract AccountManager is Pausable, IAccountManager {
         registry = _registry;
     }
 
-    function initialize() external adminOnly {
+    function initialize(address _admin, IRegistry _registry) external {
+        if (admin != address(0)) revert Errors.ContractAlreadyInitialized();
+        admin = _admin;
+        registry = _registry;
+    }
+
+    function initializeDependencies() external adminOnly {
         riskEngine = IRiskEngine(registry.addressFor('RISK_ENGINE'));
         controller = IControllerFacade(registry.addressFor('CONTROLLER'));
         accountFactory = IAccountFactory(registry.addressFor('ACCOUNT_FACTORY'));
