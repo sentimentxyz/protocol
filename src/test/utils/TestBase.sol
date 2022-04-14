@@ -22,9 +22,9 @@ contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
-    // Dummy ERC20 Token
-    TestERC20 erc20;
+    // Test ERC20 Tokens
     WETH weth;
+    TestERC20 erc20;
 
     // LTokens
     LEther lEth;
@@ -86,7 +86,7 @@ contract TestBase is DSTest {
         registry.setAddress('ACCOUNT_FACTORY', address(accountFactory));
         registry.setAddress('ACCOUNT_MANAGER', address(accountManager));
 
-        registry.setLToken(address(0), address(lEth));
+        registry.setLToken(address(weth), address(lEth));
         registry.setLToken(address(erc20), address(lErc20));
     }
 
@@ -143,8 +143,10 @@ contract TestBase is DSTest {
     )
         internal
     {
-        if (token == address(0)) {
+        if (token == address(weth)) {
             cheats.deal(address(lEth), amt);
+            cheats.prank(address(lEth));
+            weth.deposit{value: amt}();
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         } else {

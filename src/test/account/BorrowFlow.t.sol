@@ -17,11 +17,11 @@ contract BorrowFlowTest is TestBase {
         // Test
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
-        borrow(borrower, account, address(0), borrowAmt);
+        borrow(borrower, account, address(weth), borrowAmt);
 
         // Assert
         assertEq(address(lEth).balance, 0);
-        assertEq(account.balance, uint(depositAmt) + borrowAmt);
+        assertEq(riskEngine.getBalance(account), uint(depositAmt) + borrowAmt);
         assertTrue(!IAccount(account).hasNoDebt());
         assertEq(lEth.getBorrowBalance(address(account)), borrowAmt);
     }

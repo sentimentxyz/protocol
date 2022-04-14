@@ -38,7 +38,7 @@ contract AccountManagerTest is TestBase {
         // Setup
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
-        borrow(owner, account, address(0), borrowAmt);
+        borrow(owner, account, address(weth), borrowAmt);
 
         // Test
         cheats.expectRevert(Errors.AccountNotLiquidatable.selector);
@@ -51,7 +51,7 @@ contract AccountManagerTest is TestBase {
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         deposit(owner, account, address(erc20), depositAmt);
-        borrow(owner, account, address(0), borrowAmt);
+        borrow(owner, account, address(weth), borrowAmt);
         borrow(owner, account, address(erc20), borrowAmt);
 
         // Test
@@ -61,7 +61,7 @@ contract AccountManagerTest is TestBase {
         // Assert
         assertEq(account.balance, depositAmt);
         assertEq(erc20.balanceOf(account), depositAmt);
-        assertEq(address(lEth).balance, borrowAmt);
+        assertEq(weth.balanceOf(address(lEth)), borrowAmt);
         assertEq(erc20.balanceOf(address(lErc20)), borrowAmt);
     }
 

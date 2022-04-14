@@ -20,11 +20,11 @@ contract RepayFlowTest is TestBase {
         cheats.assume(borrowAmt > repayAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
-        borrow(borrower, account, address(0), borrowAmt);
+        borrow(borrower, account, address(weth), borrowAmt);
 
         // Test
         cheats.prank(borrower);
-        accountManager.repay(account, address(0), repayAmt);
+        accountManager.repay(account, address(weth), repayAmt);
 
         // Assert
         assertEq(

@@ -13,7 +13,7 @@ contract LendingFlowTest is TestBase {
         setupContracts();
     }
 
-    function testDepositEth(uint amt) public {
+    function testDepositEth(uint64 amt) public {
         // Setup
         cheats.assume(amt != 0);
         cheats.deal(lender, amt);
@@ -28,7 +28,7 @@ contract LendingFlowTest is TestBase {
         assertGe(lEth.convertToAssets(lEth.balanceOf(lender)), amt);
     }
 
-    function testWithdrawEth(uint amt) public {
+    function testWithdrawEth(uint64 amt) public {
         // Setup
         testDepositEth(amt);
         uint shares = lEth.balanceOf(lender);
@@ -43,8 +43,9 @@ contract LendingFlowTest is TestBase {
         assertEq(address(lEth).balance, 0);
     }
 
-    function testDepositERC20(uint amt) public {
+    function testDepositERC20(uint64 amt) public {
         // Setup
+        cheats.assume(amt != 0);
         erc20.mint(lender, amt);
         
         // Test
@@ -59,8 +60,9 @@ contract LendingFlowTest is TestBase {
         assertGe(lErc20.convertToAssets(lErc20.balanceOf(lender)), amt);
     }
 
-    function testWithdrawERC20(uint amt) public {
+    function testWithdrawERC20(uint64 amt) public {
         // Setup
+        cheats.assume(amt != 0);
         testDepositERC20(amt);
         uint shares = lErc20.balanceOf(lender);
 

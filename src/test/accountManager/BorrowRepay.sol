@@ -32,12 +32,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
         // Setup
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
-        cheats.deal(registry.LTokenFor(address(0)), borrowAmt);
 
         // Test
-        cheats.prank(owner);
-        accountManager.borrow(account, address(0), borrowAmt);
-        assertEq(account.balance, uint(depositAmt) + uint(borrowAmt));
+        borrow(owner, account, address(weth), borrowAmt);
+        assertEq(riskEngine.getBalance(account), uint(depositAmt) + borrowAmt);
     }
 
     function testBorrowRiskEngineError(
@@ -68,12 +66,14 @@ contract AccountManagerBorrowRepayTest is TestBase {
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
         cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
         deposit(owner, account, address(0), depositAmt);
-        cheats.deal(registry.LTokenFor(address(0)), borrowAmt);
+        cheats.deal(address(lEth), borrowAmt);
+        cheats.prank(address(lEth));
+        weth.deposit{value: borrowAmt}();
 
         // Test
         cheats.prank(owner);
         cheats.expectRevert(Errors.RiskThresholdBreached.selector);
-        accountManager.borrow(account, address(0), borrowAmt);
+        accountManager.borrow(account, address(weth), borrowAmt);
     }
 
     function testBorrowAuthError(address token, uint96 value) public {
