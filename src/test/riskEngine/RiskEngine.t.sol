@@ -44,7 +44,7 @@ contract RiskEngineTest is TestBase {
         cheats.assume(depositAmt > withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
-        borrow(owner, account, address(0), borrowAmt);
+        borrow(owner, account, address(weth), borrowAmt);
 
         // Test
         bool isWithdrawAllowed = riskEngine.isWithdrawAllowed(

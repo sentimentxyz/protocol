@@ -34,7 +34,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
             MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt
         ); // Ensure account is healthy after withdrawal
         deposit(owner, account, address(0), depositAmt);
-        borrow(owner, account, address(0), borrowAmt);
+        borrow(owner, account, address(weth), borrowAmt);
 
         // Test
         cheats.prank(owner);
@@ -42,7 +42,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
 
         // Assert
         assertEq(
-            account.balance,
+            riskEngine.getBalance(account),
             uint(depositAmt) - uint(withdrawAmt) + uint(borrowAmt)
         );
     }
@@ -62,7 +62,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
             (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
         ); // Ensures withdraw amt is large enough to breach the risk threshold
         deposit(owner, account, address(0), depositAmt);
-        borrow(owner, account, address(0), borrowAmt);
+        borrow(owner, account, address(weth), borrowAmt);
 
         // Test
         cheats.prank(owner);

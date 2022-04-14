@@ -1,13 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {DSTest} from "ds-test/test.sol";
 import {TestERC20} from "./TestERC20.sol";
 import {CheatCodes} from "./CheatCodes.sol";
-import {DSTest} from "ds-test/test.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
-import {LERC20} from "../../tokens/LERC20.sol";
 import {LEther} from "../../tokens/LEther.sol";
+import {LToken} from "../../tokens/LToken.sol";
+import {ERC20} from "solmate/tokens/ERC20.sol";
+import {WETH} from "solmate/tokens/WETH.sol";
 import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
@@ -16,16 +18,17 @@ import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
-abstract contract TestBase is DSTest {
+contract TestBase is DSTest {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
-    // Dummy ERC20 Token
+    // Test ERC20 Tokens
+    WETH weth;
     TestERC20 erc20;
 
     // LTokens
     LEther lEth;
-    LERC20 lErc20;
+    LToken lErc20;
 
     // Core Contracts
     RiskEngine riskEngine;
@@ -52,6 +55,7 @@ abstract contract TestBase is DSTest {
         
         // Deploy Dummy ERC20
         erc20 = new TestERC20("TestERC20", "TEST", uint8(18));
+        weth = new WETH();
 
         deploy();
         register();
@@ -70,15 +74,8 @@ abstract contract TestBase is DSTest {
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(address(registry), uint(1));
-        lErc20 = new LERC20(
-            "LERC20Test",
-            "LERC20",
-            uint8(18),
-            address(erc20),
-            address(registry),
-            uint(1)
-        );
+        lEth = new LEther(weth, registry, 0);
+        lErc20 = new LToken(erc20, "LTestERC20", "LERC20", registry, 0);
     }
 
     function register() private {
@@ -89,7 +86,7 @@ abstract contract TestBase is DSTest {
         registry.setAddress('ACCOUNT_FACTORY', address(accountFactory));
         registry.setAddress('ACCOUNT_MANAGER', address(accountManager));
 
-        registry.setLToken(address(0), address(lEth));
+        registry.setLToken(address(weth), address(lEth));
         registry.setLToken(address(erc20), address(lErc20));
     }
 
@@ -146,8 +143,10 @@ abstract contract TestBase is DSTest {
     )
         internal
     {
-        if (token == address(0)) {
+        if (token == address(weth)) {
             cheats.deal(address(lEth), amt);
+            cheats.prank(address(lEth));
+            weth.deposit{value: amt}();
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         } else {

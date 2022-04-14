@@ -116,8 +116,7 @@ contract AccountManager is Pausable, IAccountManager {
             revert Errors.LTokenUnavailable();
         if (!riskEngine.isBorrowAllowed(account, token, value)) 
             revert Errors.RiskThresholdBreached();
-        if (token != address(0) && token.balanceOf(account) == 0) 
-            IAccount(account).addAsset(token);
+        if (token.balanceOf(account) == 0) IAccount(account).addAsset(token);
         if (ILToken(registry.LTokenFor(token)).lendTo(account, value))
             IAccount(account).addBorrow(token);
         emit Borrow(account, msg.sender, token, value);
@@ -194,13 +193,10 @@ contract AccountManager is Pausable, IAccountManager {
     function _repay(address account, address token, uint value) internal {
         ILToken LToken = ILToken(registry.LTokenFor(token));
         if (value == type(uint).max) value = LToken.getBorrowBalance(account);
-
-        if (token.isEth()) account.withdrawEth(address(LToken), value);
-        else account.withdraw(address(LToken), token, value);
-        
-        if (LToken.collectFrom(account, value))
+        account.withdraw(address(LToken), token, value);
+        if (LToken.collectFrom(account, value)) 
             IAccount(account).removeBorrow(token);
-        if (!token.isEth() && IERC20(token).balanceOf(account) == 0)
+        if (IERC20(token).balanceOf(account) == 0) 
             IAccount(account).removeAsset(token);
     }
 

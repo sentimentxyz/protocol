@@ -28,7 +28,7 @@ contract LiquidationFlowTest is TestBase {
     function testLiquidationEth(uint96 amt) public {
         // Setup
         deposit(borrower, account, address(0), amt);
-        borrow(borrower, account, address(0), amt);
+        borrow(borrower, account, address(weth), amt);
         mockAccountRiskFactor();
         cheats.deal(maintainer, amt);
 
@@ -68,7 +68,7 @@ contract LiquidationFlowTest is TestBase {
     function testLiquidationComposite(uint96 amt) public {
         // Setup
         deposit(borrower, account, address(0), amt);
-        borrow(borrower, account, address(0), amt);
+        borrow(borrower, account, address(weth), amt);
         deposit(borrower, account, address(erc20), amt);
         borrow(borrower, account, address(erc20), amt);
         mockAccountRiskFactor();
