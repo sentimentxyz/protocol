@@ -17,12 +17,10 @@ contract LEther is LToken {
     using PRBMathUD60x18 for uint;
     
     constructor(
-        ERC20 _asset, 
-        string memory _name, 
-        string memory _symbol,
+        ERC20 _asset,
         IRegistry _registry,
         uint _reserveFactor
-    ) LToken(_asset, _name, _symbol, _registry, _reserveFactor) {}
+    ) LToken(_asset, "LEther", "LETH", _registry, _reserveFactor) {}
 
     function depositEth() external payable {
         uint assets = msg.value;

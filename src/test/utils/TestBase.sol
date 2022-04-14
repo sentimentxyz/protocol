@@ -74,7 +74,7 @@ contract TestBase is DSTest {
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(weth, "LEther", "LETH", registry, 0);
+        lEth = new LEther(weth, registry, 0);
         lErc20 = new LToken(erc20, "LTestERC20", "LERC20", registry, 0);
     }
 

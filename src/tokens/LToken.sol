@@ -13,16 +13,17 @@ import {IRateModel} from "../interface/core/IRateModel.sol";
 contract LToken is Pausable, ERC4626, ILToken {
     using PRBMathUD60x18 for uint;
 
-    IRegistry public registry;
+    IRegistry public immutable registry;
+
     IRateModel public rateModel;
     address public accountManager;
 
     uint public reserves;
-    uint public totalBorrows;
+    uint public borrows;
     uint public reserveFactor;
     uint public lastUpdated;
 
-    mapping (address => uint) public borrows;
+    mapping (address => uint) public borrowsOf;
 
     constructor(
         ERC20 _asset,
@@ -42,9 +43,9 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     function totalAssets() public view override returns (uint) {
         // delta - change in total assets due to accrued interest
-        uint delta = (totalBorrows == 0 || lastUpdated == block.number) ? 0
-            : totalBorrows.mul(getRateFactor()).mul(1e18 - reserveFactor);
-        return asset.balanceOf(address(this)) + totalBorrows - reserves + delta;
+        uint delta = (borrows == 0 || lastUpdated == block.number) ? 0
+            : borrows.mul(getRateFactor()).mul(1e18 - reserveFactor);
+        return asset.balanceOf(address(this)) + borrows - reserves + delta;
     }
 
     // Hooks
@@ -65,9 +66,9 @@ contract LToken is Pausable, ERC4626, ILToken {
         returns (bool isFirstBorrow) 
     {
         updateState();
-        isFirstBorrow = (borrows[account] == 0);
-        totalBorrows += amt;
-        borrows[account] += convertToShares(amt);
+        isFirstBorrow = (borrowsOf[account] == 0);
+        borrows += amt;
+        borrowsOf[account] += convertToShares(amt);
         asset.transfer(account, amt);
         return isFirstBorrow;
     }
@@ -78,34 +79,35 @@ contract LToken is Pausable, ERC4626, ILToken {
         returns (bool)
     {
         updateState();
-        totalBorrows -= amt;
-        borrows[account] -= convertToShares(amt);
-        return (borrows[account] == 0);
+        borrows -= amt;
+        borrowsOf[account] -= convertToShares(amt);
+        return (borrowsOf[account] == 0);
     }
 
     function getBorrowBalance(address account) external view returns (uint) {
-        return borrows[account] == 0 ? 0 : previewRedeem(borrows[account]);
+        return previewRedeem(borrowsOf[account]);
     }
 
     // Internal Accounting Functions
     function updateState() public {
         if (lastUpdated == block.number) return;
         uint rateFactor = getRateFactor();
-        uint interestAccrued = totalBorrows.mul(rateFactor);
-        totalBorrows += interestAccrued;
+        uint interestAccrued = borrows.mul(rateFactor);
+        borrows += interestAccrued;
         reserves += interestAccrued.mul(reserveFactor);
         lastUpdated = block.number;
     }
 
     // Rate Factor = Block Delta * Interest Rate Per Block
+    // Block Delta = Number of blocks since last update
     function getRateFactor() internal view returns (uint) {
         return (block.number - lastUpdated).fromUint()
-            .mul(rateModel.getBorrowRatePerBlock(
-                asset.balanceOf(address(this)), 
-                totalBorrows,
-                reserves
-                )
-            );
+                .mul(rateModel.getBorrowRatePerBlock(
+                    asset.balanceOf(address(this)), 
+                    borrows,
+                    reserves
+                    )
+                );
     }
 
     // Admin Functions
