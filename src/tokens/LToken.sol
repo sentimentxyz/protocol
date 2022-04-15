@@ -13,6 +13,8 @@ import {IRateModel} from "../interface/core/IRateModel.sol";
 contract LToken is Pausable, ERC4626, ILToken {
     using PRBMathUD60x18 for uint;
 
+    bool initialized;
+
     IRegistry public registry;
 
     IRateModel public rateModel;
@@ -45,7 +47,8 @@ contract LToken is Pausable, ERC4626, ILToken {
         IRegistry _registry,
         uint _reserveFactor
     ) external override {
-        if (admin != address(0)) revert Errors.ContractAlreadyInitialized();
+        if (initialized) revert Errors.ContractAlreadyInitialized();
+        initialized = true;
         admin = _admin;
         asset = _asset;
         registry = _registry;

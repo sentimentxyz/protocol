@@ -16,6 +16,8 @@ import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
+    bool private initialized;
+
     IRegistry public registry;
     IRiskEngine public riskEngine;
     IControllerFacade public controller;
@@ -29,7 +31,8 @@ contract AccountManager is Pausable, IAccountManager {
     }
 
     function initialize(address _admin, IRegistry _registry) external {
-        if (admin != address(0)) revert Errors.ContractAlreadyInitialized();
+        if (initialized) revert Errors.ContractAlreadyInitialized();
+        initialized = true;
         admin = _admin;
         registry = _registry;
     }
@@ -37,7 +40,8 @@ contract AccountManager is Pausable, IAccountManager {
     function initializeDependencies() external adminOnly {
         riskEngine = IRiskEngine(registry.addressFor('RISK_ENGINE'));
         controller = IControllerFacade(registry.addressFor('CONTROLLER'));
-        accountFactory = IAccountFactory(registry.addressFor('ACCOUNT_FACTORY'));
+        accountFactory =
+            IAccountFactory(registry.addressFor('ACCOUNT_FACTORY'));
     }
 
     modifier onlyOwner(address account) {

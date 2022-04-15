@@ -7,6 +7,8 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 
 contract Registry is Ownable, IRegistry {
 
+    bool private initialized;
+
     string[] public keys;
     address[] public accounts;
     address[] public LTokenList;
@@ -24,7 +26,8 @@ contract Registry is Ownable, IRegistry {
     }
 
     function initialize(address _admin) external {
-        if (admin != address(0)) revert Errors.ContractAlreadyInitialized();
+        if (initialized) revert Errors.ContractAlreadyInitialized();
+        initialized = true;
         admin = _admin;
     }
 
