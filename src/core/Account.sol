@@ -5,59 +5,125 @@ import {Errors} from "../utils/Errors.sol";
 import {Helpers} from "../utils/Helpers.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 
+/**
+@title Sentiment Credit Account
+@author github.com/sentimentxyz
+@notice Contract that acts as a dynamic and distributed asset reserve
+which holds a user’s collateral and loaned assets. */
 contract Account is IAccount {
     using Helpers for address;
 
+    /**
+        @dev STORAGE VARIABLES
+    */
+
+    /// @notice block number for when the account is activated.
     uint public activationBlock;
+    /// @notice address of account manager
     address public accountManager;
 
+    /// @notice A list of ERC-20 assets (Collaterals + Borrows) present in the
+    /// account.
     address[] public assets;
+    /// @notice A list of borrowed ERC-20 assets present in the account.
     address[] public borrows;
+
+    /**
+        @dev CUSTOM MODIFIERS
+    */
 
     modifier accountManagerOnly() {
         if (msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
     }
 
+    /**
+        @dev EXTERNAL FUNCTIONS
+    */
+
+    /**
+    @notice Initializes the account by setting the address of the account
+    manager.
+    @dev Can only be called as long as the address of the accountManager is
+    0x0.
+    @param _accountManager address of the account manager. */
     function init(address _accountManager) external {
         if (accountManager != address(0))
             revert Errors.ContractAlreadyInitialized();
         accountManager = _accountManager;
     }
 
+    /**
+    @notice Activates an account for a given owner.
+    @dev Can only be invoked by the account manager. */
     function activate() external accountManagerOnly {
-        delete assets;
         activationBlock = block.number;
     }
 
+    /**
+    @notice Returns a list of ERC-20 assets deposited and borrowed by the owner.
+    @return assets List of addresses */
     function getAssets() external view returns (address[] memory) {
         return assets;
     }
 
+    /**
+    @notice Returns a list of ERC-20 assets borrowed by the owner.
+    @return borrows List of addresses */
     function getBorrows() external view returns (address[] memory) {
         return borrows;
     }
 
+    /**
+    @notice Adds a given ERC-20 token to the assets list.
+    @dev Can only be invoked by the account manager.
+    @param token Address of the ERC-20 token to add. */
     function addAsset(address token) external accountManagerOnly {
         assets.push(token);
     }
 
+    /**
+    @notice Adds a given ERC-20 token to the borrows list.
+    @dev Can only be invoked by the account manager.
+    @param token Address of the ERC-20 token to add. */
     function addBorrow(address token) external accountManagerOnly {
         borrows.push(token);
     }
 
+    /**
+    @notice Removes a given ERC-20 token from the assets list.
+    @dev Can only be invoked by the account manager.
+    @param token Address of the ERC-20 token to remove. */
     function removeAsset(address token) external accountManagerOnly {
         _remove(assets, token);
     }
 
+    /**
+    @notice Removes a given ERC-20 token from the borrows list.
+    @dev Can only be invoked by the account manager.
+    @param token Address of the ERC-20 token to remove. */
     function removeBorrow(address token) external accountManagerOnly {
         _remove(borrows, token);
     }
 
+    /**
+    @notice Returns whether the account has debt or not by checking the length 
+    of the borrows list.
+    @return hasNoDebt bool */
     function hasNoDebt() external view returns (bool) {
         return borrows.length == 0;
     }
 
+    /**
+    @notice Generalized utility function to transact with a given contract.
+    @dev Can only be called by the account manager.
+    @param target Address of contract to transact with.
+    @param amt Amount of Eth to send to the target contract.
+    @param data Encoded sig + params of the function to transact with in the 
+    target contract.
+    @return success True if transaction was successful, false otherwise.
+    @return retData Data returned by call to the given target contract after 
+    the transaction. */
     function exec(address target, uint amt, bytes calldata data) 
         external
         payable
@@ -68,6 +134,11 @@ contract Account is IAccount {
         return (success, retData);
     }
 
+    /**
+    @notice Utility function to transfer all assets to a specified account and
+    delete all assets.
+    @dev Can only be called by the account manager
+    @param toAddress address of the account to send the assets to */
     function sweepTo(address toAddress) external accountManagerOnly {
         uint assetsLen = assets.length;
         for(uint i = 0; i < assetsLen; ++i) {
@@ -76,10 +147,15 @@ contract Account is IAccount {
                 assets[i].balanceOf(address(this))
             );
         }
+        delete assets;
         toAddress.safeTransferEth(address(this).balance);
     }
 
-     function _remove(address[] storage arr, address token) internal {
+    /**
+        @dev INTERNAL FUNCTIONS
+    */
+
+    function _remove(address[] storage arr, address token) internal {
          uint len = arr.length;
         // Copy the last element in place of tokenAddr and pop
         for(uint i = 0; i < len; ++i) {
