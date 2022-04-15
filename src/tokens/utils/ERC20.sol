@@ -48,11 +48,11 @@ abstract contract ERC20 {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(
+    function initializeERC20(
         string memory _name,
         string memory _symbol,
         uint8 _decimals
-    ) {
+    ) internal {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;

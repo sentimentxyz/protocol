@@ -2,15 +2,14 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
-import {Pausable} from "../utils/Pausable.sol";
+import {Pausable} from "../proxy/utils/Pausable.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {ERC4626} from "../utils/ERC4626.sol";
-import {ILToken} from "../interface/tokens/ILToken.sol";
+import {ERC4626} from "./utils/ERC4626.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
 
-contract LToken is Pausable, ERC4626, ILToken {
+contract LToken is Pausable, ERC4626 {
     using PRBMathUD60x18 for uint;
 
     bool initialized;
@@ -27,17 +26,7 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     mapping (address => uint) public borrowsOf;
 
-    constructor(
-        ERC20 _asset,
-        string memory _name, 
-        string memory _symbol,
-        IRegistry _registry,
-        uint _reserveFactor
-    ) Pausable(msg.sender) ERC4626(_asset, _name, _symbol) {
-        registry = _registry;
-        reserveFactor = _reserveFactor;
-        asset = _asset;
-    }
+    event ReservesRedeemed(address indexed treasury, uint value);
 
     function initialize(
         address _admin,
@@ -46,19 +35,13 @@ contract LToken is Pausable, ERC4626, ILToken {
         string calldata _symbol,
         IRegistry _registry,
         uint _reserveFactor
-    ) external override {
+    ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
-        admin = _admin;
-        asset = _asset;
+        initializeOwnable(_admin);
+        initializeERC4626(_asset, _name, _symbol);
         registry = _registry;
         reserveFactor = _reserveFactor;
-        name = _name;
-        symbol = _symbol;
-        decimals = asset.decimals();
-
-        INITIAL_CHAIN_ID = block.chainid;
-        INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
     }
 
     function initializeDependencies(string calldata _rateModel) external adminOnly {

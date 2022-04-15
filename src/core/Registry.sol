@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
-import {Ownable} from "../utils/Ownable.sol";
+import {Ownable} from "../proxy/utils/Ownable.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 
 contract Registry is Ownable, IRegistry {
@@ -17,8 +17,6 @@ contract Registry is Ownable, IRegistry {
     mapping(address => address) public LTokenFor;
     mapping(string => address) public addressFor;
 
-    constructor() Ownable(msg.sender) {}
-
     modifier accountManagerOnly() {
         if (msg.sender != addressFor['ACCOUNT_MANAGER']) 
             revert Errors.AccountManagerOnly();
@@ -28,7 +26,7 @@ contract Registry is Ownable, IRegistry {
     function initialize(address _admin) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
-        admin = _admin;
+        initializeOwnable(_admin);
     }
 
     function setAddress(string calldata id, address _address) 

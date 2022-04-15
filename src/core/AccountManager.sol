@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
 import {Helpers} from "../utils/Helpers.sol";
-import {Pausable} from "../utils/Pausable.sol";
+import {Pausable} from "../proxy/utils/Pausable.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
@@ -26,14 +26,10 @@ contract AccountManager is Pausable, IAccountManager {
     address[] public inactiveAccounts;
     mapping(address => bool) public isCollateralAllowed;
 
-    constructor(IRegistry _registry) Pausable(msg.sender) {
-        registry = _registry;
-    }
-
     function initialize(address _admin, IRegistry _registry) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
-        admin = _admin;
+        initializeOwnable(_admin);
         registry = _registry;
     }
 

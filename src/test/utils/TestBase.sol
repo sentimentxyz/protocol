@@ -11,6 +11,7 @@ import {Account} from "../../core/Account.sol";
 import {LEther} from "../../tokens/LEther.sol";
 import {LToken} from "../../tokens/LToken.sol";
 import {ILToken} from "../../interface/tokens/ILToken.sol";
+import {ILEther} from "../../interface/tokens/ILEther.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
@@ -31,15 +32,20 @@ contract TestBase is Test {
     TestERC20 erc20;
 
     // LTokens
-    LEther lEth;
-    LToken lErc20;
+    LEther lEthImplementation;
+    ILEther lEth;
+
+    LToken lErc20Implementation;
+    ILToken lErc20;
 
     // Core Contracts
     RiskEngine riskEngine;
     
+    // Registry Proxy
     Registry registryImplementation;
     IRegistry registry;
 
+    // Account Manager Proxy
     AccountManager accountManagerImplementation;
     IAccountManager accountManager;
 
@@ -85,7 +91,7 @@ contract TestBase is Test {
         riskEngine = new RiskEngine(registry);
         
         // Account Manager deployment
-        accountManagerImplementation = new AccountManager(registry);
+        accountManagerImplementation = new AccountManager();
         accountManager = IAccountManager(
             address(new Proxy(address(accountManagerImplementation)))
         );
@@ -94,8 +100,15 @@ contract TestBase is Test {
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(weth, registry, 0);
-        lErc20 = new LToken(erc20, "LTestERC20", "LERC20", registry, 0);
+        lEthImplementation = new LEther();
+        lEth = ILEther(address(new Proxy(address(lEthImplementation))));
+        lEth.initialize(address(this), weth, "LEther", "LEth", registry, 0);
+
+        lErc20Implementation = new LToken();
+        lErc20 = ILToken(address(new Proxy(address(lErc20Implementation))));
+        lErc20.initialize(
+            address(this), erc20, "LTestERC20", "LERC20", registry, 0
+        );
     }
 
     function register() private {

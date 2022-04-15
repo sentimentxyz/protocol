@@ -16,12 +16,6 @@ interface IWETH {
 contract LEther is LToken {
     using Helpers for address;
     using PRBMathUD60x18 for uint;
-    
-    constructor(
-        ERC20 _asset,
-        IRegistry _registry,
-        uint _reserveFactor
-    ) LToken(_asset, "LEther", "LETH", _registry, _reserveFactor) {}
 
     function depositEth() external payable {
         uint assets = msg.value;
