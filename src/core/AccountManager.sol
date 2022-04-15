@@ -148,6 +148,8 @@ contract AccountManager is Pausable, IAccountManager {
         external
         onlyOwner(account)
     {
+        if(address(controller.controllerFor(spender)) == address(0)) 
+            revert Errors.FunctionCallRestricted();
         account.safeApprove(token, spender, value);
     }
 
