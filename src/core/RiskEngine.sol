@@ -20,7 +20,8 @@ contract RiskEngine is Ownable, IRiskEngine {
     IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
-    constructor(IRegistry _registry) Ownable(msg.sender) {
+    constructor(IRegistry _registry) {
+        initializeOwnable(msg.sender);
         registry = _registry;
     }
 

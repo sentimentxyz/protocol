@@ -11,7 +11,8 @@ contract Beacon is IBeacon, Ownable {
 
     event Upgraded(address indexed implementation);
 
-    constructor(address _implementation) Ownable(msg.sender) {
+    constructor(address _implementation) {
+        initializeOwnable(msg.sender);
         _setImplementation(_implementation);
     }
 

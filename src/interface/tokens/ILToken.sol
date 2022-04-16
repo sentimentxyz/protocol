@@ -10,7 +10,6 @@ import {IRateModel} from "../core/IRateModel.sol";
 
 interface ILToken is IERC20, IERC4626, IOwnable {
     function initialize(
-        address _admin,
         ERC20 _asset,
         string calldata _name,
         string calldata _symbol,

@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
-import {Ownable} from "../proxy/utils/Ownable.sol";
+import {Ownable} from "../utils/Ownable.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 
 contract Registry is Ownable, IRegistry {
@@ -23,10 +23,10 @@ contract Registry is Ownable, IRegistry {
         _;
     }
 
-    function initialize(address _admin) external {
+    function initialize() external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
-        initializeOwnable(_admin);
+        initializeOwnable(msg.sender);
     }
 
     function setAddress(string calldata id, address _address) 
@@ -77,7 +77,7 @@ contract Registry is Ownable, IRegistry {
 
     // View Functions
 
-    function getAllkeys() external view returns(string[] memory) {
+    function getAllKeys() external view returns(string[] memory) {
         return keys;
     }
 

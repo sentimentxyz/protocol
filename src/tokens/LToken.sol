@@ -2,14 +2,14 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
-import {Pausable} from "../proxy/utils/Pausable.sol";
+import {Pauseable} from "../utils/Pauseable.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {ERC4626} from "./utils/ERC4626.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
 
-contract LToken is Pausable, ERC4626 {
+contract LToken is Pauseable, ERC4626 {
     using PRBMathUD60x18 for uint;
 
     bool initialized;
@@ -29,7 +29,6 @@ contract LToken is Pausable, ERC4626 {
     event ReservesRedeemed(address indexed treasury, uint value);
 
     function initialize(
-        address _admin,
         ERC20 _asset,
         string calldata _name,
         string calldata _symbol,
@@ -38,7 +37,7 @@ contract LToken is Pausable, ERC4626 {
     ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
-        initializeOwnable(_admin);
+        initializePauseable(msg.sender);
         initializeERC4626(_asset, _name, _symbol);
         registry = _registry;
         reserveFactor = _reserveFactor;

@@ -83,7 +83,7 @@ contract TestBase is Test {
         registry = IRegistry(
             address(new Proxy(address(registryImplementation)))
         );
-        registry.initialize(address(this));
+        registry.initialize();
         
         oracle = new OracleFacade();
         rateModel = new DefaultRateModel();
@@ -95,20 +95,18 @@ contract TestBase is Test {
         accountManager = IAccountManager(
             address(new Proxy(address(accountManagerImplementation)))
         );
-        accountManager.initialize(address(this), registry);
+        accountManager.initialize(registry);
         
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
         lEthImplementation = new LEther();
         lEth = ILEther(address(new Proxy(address(lEthImplementation))));
-        lEth.initialize(address(this), weth, "LEther", "LEth", registry, 0);
+        lEth.initialize(weth, "LEther", "LEth", registry, 0);
 
         lErc20Implementation = new LToken();
         lErc20 = ILToken(address(new Proxy(address(lErc20Implementation))));
-        lErc20.initialize(
-            address(this), erc20, "LTestERC20", "LERC20", registry, 0
-        );
+        lErc20.initialize(erc20, "LTestERC20", "LERC20", registry, 0);
     }
 
     function register() private {
