@@ -12,24 +12,24 @@ import {IAccount} from "../interface/core/IAccount.sol";
 */
 contract Account is IAccount {
     using Helpers for address;
-    
+
     /* -------------------------------------------------------------------------- */
     /*                              STORAGE VARIABLES                             */
     /* -------------------------------------------------------------------------- */
 
     /// @notice Block number for when the account is activated
     uint public activationBlock;
-    
-    /** 
+
+    /**
         @notice Address of account manager
         @dev If the value is 0x0 the contract is not initialized
     */
     address public accountManager;
 
-    
+
     /// @notice A list of ERC-20 assets (Collaterals + Borrows) present in the account
     address[] public assets;
-    
+
     /// @notice A list of borrowed ERC-20 assets present in the account
     address[] public borrows;
 
@@ -40,8 +40,8 @@ contract Account is IAccount {
     modifier accountManagerOnly() {
         if (msg.sender != accountManager) revert Errors.AccountManagerOnly();
         _;
-    }   
-    
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                             EXTERNAL FUNCTIONS                             */
     /* -------------------------------------------------------------------------- */
@@ -141,7 +141,7 @@ contract Account is IAccount {
         @return retData Data returned by given target contract after
             the transaction
     */
-    function exec(address target, uint amt, bytes calldata data) 
+    function exec(address target, uint amt, bytes calldata data)
         external
         payable
         accountManagerOnly
@@ -170,7 +170,7 @@ contract Account is IAccount {
 
     /* -------------------------------------------------------------------------- */
     /*                             INTERNAL FUNCTIONS                             */
-    /* -------------------------------------------------------------------------- */    
+    /* -------------------------------------------------------------------------- */
 
     /**
         @dev Utility function to remove a given address from a list of addresses
