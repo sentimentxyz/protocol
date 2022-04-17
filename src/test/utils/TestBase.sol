@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {DSTest} from "ds-test/test.sol";
+import {Test} from "forge-std/Test.sol";
 import {TestERC20} from "./TestERC20.sol";
 import {CheatCodes} from "./CheatCodes.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
@@ -18,7 +18,7 @@ import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
-contract TestBase is DSTest {
+contract TestBase is Test {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
