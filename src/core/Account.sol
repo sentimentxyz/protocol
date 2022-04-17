@@ -17,11 +17,11 @@ contract Account is IAccount {
     /*                              STORAGE VARIABLES                             */
     /* -------------------------------------------------------------------------- */
 
-    /// @notice block number for when the account is activated
+    /// @notice Block number for when the account is activated
     uint public activationBlock;
     
     /** 
-        @notice address of account manager
+        @notice Address of account manager
         @dev If the value is 0x0 the contract is not initialized
     */
     address public accountManager;
@@ -47,7 +47,7 @@ contract Account is IAccount {
     /* -------------------------------------------------------------------------- */
 
     /**
-        @notice Initializes the account by setting the address of the account 
+        @notice Initializes the account by setting the address of the account
             manager
         @dev Can only be called as long as the address of the accountManager is
             0x0
@@ -67,7 +67,7 @@ contract Account is IAccount {
     }
 
     /**
-        @notice Activates an account by setting the activationBlock to the 
+        @notice Activates an account by setting the activationBlock to the
             current block number
     */
     function activate() external accountManagerOnly {
@@ -123,9 +123,9 @@ contract Account is IAccount {
     }
 
     /**
-        @notice Returns whether the account has debt or not by checking the length 
+        @notice Returns whether the account has debt or not by checking the length
             of the borrows list
-        @return hasNoDebt bool 
+        @return hasNoDebt bool
     */
     function hasNoDebt() external view returns (bool) {
         return borrows.length == 0;
@@ -135,10 +135,10 @@ contract Account is IAccount {
         @notice Generalized utility function to transact with a given contract
         @param target Address of contract to transact with
         @param amt Amount of Eth to send to the target contract
-        @param data Encoded sig + params of the function to transact with in the 
+        @param data Encoded sig + params of the function to transact with in the
             target contract
-        @return success True if transaction was successful, false otherwise.
-        @return retData Data returned by given target contract after 
+        @return success True if transaction was successful, false otherwise
+        @return retData Data returned by given target contract after
             the transaction
     */
     function exec(address target, uint amt, bytes calldata data) 
@@ -152,9 +152,9 @@ contract Account is IAccount {
     }
 
     /**
-        @notice Utility function to transfer all assets to a specified account 
+        @notice Utility function to transfer all assets to a specified account
             and delete all assets
-        @param toAddress address of the account to send the assets to 
+        @param toAddress address of the account to send the assets to
     */
     function sweepTo(address toAddress) external accountManagerOnly {
         uint assetsLen = assets.length;
@@ -175,7 +175,7 @@ contract Account is IAccount {
     /**
         @dev Utility function to remove a given address from a list of addresses
         @param arr A list of addresses
-        @param token Address to remove 
+        @param token Address to remove
     */
     function _remove(address[] storage arr, address token) internal {
          uint len = arr.length;
