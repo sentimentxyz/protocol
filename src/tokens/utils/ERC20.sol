@@ -48,7 +48,7 @@ abstract contract ERC20 {
                                CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    function initializeERC20(
+    function initERC20(
         string memory _name,
         string memory _symbol,
         uint8 _decimals

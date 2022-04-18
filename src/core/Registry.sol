@@ -23,10 +23,10 @@ contract Registry is Ownable, IRegistry {
         _;
     }
 
-    function initialize() external {
+    function init() external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
-        initializeOwnable(msg.sender);
+        initOwnable(msg.sender);
     }
 
     function setAddress(string calldata id, address _address) 

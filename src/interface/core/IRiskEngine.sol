@@ -2,7 +2,7 @@
 pragma solidity ^0.8.10;
 
 interface IRiskEngine {
-    function initializeDependencies() external;
+    function initDep() external;
     function getBorrows(address account) external returns (uint);
     function getBalance(address account) external view returns (uint);
     function isAccountHealthy(address account) external returns (bool);

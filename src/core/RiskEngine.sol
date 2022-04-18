@@ -21,11 +21,12 @@ contract RiskEngine is Ownable, IRiskEngine {
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
     constructor(IRegistry _registry) {
-        initializeOwnable(msg.sender);
+        initOwnable(msg.sender);
         registry = _registry;
     }
 
-    function initializeDependencies() external adminOnly {
+    /// @notice Initializes external dependencies
+    function initDep() external adminOnly {
         oracle = IOracle(registry.addressFor('ORACLE'));
         accountManager = IAccountManager(registry.addressFor('ACCOUNT_MANAGER'));
     } 

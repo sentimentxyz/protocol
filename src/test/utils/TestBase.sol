@@ -83,7 +83,7 @@ contract TestBase is Test {
         registry = IRegistry(
             address(new Proxy(address(registryImplementation)))
         );
-        registry.initialize();
+        registry.init();
         
         oracle = new OracleFacade();
         rateModel = new DefaultRateModel();
@@ -95,18 +95,18 @@ contract TestBase is Test {
         accountManager = IAccountManager(
             address(new Proxy(address(accountManagerImplementation)))
         );
-        accountManager.initialize(registry);
+        accountManager.init(registry);
         
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
         lEthImplementation = new LEther();
         lEth = ILEther(address(new Proxy(address(lEthImplementation))));
-        lEth.initialize(weth, "LEther", "LEth", registry, 0);
+        lEth.init(weth, "LEther", "LEth", registry, 0);
 
         lErc20Implementation = new LToken();
         lErc20 = ILToken(address(new Proxy(address(lErc20Implementation))));
-        lErc20.initialize(erc20, "LTestERC20", "LERC20", registry, 0);
+        lErc20.init(erc20, "LTestERC20", "LERC20", registry, 0);
     }
 
     function register() private {
@@ -122,10 +122,10 @@ contract TestBase is Test {
     }
 
     function initialize() private {
-        riskEngine.initializeDependencies();
-        accountManager.initializeDependencies();
-        lEth.initializeDependencies('RATE_MODEL');
-        lErc20.initializeDependencies('RATE_MODEL');
+        riskEngine.initDep();
+        accountManager.initDep();
+        lEth.initDep('RATE_MODEL');
+        lErc20.initDep('RATE_MODEL');
 
         accountManager.toggleCollateralStatus(address(erc20));
     }

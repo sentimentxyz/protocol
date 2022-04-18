@@ -4,13 +4,13 @@ pragma solidity ^0.8.10;
 import {Errors} from "./Errors.sol";
 import {Ownable} from  "./Ownable.sol";
 
-abstract contract Pauseable is Ownable {
+abstract contract Pausable is Ownable {
     bool public paused;
 
     event PauseToggled(address indexed admin, bool pause);
 
-    function initializePauseable(address _admin) internal {
-        initializeOwnable(_admin);
+    function initPausable(address _admin) internal {
+        initOwnable(_admin);
     }
 
     modifier whenNotPaused() {

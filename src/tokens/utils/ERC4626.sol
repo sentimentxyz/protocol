@@ -32,13 +32,13 @@ abstract contract ERC4626 is CustomERC20 {
 
     ERC20 public asset;
 
-    function initializeERC4626(
+    function initERC4626(
         ERC20 _asset,
         string memory _name,
         string memory _symbol
     ) internal {
         asset = _asset;
-        initializeERC20(_name, _symbol, asset.decimals());
+        initERC20(_name, _symbol, asset.decimals());
     }
 
     /*//////////////////////////////////////////////////////////////

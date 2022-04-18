@@ -16,7 +16,7 @@ contract AccountManagerAdminOnlyTest is TestBase {
         assertEq(address(registry), address(accountManager.registry()));
 
         // Test
-        accountManager.initializeDependencies();
+        accountManager.initDep();
 
         // Assert
         assertEq(address(riskEngine), address(accountManager.riskEngine()));
@@ -28,6 +28,6 @@ contract AccountManagerAdminOnlyTest is TestBase {
         cheats.assume(caller != IOwnable(address(accountManager)).admin());
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
-        accountManager.initializeDependencies();
+        accountManager.initDep();
     }
 }

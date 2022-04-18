@@ -27,8 +27,8 @@ interface IAccountManager {
     function riskEngine() external returns (IRiskEngine);
     function accountFactory() external returns (IAccountFactory);
     function controller() external returns (IControllerFacade);
-    function initialize(IRegistry) external;
-    function initializeDependencies() external;
+    function init(IRegistry) external;
+    function initDep() external;
     function openAccount(address owner) external;
     function closeAccount(address account) external;
     function getInactiveAccounts() external view returns (address[] memory);

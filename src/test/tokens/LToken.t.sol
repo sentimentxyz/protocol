@@ -106,7 +106,7 @@ contract LTokenTest is TestBase {
         assertEq(address(registry), address(lErc20.registry()));
 
         // Test
-        accountManager.initializeDependencies();
+        accountManager.initDep();
 
         // Assert
         assertEq(address(rateModel), address(lErc20.rateModel()));
@@ -117,6 +117,6 @@ contract LTokenTest is TestBase {
         cheats.assume(caller != lErc20.admin());
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
-        lErc20.initializeDependencies('RATE_MODEL');
+        lErc20.initDep('RATE_MODEL');
     }
 }

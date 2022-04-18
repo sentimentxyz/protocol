@@ -12,7 +12,7 @@ abstract contract Ownable {
         address indexed newAdmin
     );
 
-    function initializeOwnable(address _admin) internal {
+    function initOwnable(address _admin) internal {
         admin = _admin;
     }
 

@@ -3,7 +3,7 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
 import {Helpers} from "../utils/Helpers.sol";
-import {Pauseable} from "../utils/Pauseable.sol";
+import {Pausable} from "../utils/Pausable.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
@@ -13,7 +13,7 @@ import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 
-contract AccountManager is Pauseable, IAccountManager {
+contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
     bool private initialized;
@@ -26,14 +26,15 @@ contract AccountManager is Pauseable, IAccountManager {
     address[] public inactiveAccounts;
     mapping(address => bool) public isCollateralAllowed;
 
-    function initialize(IRegistry _registry) external {
+    function init(IRegistry _registry) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
-        initializePauseable(msg.sender);
+        initPausable(msg.sender);
         registry = _registry;
     }
 
-    function initializeDependencies() external adminOnly {
+    /// @notice Initializes external dependencies
+    function initDep() external adminOnly {
         riskEngine = IRiskEngine(registry.addressFor('RISK_ENGINE'));
         controller = IControllerFacade(registry.addressFor('CONTROLLER'));
         accountFactory =
@@ -50,7 +51,7 @@ contract AccountManager is Pauseable, IAccountManager {
         address account;
         if (inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
-            IAccount(account).initialize(address(this));
+            IAccount(account).init(address(this));
             registry.addAccount(account, owner);
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];

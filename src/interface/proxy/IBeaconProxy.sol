@@ -2,5 +2,5 @@
 pragma solidity ^0.8.10;
 
 interface IBeaconProxy {
-    function initializeProxy(address beacon, address admin) external;
+    function initProxy(address beacon, address admin) external;
 }

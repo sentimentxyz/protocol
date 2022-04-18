@@ -9,14 +9,14 @@ import {IRegistry} from "../core/IRegistry.sol";
 import {IRateModel} from "../core/IRateModel.sol";
 
 interface ILToken is IERC20, IERC4626, IOwnable {
-    function initialize(
+    function init(
         ERC20 _asset,
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
         uint _reserveFactor
     ) external;
-    function initializeDependencies(string calldata) external;
+    function initDep(string calldata) external;
     
     function registry() external returns (IRegistry);
     function rateModel() external returns (IRateModel);
