@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {LToken} from "./LToken.sol";
 import {Helpers} from "../utils/Helpers.sol";
+import {Errors} from "../utils/Errors.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
@@ -15,12 +16,6 @@ interface IWETH {
 contract LEther is LToken {
     using Helpers for address;
     using PRBMathUD60x18 for uint;
-    
-    constructor(
-        ERC20 _asset,
-        IRegistry _registry,
-        uint _reserveFactor
-    ) LToken(_asset, "LEther", "LETH", _registry, _reserveFactor) {}
 
     function depositEth() external payable {
         uint assets = msg.value;

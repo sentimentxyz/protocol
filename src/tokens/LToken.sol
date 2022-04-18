@@ -4,16 +4,17 @@ pragma solidity ^0.8.10;
 import {Errors} from "../utils/Errors.sol";
 import {Pausable} from "../utils/Pausable.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {ERC4626} from "solmate/mixins/ERC4626.sol";
-import {ILToken} from "../interface/tokens/ILToken.sol";
+import {ERC4626} from "./utils/ERC4626.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
 
-contract LToken is Pausable, ERC4626, ILToken {
+contract LToken is Pausable, ERC4626 {
     using PRBMathUD60x18 for uint;
 
-    IRegistry public immutable registry;
+    bool initialized;
+
+    IRegistry public registry;
 
     IRateModel public rateModel;
     address public accountManager;
@@ -25,18 +26,25 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     mapping (address => uint) public borrowsOf;
 
-    constructor(
+    event ReservesRedeemed(address indexed treasury, uint value);
+
+    function init(
         ERC20 _asset,
-        string memory _name, 
-        string memory _symbol,
+        string calldata _name,
+        string calldata _symbol,
         IRegistry _registry,
         uint _reserveFactor
-    ) Pausable(msg.sender) ERC4626(_asset, _name, _symbol) {
+    ) external {
+        if (initialized) revert Errors.ContractAlreadyInitialized();
+        initialized = true;
+        initPausable(msg.sender);
+        initERC4626(_asset, _name, _symbol);
         registry = _registry;
         reserveFactor = _reserveFactor;
     }
 
-    function initialize(string calldata _rateModel) external adminOnly {
+    /// @notice Initializes external dependencies
+    function initDep(string calldata _rateModel) external adminOnly {
         rateModel = IRateModel(registry.addressFor(_rateModel));
         accountManager = registry.addressFor('ACCOUNT_MANAGER');
     }

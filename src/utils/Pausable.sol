@@ -9,7 +9,9 @@ abstract contract Pausable is Ownable {
 
     event PauseToggled(address indexed admin, bool pause);
 
-    constructor(address _admin) Ownable(_admin) {}
+    function initPausable(address _admin) internal {
+        initOwnable(_admin);
+    }
 
     modifier whenNotPaused() {
         if (paused) revert Errors.ContractPaused();

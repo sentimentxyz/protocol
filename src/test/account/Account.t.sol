@@ -18,7 +18,7 @@ contract AccountTest is TestBase {
     function testInitialize() public {
         // Test
         cheats.expectRevert(Errors.ContractAlreadyInitialized.selector);
-        account.initialize(address(accountManager));
+        account.init(address(accountManager));
     }
 
     function testAddAsset(address token) public {

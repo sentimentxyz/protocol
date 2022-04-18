@@ -19,7 +19,7 @@ contract Account is IAccount {
         _;
     }
 
-    function initialize(address _accountManager) external {
+    function init(address _accountManager) external {
         if (accountManager != address(0))
             revert Errors.ContractAlreadyInitialized();
         accountManager = _accountManager;

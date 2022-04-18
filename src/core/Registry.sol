@@ -7,6 +7,8 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 
 contract Registry is Ownable, IRegistry {
 
+    bool private initialized;
+
     string[] public keys;
     address[] public accounts;
     address[] public LTokenList;
@@ -15,12 +17,16 @@ contract Registry is Ownable, IRegistry {
     mapping(address => address) public LTokenFor;
     mapping(string => address) public addressFor;
 
-    constructor() Ownable(msg.sender) {}
-
     modifier accountManagerOnly() {
         if (msg.sender != addressFor['ACCOUNT_MANAGER']) 
             revert Errors.AccountManagerOnly();
         _;
+    }
+
+    function init() external {
+        if (initialized) revert Errors.ContractAlreadyInitialized();
+        initialized = true;
+        initOwnable(msg.sender);
     }
 
     function setAddress(string calldata id, address _address) 
@@ -71,7 +77,7 @@ contract Registry is Ownable, IRegistry {
 
     // View Functions
 
-    function getAllkeys() external view returns(string[] memory) {
+    function getAllKeys() external view returns(string[] memory) {
         return keys;
     }
 

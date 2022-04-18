@@ -63,7 +63,7 @@ contract RiskEngineTest is TestBase {
         assertEq(address(registry), address(riskEngine.registry()));
 
         // Test
-        riskEngine.initialize();
+        riskEngine.initDep();
 
         // Assert
         assertEq(address(oracle), address(riskEngine.oracle()));
@@ -74,6 +74,6 @@ contract RiskEngineTest is TestBase {
         cheats.assume(caller != riskEngine.admin());
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
-        riskEngine.initialize();
+        riskEngine.initDep();
     }
 }

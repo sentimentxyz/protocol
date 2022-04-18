@@ -9,14 +9,16 @@ import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
-import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
+import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 
 contract AccountManager is Pausable, IAccountManager {
     using Helpers for address;
 
-    IRegistry public immutable registry;
+    bool private initialized;
+
+    IRegistry public registry;
     IRiskEngine public riskEngine;
     IControllerFacade public controller;
     IAccountFactory public accountFactory;
@@ -24,14 +26,19 @@ contract AccountManager is Pausable, IAccountManager {
     address[] public inactiveAccounts;
     mapping(address => bool) public isCollateralAllowed;
 
-    constructor(IRegistry _registry) Pausable(msg.sender) {
+    function init(IRegistry _registry) external {
+        if (initialized) revert Errors.ContractAlreadyInitialized();
+        initialized = true;
+        initPausable(msg.sender);
         registry = _registry;
     }
 
-    function initialize() external adminOnly {
+    /// @notice Initializes external dependencies
+    function initDep() external adminOnly {
         riskEngine = IRiskEngine(registry.addressFor('RISK_ENGINE'));
         controller = IControllerFacade(registry.addressFor('CONTROLLER'));
-        accountFactory = IAccountFactory(registry.addressFor('ACCOUNT_FACTORY'));
+        accountFactory =
+            IAccountFactory(registry.addressFor('ACCOUNT_FACTORY'));
     }
 
     modifier onlyOwner(address account) {
@@ -44,7 +51,7 @@ contract AccountManager is Pausable, IAccountManager {
         address account;
         if (inactiveAccounts.length == 0) {
             account = accountFactory.create(address(this));
-            IAccount(account).initialize(address(this));
+            IAccount(account).init(address(this));
             registry.addAccount(account, owner);
         } else {
             account = inactiveAccounts[inactiveAccounts.length - 1];

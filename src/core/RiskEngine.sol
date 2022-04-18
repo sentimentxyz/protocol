@@ -7,7 +7,7 @@ import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
-import {IOracle} from "../interface/periphery/IOracle.sol";
+import {IOracle} from "oracle/core/IOracle.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
@@ -20,11 +20,13 @@ contract RiskEngine is Ownable, IRiskEngine {
     IAccountManager public accountManager;
     uint public constant balanceToBorrowThreshold = 12 * 1e17; // 1.2
 
-    constructor(IRegistry _registry) Ownable(msg.sender) {
+    constructor(IRegistry _registry) {
+        initOwnable(msg.sender);
         registry = _registry;
     }
 
-    function initialize() external adminOnly {
+    /// @notice Initializes external dependencies
+    function initDep() external adminOnly {
         oracle = IOracle(registry.addressFor('ORACLE'));
         accountManager = IAccountManager(registry.addressFor('ACCOUNT_MANAGER'));
     } 

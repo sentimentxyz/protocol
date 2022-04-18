@@ -4,18 +4,23 @@ pragma solidity ^0.8.10;
 import {Test} from "forge-std/Test.sol";
 import {TestERC20} from "./TestERC20.sol";
 import {CheatCodes} from "./CheatCodes.sol";
+import {Proxy} from "../../proxy/Proxy.sol";
+import {WETH} from "solmate/tokens/WETH.sol";
 import {Beacon} from "../../proxy/Beacon.sol";
 import {Account} from "../../core/Account.sol";
 import {LEther} from "../../tokens/LEther.sol";
 import {LToken} from "../../tokens/LToken.sol";
+import {ILToken} from "../../interface/tokens/ILToken.sol";
+import {ILEther} from "../../interface/tokens/ILEther.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {WETH} from "solmate/tokens/WETH.sol";
 import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
+import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
-import {OracleFacade} from "oracle/core/OracleFacade.sol";
+import {IRegistry} from "../../interface/core/IRegistry.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
+import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
 contract TestBase is Test {
@@ -27,13 +32,22 @@ contract TestBase is Test {
     TestERC20 erc20;
 
     // LTokens
-    LEther lEth;
-    LToken lErc20;
+    LEther lEthImplementation;
+    ILEther lEth;
+
+    LToken lErc20Implementation;
+    ILToken lErc20;
 
     // Core Contracts
     RiskEngine riskEngine;
-    Registry registry;
-    AccountManager accountManager;
+    
+    // Registry Proxy
+    Registry registryImplementation;
+    IRegistry registry;
+
+    // Account Manager Proxy
+    AccountManager accountManagerImplementation;
+    IAccountManager accountManager;
 
     // Account Factory
     Beacon beacon;
@@ -64,18 +78,35 @@ contract TestBase is Test {
     }
 
     function deploy() private {
-        registry = new Registry();
+        // Registry deployment
+        registryImplementation = new Registry();
+        registry = IRegistry(
+            address(new Proxy(address(registryImplementation)))
+        );
+        registry.init();
+        
         oracle = new OracleFacade();
         rateModel = new DefaultRateModel();
         controller = new ControllerFacade();
         riskEngine = new RiskEngine(registry);
-        accountManager = new AccountManager(registry);
+        
+        // Account Manager deployment
+        accountManagerImplementation = new AccountManager();
+        accountManager = IAccountManager(
+            address(new Proxy(address(accountManagerImplementation)))
+        );
+        accountManager.init(registry);
         
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 
-        lEth = new LEther(weth, registry, 0);
-        lErc20 = new LToken(erc20, "LTestERC20", "LERC20", registry, 0);
+        lEthImplementation = new LEther();
+        lEth = ILEther(address(new Proxy(address(lEthImplementation))));
+        lEth.init(weth, "LEther", "LEth", registry, 0);
+
+        lErc20Implementation = new LToken();
+        lErc20 = ILToken(address(new Proxy(address(lErc20Implementation))));
+        lErc20.init(erc20, "LTestERC20", "LERC20", registry, 0);
     }
 
     function register() private {
@@ -91,10 +122,10 @@ contract TestBase is Test {
     }
 
     function initialize() private {
-        riskEngine.initialize();
-        accountManager.initialize();
-        lEth.initialize('RATE_MODEL');
-        lErc20.initialize('RATE_MODEL');
+        riskEngine.initDep();
+        accountManager.initDep();
+        lEth.initDep('RATE_MODEL');
+        lErc20.initDep('RATE_MODEL');
 
         accountManager.toggleCollateralStatus(address(erc20));
     }

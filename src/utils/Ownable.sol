@@ -12,7 +12,7 @@ abstract contract Ownable {
         address indexed newAdmin
     );
 
-    constructor(address _admin) {
+    function initOwnable(address _admin) internal {
         admin = _admin;
     }
 
