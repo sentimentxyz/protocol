@@ -86,7 +86,12 @@ contract TestBase is Test {
         registry.init();
         
         oracle = new OracleFacade();
-        rateModel = new DefaultRateModel();
+        rateModel = new DefaultRateModel(
+            1 * 1e17,
+            3 * 1e17,
+            35 * 1e17,
+            2102400 * 1e18
+        );
         controller = new ControllerFacade();
         riskEngine = new RiskEngine(registry);
         

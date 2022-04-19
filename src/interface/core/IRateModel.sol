@@ -6,5 +6,5 @@ interface IRateModel {
         uint liquidity,
         uint borrows,
         uint reserves
-    ) external pure returns (uint);
+    ) external view returns (uint);
 }
