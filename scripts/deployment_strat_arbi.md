@@ -63,15 +63,15 @@
 
 ---
 
-### Interactions
+## Interactions
 
-#### Chain link Oracle
+### Chain link Oracle
 
 1. Deploy ChainLinkOracle(ETH/USD)
     1. call oracleFacade.setOracle(token, ChainLinkOracle)
 2. For every token call chainLinkOracle.setFeed(Token, Token/USD)
 
-##### Chain link oracle Contracts
+#### Chain link oracle Contracts
 
 1. ETH/USD - 0x639fe6ab55c921f74e7fac1ee960c0b6293ba612
 2. BTC/USD - 0x6ce185860a4963106506c203335a2910413708e9
@@ -80,7 +80,7 @@
 
 ---
 
-#### Uniswap
+### Uniswap
 
 1. Deploy Controllers
    1. Deploy UniV3Controller(controllerFacade)
@@ -88,7 +88,7 @@
 2. Toggle allowance for tokens which are to be swapped.
    1. controllerFacade.toggleTokenAllowance(token)
 
-##### Uniswap Contracts
+#### Uniswap Contracts
 
 1. Router - 0xE592427A0AEce92De3Edee1F18E0157C05861564
 2. Quoter - 0xb27308f9F90D607463bb33eA1BeBb41C27CE5AB6
@@ -96,7 +96,7 @@
 
 ---
 
-#### SushiSwap
+### SushiSwap
 
 1. Deploy Controller
    1. Deploy UniV2Controller(controllerFacade)
@@ -105,7 +105,7 @@
    1. Deploy UniV2LPOracle(OracleFacade)
    2. call oracleFacade.setOracle(Pair, UniV2LPOracle)
 
-##### SushiSwap Contracts
+#### SushiSwap Contracts
 
 1. SushiSwap Router - 0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506
 2. Factory - 0xc35DADB65012eC5796536bD9864eD8773aBc74C4
@@ -117,7 +117,7 @@
 
 ---
 
-#### Aave
+### Aave
 
 1. Deploy Controller
    1. Deploy AaveV3Controller(controllerFacade)
@@ -130,7 +130,7 @@
    1. call oracleFacade.setOracle(aToken, aTokenOracle)
    2. call controllerFacade.toggleTokenAllowance(aToken)
 
-##### Aave contracts
+#### Aave contracts
 
 1. Pool - 0x794a61358D6845594F94dc1DB02A252b5b4814aD
 2. PoolDataProvider - 0x69FA688f1Dc47d4B5d8029D5a35FB7a548310654
@@ -143,7 +143,7 @@
 
 ---
 
-#### WETH
+### WETH
 
 1. Deploy Controller
    1. Deploy WETHController(WETH)
@@ -153,7 +153,9 @@
    1. Deploy WETHOracle()
    2. call oracleFacade.setOracle(WETH, WETHOracle)
 
-#### Curve
+---
+
+### Curve
 
 1. Deploy Controller
    1. Deploy CurveCryptoSwapController(controllerFacade)
@@ -162,14 +164,14 @@
    1. Deploy CurveTriCryptoOracle(Pool)
    2. call oracleFacade.setOracle(crv3crypto, CurveTriCryptoOracle)
 
-##### Curve Contracts
+#### Curve Contracts
 
 1. Pool - 0x960ea3e3C7FB317332d990873d354E18d7645590
 2. crv3crypto - 0x8e0B8c8BB9db49a46697F3a5Bb8A308e744821D2
 
 ---
 
-#### Yearn
+### Yearn
 
 1. Deploy Controller
    1. Deploy YearnVaultController()
@@ -178,13 +180,13 @@
    1. Deploy YTokenOracle(oracleFacade)
    2. call oracle.setOracle(Curve3CryptoVault, YTokenOracle)
 
-##### Yearn Contracts
+#### Yearn Contracts
 
 1. Curve3Crypto Vault - 0x239e14A19DFF93a17339DCC444f74406C17f8E67
 
 ---
 
-### Arbitrum token addresses
+## Arbitrum token addresses
 
 1. WETH - 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1
 2. DAI - 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1
