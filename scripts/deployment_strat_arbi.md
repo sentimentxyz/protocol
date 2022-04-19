@@ -2,8 +2,6 @@
 
 ## Contract deployment flow
 
----
-
 ### Core Contracts
 
 1. Registry
