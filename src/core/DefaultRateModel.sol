@@ -73,7 +73,7 @@ contract DefaultRateModel is IRateModel {
         pure
         returns (uint)
     {
-        return (liquidity - reserves + borrows == 0) ?
-            0 : borrows.div(liquidity - reserves + borrows);
+        uint totalAssets = liquidity - reserves + borrows;
+        return (totalAssets == 0) ? 0 : borrows.div(totalAssets);
     }
 }
