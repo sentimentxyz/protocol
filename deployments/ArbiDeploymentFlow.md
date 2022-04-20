@@ -34,6 +34,8 @@
 9. ControllerFacade
    1. Deploy Contract
    2. Register controller against "CONTROLLER_FACADE"
+   3. Setting token allowance
+      1. call controllerFacade.toggleTokenAllowance(token)
 10. Initializing dependencies
     1. AccountManager.initDep()
     2. RiskEngine.initDep()
@@ -83,8 +85,6 @@
 1. Deploy Controllers
    1. Deploy UniV3Controller(controllerFacade)
    2. call controllerFacade.updateController(Router, UniV3Controller)
-2. Toggle allowance for tokens which are to be swapped.
-   1. controllerFacade.toggleTokenAllowance(token)
 
 #### Uniswap Contracts
 
