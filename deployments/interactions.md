@@ -53,7 +53,7 @@
 
 | Interaction | Signature                                                                                   | Bytes      | Target                                     |
 |-------------|---------------------------------------------------------------------------------------------|------------|--------------------------------------------|
-| Swap        | exchange(uint256 coinId, uint256 coinId, uint256 amount, uint256 amountOutMin, bool useEth) | 0x394747c5 | 0x960ea3e3C7FB317332d990873d354E18d7645590 |
+| Swap        | exchange(uint256 tokenOutId, uint256 tokenInID, uint256 amount, uint256 amountOutMin, bool useEth) | 0x394747c5 | 0x960ea3e3C7FB317332d990873d354E18d7645590 |
 | Deposit     | add_liquidity(uint256[3] amounts, uint256 amountOutMin)                                     | 0x4515cef3 | 0x960ea3e3C7FB317332d990873d354E18d7645590 |
 | Withdraw    | remove_liquidity(uint256 amount, uint256[3] minAmounts)                                     | 0xecb586a5 | 0x960ea3e3C7FB317332d990873d354E18d7645590 |
 | Withdraw    | remove_liquidity_one_coin(uint256 amount,uint256 coinId, uint256 amountOutMin)              | 0xf1dc3cc9 | 0x960ea3e3C7FB317332d990873d354E18d7645590 |
