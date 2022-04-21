@@ -6,7 +6,7 @@ import {Helpers} from "../utils/Helpers.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 
 /**
-    @title Sentiment Credit Account
+    @title Sentiment Account
     @notice Contract that acts as a dynamic and distributed asset reserve
         which holds a user’s collateral and loaned assets
 */
@@ -14,7 +14,7 @@ contract Account is IAccount {
     using Helpers for address;
 
     /* -------------------------------------------------------------------------- */
-    /*                              STORAGE VARIABLES                             */
+    /*                              STATE VARIABLES                             */
     /* -------------------------------------------------------------------------- */
 
     /// @notice Block number for when the account is activated

@@ -18,7 +18,7 @@ interface IRegistry {
     function addAccount(address account, address owner) external;
     function updateAccount(address account, address owner) external;
     function closeAccount(address account) external;
-    
+
     function getAllAccounts() external view returns(address[] memory);
     function accountsOwnedBy(address user)
         external view returns (address[] memory);
