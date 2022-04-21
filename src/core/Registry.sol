@@ -8,14 +8,14 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 /**
     @title Registry Contract
     @notice This contract stores:
-        1. Address of all credit accounts as well their owners
-        2. LToken addresses and Token->LToken mapping
+        1. Address of all accounts as well their owners
+        2. Active LToken addresses and Token->LToken mapping
         3. Address of all deployed protocol contracts
 */
 contract Registry is Ownable, IRegistry {
 
     /* -------------------------------------------------------------------------- */
-    /*                              STORAGE VARIABLES                             */
+    /*                              STATE VARIABLES                             */
     /* -------------------------------------------------------------------------- */
 
     /// @notice Utility variable to indicate if contract is initialized
@@ -25,19 +25,19 @@ contract Registry is Ownable, IRegistry {
     /// @dev Contract Name should be separated by _ and in all caps Ex. (REGISTRY, RATE_MODEL)
     string[] public keys;
 
-    /// @notice List of credit accounts
+    /// @notice List of accounts
     address[] public accounts;
 
-    /// @notice List of lTokens
+    /// @notice List of active lTokens
     address[] public lTokens;
 
-    /// @notice Mapping indicating owner for given account (account => owner)
+    /// @notice Account address to owner mapping (account => owner)
     mapping(address => address) public ownerFor;
 
-    /// @notice Mapping indicating LToken for given token (token => LToken)
+    /// @notice Token to LToken mapping (token => LToken)
     mapping(address => address) public LTokenFor;
 
-    /// @notice Mapping indication address for given contract (contractName => contract)
+    /// @notice Contract name to contract address mapping (contractName => contract)
     mapping(string => address) public addressFor;
 
     /* -------------------------------------------------------------------------- */
@@ -107,8 +107,8 @@ contract Registry is Ownable, IRegistry {
         @notice Adds account and sets owner of the account
         @dev Adds account to accounts and stores owner for the account.
         Event AccountCreated(account, owner) is emitted
-        @param account Address of credit account
-        @param owner Address of owner of the credit account
+        @param account Address of account
+        @param owner Address of owner of the account
     */
     function addAccount(address account, address owner)
         external
@@ -120,9 +120,9 @@ contract Registry is Ownable, IRegistry {
     }
 
     /**
-        @notice Updates owner of a credit account
-        @param account Address of credit account
-        @param owner Address of owner of the credit account
+        @notice Updates owner of account
+        @param account Address of account
+        @param owner Address of owner of account
     */
     function updateAccount(address account, address owner)
         external
@@ -132,7 +132,7 @@ contract Registry is Ownable, IRegistry {
     }
 
     /**
-        @notice Closes credit account
+        @notice Closes account
         @dev Sets address of owner for the account to 0x0
         @param account Address of account to close
     */
@@ -153,15 +153,15 @@ contract Registry is Ownable, IRegistry {
     }
 
     /**
-        @notice Returns all credit accounts in registry
-        @return accounts List of credit accounts
+        @notice Returns all accounts in registry
+        @return accounts List of accounts
     */
     function getAllAccounts() external view returns (address[] memory) {
         return accounts;
     }
 
     /**
-        @notice Returns all lTokens in registry
+        @notice Returns all active LTokens in registry
         @return lTokens List of lTokens
     */
     function getAllLTokens() external view returns(address[] memory) {
@@ -171,7 +171,7 @@ contract Registry is Ownable, IRegistry {
     /**
         @notice Returns all accounts owned by a specific user
         @param user Address of user
-        @return userAccounts List of credit accounts
+        @return userAccounts List of accounts
     */
     function accountsOwnedBy(address user)
         external
