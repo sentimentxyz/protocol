@@ -179,8 +179,8 @@ contract Registry is Ownable, IRegistry {
         returns (address[] memory userAccounts)
     {
         userAccounts = new address[](accounts.length);
-        uint index = 0;
-        for (uint i = 0; i < accounts.length; i++) {
+        uint index;
+        for (uint i; i < accounts.length; i++) {
             if (ownerFor[accounts[i]] == user) {
                 userAccounts[index] = accounts[i];
                 index++;
