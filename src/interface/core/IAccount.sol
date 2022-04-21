@@ -16,8 +16,8 @@ interface IAccount {
     function getAssets() external view returns (address[] memory);
     function getBorrows() external view returns (address[] memory);
     function exec(
-        address target, 
-        uint amt, 
+        address target,
+        uint amt,
         bytes memory data
     ) payable external returns (bool, bytes memory);
 }

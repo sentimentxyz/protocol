@@ -56,13 +56,13 @@ library Helpers {
     }
 
     function withdraw(address account, address to, address token, uint value) internal {
-        (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
+        (bool success, bytes memory data) = IAccount(account).exec(token, 0,
                 abi.encodeWithSelector(IERC20.transfer.selector, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
     }
 
     function safeApprove(address account, address token, address spender, uint value) internal {
-        (bool success, bytes memory data) = IAccount(account).exec(token, 0, 
+        (bool success, bytes memory data) = IAccount(account).exec(token, 0,
             abi.encodeWithSelector(IERC20.approve.selector, spender, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED");
     }

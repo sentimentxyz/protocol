@@ -6,7 +6,6 @@ import {Ownable} from "../utils/Ownable.sol";
 import {IBeacon} from "../interface/proxy/IBeacon.sol";
 
 contract Beacon is IBeacon, Ownable {
-    
     address public implementation;
 
     event Upgraded(address indexed implementation);

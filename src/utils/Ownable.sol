@@ -24,6 +24,5 @@ abstract contract Ownable {
     function transferOwnership(address newAdmin) external virtual adminOnly {
         emit OwnershipTransferred(admin, newAdmin);
         admin = newAdmin;
-        
     }
 }
