@@ -21,7 +21,7 @@ contract Registry is Ownable, IRegistry {
     /// @notice Utility variable to indicate if contract is initialized
     bool private initialized;
 
-    /// @notice List of contracts whose mappings exist in addressFor
+    /// @notice List of contracts
     /// @dev Contract Name should be separated by _ and in all caps Ex. (REGISTRY, RATE_MODEL)
     string[] public keys;
 
@@ -34,7 +34,7 @@ contract Registry is Ownable, IRegistry {
     /// @notice Mapping indicating owner for given account (account => owner)
     mapping(address => address) public ownerFor;
 
-    /// @notice Mapping indication LToken for given token (token => LToken)
+    /// @notice Mapping indicating LToken for given token (token => LToken)
     mapping(address => address) public LTokenFor;
 
     /// @notice Mapping indication address for given contract (contractName => contract)
@@ -68,8 +68,8 @@ contract Registry is Ownable, IRegistry {
         @notice Sets contract address for a given contract id
         @dev If address is 0x0 it removes the address from keys.
         If addressFor[id] returns 0x0 then the contract id is added to keys
-        @param id contract name, format (REGISTRY, RATE_MODEL)
-        @param _address address of the contract, set to zero if you want to delete mapping
+        @param id Contract name, format (REGISTRY, RATE_MODEL)
+        @param _address Address of the contract
     */
     function setAddress(string calldata id, address _address)
         external
@@ -86,11 +86,11 @@ contract Registry is Ownable, IRegistry {
 
     /**
         @notice Sets LToken address for a specified token
-        @dev if underlying token is 0x0 LToken is removed from lTokens
-        if the mapping doesn't exist LToken is push to lTokens
+        @dev If underlying token is 0x0 LToken is removed from lTokens
+        if the mapping doesn't exist LToken is pushed to lTokens
         if the mapping exist LToken is updated in lTokens
-        @param underlying address of token
-        @param lToken address of LToken
+        @param underlying Address of token
+        @param lToken Address of LToken
     */
     function setLToken(address underlying, address lToken) external adminOnly {
         if (LTokenFor[underlying] == address(0)) {
@@ -107,8 +107,8 @@ contract Registry is Ownable, IRegistry {
         @notice Adds account and sets owner of the account
         @dev Adds account to accounts and stores owner for the account.
         Event AccountCreated(account, owner) is emitted
-        @param account address of credit account
-        @param owner address of owner of the credit account
+        @param account Address of credit account
+        @param owner Address of owner of the credit account
     */
     function addAccount(address account, address owner)
         external
@@ -121,8 +121,8 @@ contract Registry is Ownable, IRegistry {
 
     /**
         @notice Updates owner of a credit account
-        @param account address of credit account
-        @param owner address of owner of the credit account
+        @param account Address of credit account
+        @param owner Address of owner of the credit account
     */
     function updateAccount(address account, address owner)
         external
@@ -134,7 +134,7 @@ contract Registry is Ownable, IRegistry {
     /**
         @notice Closes credit account
         @dev Sets address of owner for the account to 0x0
-        @param account address of account to close
+        @param account Address of account to close
     */
     function closeAccount(address account) external accountManagerOnly {
         ownerFor[account] = address(0);
