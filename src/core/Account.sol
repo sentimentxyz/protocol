@@ -158,7 +158,7 @@ contract Account is IAccount {
     */
     function sweepTo(address toAddress) external accountManagerOnly {
         uint assetsLen = assets.length;
-        for(uint i = 0; i < assetsLen; ++i) {
+        for(uint i; i < assetsLen; ++i) {
             assets[i].safeTransfer(
                 toAddress,
                 assets[i].balanceOf(address(this))
@@ -179,7 +179,7 @@ contract Account is IAccount {
     */
     function _remove(address[] storage arr, address token) internal {
          uint len = arr.length;
-        for(uint i = 0; i < len; ++i) {
+        for(uint i; i < len; ++i) {
             if (arr[i] == token) {
                 arr[i] = arr[arr.length - 1];
                 arr.pop();
