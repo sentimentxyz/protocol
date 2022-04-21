@@ -36,7 +36,7 @@ contract LendingFlowTest is TestBase {
         // Test
         cheats.prank(lender);
         lEth.redeemEth(shares);
-        
+
         // Asserts
         assertEq(lender.balance, amt);
         assertEq(lEth.balanceOf(lender), 0);
@@ -47,7 +47,7 @@ contract LendingFlowTest is TestBase {
         // Setup
         cheats.assume(amt != 0);
         erc20.mint(lender, amt);
-        
+
         // Test
         cheats.startPrank(lender);
         erc20.approve(address(lErc20), type(uint).max);

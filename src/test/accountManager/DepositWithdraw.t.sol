@@ -25,8 +25,8 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         uint96 depositAmt,
         uint96 borrowAmt,
         uint96 withdrawAmt
-    ) 
-        public 
+    )
+        public
     {
         // Setup
         cheats.assume(depositAmt >= withdrawAmt);
@@ -51,8 +51,8 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         uint96 depositAmt,
         uint96 borrowAmt,
         uint96 withdrawAmt
-    ) 
-        public 
+    )
+        public
     {
         // Setup
         cheats.assume(borrowAmt != 0);
@@ -83,7 +83,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         accountManager.deposit(account, token, value);
     }
 
-    function testDepositCollateralTypeError(address token, uint96 value) 
+    function testDepositCollateralTypeError(address token, uint96 value)
         public
     {
         // Test
@@ -95,11 +95,11 @@ contract AccountManagerDepositWithdrawTest is TestBase {
 
     // Withdraw ERC20
     function testWithdraw(
-        uint96 depositAmt, 
+        uint96 depositAmt,
         uint96 borrowAmt,
         uint96 withdrawAmt
-    ) 
-        public 
+    )
+        public
     {
         // Setup
         cheats.assume(depositAmt >= withdrawAmt);
@@ -124,8 +124,8 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         uint96 depositAmt,
         uint96 borrowAmt,
         uint96 withdrawAmt
-    ) 
-        public 
+    )
+        public
     {
         // Setup
         cheats.assume(borrowAmt != 0);

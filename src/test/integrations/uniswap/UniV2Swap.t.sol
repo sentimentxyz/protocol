@@ -10,7 +10,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
     address user = cheats.addr(1);
 
     address constant UNIV2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
-    
+
     // Path Arrays
     address[] wethToUsdt = [WETH, USDT];
     address[] usdtToWeth = [USDT, WETH];
@@ -44,9 +44,9 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)", 
+            "swapExactTokensForTokens(uint256,uint256,address[],address,uint256)",
             amt, 0, wethToUsdt, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH, UNIV2_ROUTER, type(uint).max);
@@ -69,9 +69,9 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "swapTokensForExactTokens(uint256,uint256,address[],address,uint256)", 
+            "swapTokensForExactTokens(uint256,uint256,address[],address,uint256)",
             amountOut, amt, wethToUsdt, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH, UNIV2_ROUTER, type(uint).max);
@@ -92,9 +92,9 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "swapExactETHForTokens(uint256,address[],address,uint256)", 
+            "swapExactETHForTokens(uint256,address[],address,uint256)",
             0, wethToUsdt, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH, UNIV2_ROUTER, type(uint).max);
@@ -116,9 +116,9 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "swapETHForExactTokens(uint256,address[],address,uint256)", 
+            "swapETHForExactTokens(uint256,address[],address,uint256)",
             amountOut, wethToUsdt, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH, UNIV2_ROUTER, type(uint).max);
@@ -141,7 +141,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "swapExactTokensForETH(uint256,uint256,address[],address,uint256)", 
+            "swapExactTokensForETH(uint256,uint256,address[],address,uint256)",
             amtUsdt, 0, usdtToWeth, account, 1893456000);
 
         // Test
@@ -167,9 +167,9 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "swapTokensForExactETH(uint256,uint256,address[],address,uint256)", 
+            "swapTokensForExactETH(uint256,uint256,address[],address,uint256)",
             amountOut, amtUsdt, usdtToWeth, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, USDT, UNIV2_ROUTER, type(uint).max);

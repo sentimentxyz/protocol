@@ -13,8 +13,8 @@ contract RepayFlowTest is TestBase {
         account = openAccount(borrower);
     }
 
-    function testRepayEth(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt) 
-        public 
+    function testRepayEth(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt)
+        public
     {
         // Setup
         cheats.assume(borrowAmt > repayAmt);
@@ -28,13 +28,13 @@ contract RepayFlowTest is TestBase {
 
         // Assert
         assertEq(
-            riskEngine.getBalance(account), 
+            riskEngine.getBalance(account),
             uint(depositAmt) + borrowAmt - repayAmt
         );
         assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }
 
-    function testRepayERC20(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt) 
+    function testRepayERC20(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt)
         public
     {
         // Setup
@@ -49,7 +49,7 @@ contract RepayFlowTest is TestBase {
 
         // Assert
         assertEq(
-            riskEngine.getBalance(account), 
+            riskEngine.getBalance(account),
             uint(depositAmt) + borrowAmt - repayAmt
         );
         assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);

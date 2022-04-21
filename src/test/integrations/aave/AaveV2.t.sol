@@ -13,21 +13,21 @@ import {IProtocolDataProvider}
 contract AaveV2IntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
-    
+
     address lendingPool = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
     address aaveDataProvider = 0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d;
     address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
     address aDai = 0x028171bCA77440897B824Ca71D1c56caC55b68A3;
-    
+
     ATokenOracle aTokenOracle;
     AaveV2Controller aaveController;
 
     function setupAaveController() internal {
         aTokenOracle = new ATokenOracle(oracle);
         oracle.setOracle(aWeth, aTokenOracle);
-        
+
         aaveController = new AaveV2Controller(
-            controller, 
+            controller,
             IProtocolDataProvider(aaveDataProvider)
         );
         controller.updateController(lendingPool, aaveController);

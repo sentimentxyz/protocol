@@ -19,8 +19,8 @@ contract YearnIntegrationTest is IntegrationTestBase {
     function setupYearnController() internal {
         yearnController = new YearnVaultController();
         controller.updateController(yearnVault, yearnController);
-        
-        yTokenOracle = new YTokenOracle(oracle);  
+
+        yTokenOracle = new YTokenOracle(oracle);
         oracle.setOracle(yearnVault, yTokenOracle);
     }
 
@@ -41,7 +41,7 @@ contract YearnIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "deposit(uint256)", 
+            "deposit(uint256)",
             IERC20(crv3crypto).balanceOf(account)
         );
 
@@ -63,7 +63,7 @@ contract YearnIntegrationTest is IntegrationTestBase {
 
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
-            "withdraw(uint256)", 
+            "withdraw(uint256)",
             IERC20(yearnVault).balanceOf(account)
         );
 

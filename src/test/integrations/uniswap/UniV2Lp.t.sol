@@ -12,15 +12,15 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
 
     address constant UNIV2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address constant WETH_USDT_LP = 0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852;
-    
+
     UniV2Controller uniV2Controller;
     UniV2LpOracle uniLPOracle;
-    
+
     function setupUniV2Controller() private {
         uniV2Controller = new UniV2Controller(controller);
         controller.updateController(UNIV2_ROUTER, uniV2Controller);
         controller.toggleTokenAllowance(WETH_USDT_LP);
-        
+
         uniLPOracle = new UniV2LpOracle(oracle);
         oracle.setOracle(WETH_USDT_LP, uniLPOracle);
     }
@@ -51,7 +51,7 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
         bytes memory data = abi.encodeWithSignature(
             "addLiquidity(address,address,uint256,uint256,uint256,uint256,address,uint256)",
             WETH, USDT, amt, amtUsdt, 0, 0, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH, UNIV2_ROUTER, type(uint).max);
@@ -97,7 +97,7 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
         bytes memory data = abi.encodeWithSignature(
             "removeLiquidity(address,address,uint256,uint256,uint256,address,uint256)",
             WETH, USDT, lpTokens, 0, 0, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH_USDT_LP, UNIV2_ROUTER, type(uint).max);
@@ -120,7 +120,7 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
         bytes memory data = abi.encodeWithSignature(
             "removeLiquidityETH(address,uint256,uint256,uint256,address,uint256)",
             USDT, lpTokens, 0, 0, account, 1893456000);
-        
+
         // Test
         cheats.startPrank(user);
         accountManager.approve(account, WETH_USDT_LP, UNIV2_ROUTER, type(uint).max);

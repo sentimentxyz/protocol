@@ -32,13 +32,12 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     }
 
     // Swap ETH - ERC20 (ExactOutput)
-    
     function testMultiCallExactOutputSingleEthUSDT(uint64 amt) public {
         // Setup
         uint256 amtOut = 100 * 1e6; // 100 USD
         cheats.assume(amt > 1e8 gwei);
         deposit(user, account, address(0), amt);
-        
+
         // Encode calldata
         bytes[] memory multiData = new bytes[](2);
         multiData[0] = abi.encodeWithSignature(
@@ -69,9 +68,8 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     }
 
     // Swap ERC20 - ETH (ExactOutput)
-
     function testMultiCallExactOutputSingleUSDTETH(uint64 amt) public {
-        
+
         uint256 amtOut = 1e6 gwei;
         // Setup
         cheats.assume(amt > 1e8 gwei);
@@ -80,7 +78,7 @@ contract UniV3IntegrationTest is IntegrationTestBase {
         // Swap Eth for USDT
         swapEthUsdt(amt, account, user);
         uint usdtAmount = IERC20(USDT).balanceOf(account);
-        
+
         // Encode calldata
         bytes[] memory multiData = new bytes[](2);
         multiData[0] = abi.encodeWithSignature(
@@ -114,12 +112,11 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     }
 
     // Swap ERC20 - ETH (ExactInput)
-
     function testMultiCallExactInputSingleUSDTETH(uint64 amt) public {
         // Setup
         testMultiCallExactOutputSingleEthUSDT(amt);
         uint usdtAmount = IERC20(USDT).balanceOf(account);
-        
+
         // Encode calldata
         bytes[] memory multiData = new bytes[](2);
         multiData[0] = abi.encodeWithSignature(
@@ -154,17 +151,16 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     }
 
     // Swap ERC20 - ERC20 (ExactOutput)
-
     function testExactOutputSingleWETHUSDT(uint64 amt) public {
         uint256 amtOut = 100 * 1e6; // 100 USD
-        
+
         // Setup
         cheats.assume(amt > 1e8 gwei);
         deposit(user, account, address(0), amt);
 
         // Wrap Eth
         wrapEth(account, amt, user);
-        
+
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
             "exactOutputSingle((address,address,uint24,address,uint256,uint256,uint160))",
@@ -189,12 +185,11 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     }
 
     // Swap ETH - ERC20 (ExactInput)
-
     function testExactInputSingleETHUSDT(uint64 amt) public {
         // Setup
         cheats.assume(amt > 1e8 gwei);
         deposit(user, account, address(0), amt);
-        
+
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
             "exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))",
@@ -218,13 +213,12 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     }
 
     // Swap ERC20 - ERC20 (ExactInput)
-
     function testExactInputSingleWETHUSDT(uint64 amt) public {
         // Setup
         cheats.assume(amt > 1e8 gwei);
         deposit(user, account, address(0), amt);
         wrapEth(account, amt, user);
-        
+
         // Encode calldata
         bytes memory data = abi.encodeWithSignature(
             "exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))",
@@ -255,7 +249,7 @@ contract UniV3IntegrationTest is IntegrationTestBase {
         address recipient,
         uint256 amountOut,
         uint256 amountIn
-    ) 
+    )
         private
         pure
         returns (ISwapRouterV3.ExactOutputSingleParams memory data)
@@ -277,7 +271,7 @@ contract UniV3IntegrationTest is IntegrationTestBase {
         address recipient,
         uint256 amountOut,
         uint256 amountIn
-    ) 
+    )
         private
         pure
         returns (ISwapRouterV3.ExactInputSingleParams memory data)
