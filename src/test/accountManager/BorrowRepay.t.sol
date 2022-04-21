@@ -41,7 +41,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     function testBorrowRiskEngineError(
         uint96 depositAmt,
         uint96 borrowAmt
-    ) 
+    )
         public
     {
         // Setup
@@ -59,7 +59,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     function testBorrowEthRiskEngineError(
         uint96 depositAmt,
         uint96 borrowAmt
-    ) 
+    )
         public
     {
         // Setup
@@ -86,7 +86,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         address token,
         uint96 value
     )
-        public 
+        public
     {
         // Setup
         cheats.assume(token != address(0) && !isContract(token));

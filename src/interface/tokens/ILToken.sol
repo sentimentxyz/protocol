@@ -17,7 +17,7 @@ interface ILToken is IERC20, IERC4626, IOwnable {
         uint _reserveFactor
     ) external;
     function initDep(string calldata) external;
-    
+
     function registry() external returns (IRegistry);
     function rateModel() external returns (IRateModel);
     function accountManager() external returns (address);

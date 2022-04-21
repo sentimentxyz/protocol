@@ -6,7 +6,7 @@ import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
 
-interface IStableSwapPool {    
+interface IStableSwapPool {
     function get_dy(uint256, uint256, uint256) external view returns (uint256);
 }
 
@@ -112,7 +112,7 @@ contract CurveIntegrationTest is IntegrationTestBase {
         cheats.startPrank(user);
         accountManager.approve(account, crv3crypto, tricryptoPool, amt);
         accountManager.exec(account, tricryptoPool, 0, data);
-        
+
         // Assert
         assertTrue(IERC20(WETH).balanceOf(account) > 0);
         assertEq(IAccount(account).assets(0), WETH);
@@ -134,7 +134,7 @@ contract CurveIntegrationTest is IntegrationTestBase {
         cheats.startPrank(user);
         accountManager.approve(account, crv3crypto, tricryptoPool, amt);
         accountManager.exec(account, tricryptoPool, 0, data);
-        
+
         // Assert
         assertTrue(IERC20(WETH).balanceOf(account) > 0);
         assertEq(IAccount(account).assets(0), WETH);

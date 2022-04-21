@@ -6,7 +6,7 @@ import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 
 contract AccountTest is TestBase {
-    
+
     IAccount public account;
     address public owner = cheats.addr(1);
 

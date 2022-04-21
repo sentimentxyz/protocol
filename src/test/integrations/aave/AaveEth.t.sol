@@ -11,7 +11,7 @@ import {AaveEthController} from "controller/aave/AaveEthController.sol";
 contract AaveEthIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
-    
+
     address lendingPool = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
     address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
     address aaveWethGateway = 0xcc9a0B7c43DC2a5F023Bb9b738E45B0Ef6B06E04;
@@ -22,7 +22,7 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
     function setupAaveController() internal {
         aTokenOracle = new ATokenOracle(oracle);
         oracle.setOracle(aWeth, aTokenOracle);
-        
+
         aaveEthController = new AaveEthController(aWeth);
         controller.updateController(aaveWethGateway, aaveEthController);
     }
@@ -56,7 +56,7 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
         assertGt(IERC20(aWeth).balanceOf(account), 0);
         assertEq(IAccount(account).assets(0), aWeth);
     }
-    
+
     function testWithdrawEth(uint64 amt) public {
         // Setup
         testDepositEth(amt);

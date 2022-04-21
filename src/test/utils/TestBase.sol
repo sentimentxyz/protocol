@@ -40,7 +40,7 @@ contract TestBase is Test {
 
     // Core Contracts
     RiskEngine riskEngine;
-    
+
     // Registry Proxy
     Registry registryImplementation;
     IRegistry registry;
@@ -66,7 +66,7 @@ contract TestBase is Test {
     function setupContracts() internal virtual {
         // Log block number
         emit log_uint(block.number);
-        
+
         // Deploy Dummy ERC20
         erc20 = new TestERC20("TestERC20", "TEST", uint8(18));
         weth = new WETH();
@@ -84,7 +84,7 @@ contract TestBase is Test {
             address(new Proxy(address(registryImplementation)))
         );
         registry.init();
-        
+
         oracle = new OracleFacade();
         rateModel = new DefaultRateModel(
             1 * 1e17,
@@ -94,14 +94,14 @@ contract TestBase is Test {
         );
         controller = new ControllerFacade();
         riskEngine = new RiskEngine(registry);
-        
+
         // Account Manager deployment
         accountManagerImplementation = new AccountManager();
         accountManager = IAccountManager(
             address(new Proxy(address(accountManagerImplementation)))
         );
         accountManager.init(registry);
-        
+
         beacon = new Beacon(address(new Account()));
         accountFactory = new AccountFactory(address(beacon));
 

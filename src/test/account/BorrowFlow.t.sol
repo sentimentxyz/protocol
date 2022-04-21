@@ -37,7 +37,7 @@ contract BorrowFlowTest is TestBase {
         assertEq(erc20.balanceOf(address(lErc20)), 0);
         assertEq(lErc20.getBorrowBalance(address(account)), borrowAmt);
         assertEq(
-            erc20.balanceOf(address(account)), 
+            erc20.balanceOf(address(account)),
             uint(depositAmt) + borrowAmt
         );
     }

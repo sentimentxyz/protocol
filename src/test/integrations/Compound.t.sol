@@ -16,7 +16,7 @@ interface ICERC20 {
 contract CompoundIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
-    
+
     address constant cEth = 0x4Ddc2D193948926D02f9B1fE9e1daa0718270ED5;
     address constant cUSDT = 0xf650C3d88D12dB855b8bf7D11Be6C55A4e07dCC9;
 
@@ -27,7 +27,7 @@ contract CompoundIntegrationTest is IntegrationTestBase {
         compoundController = new CompoundController();
         controller.updateController(cEth, compoundController);
         controller.updateController(cUSDT, compoundController);
-        
+
         cTokenOracle = new CTokenOracle(oracle, cEth);
         oracle.setOracle(cEth, cTokenOracle);
         oracle.setOracle(cUSDT, cTokenOracle);
@@ -98,7 +98,7 @@ contract CompoundIntegrationTest is IntegrationTestBase {
         // Setup
         testDepositEth(amt);
         cheats.roll(block.number + 100);
-        
+
         // Encode call data
         uint cEthBalance = IERC20(cEth).balanceOf(account);
         bytes memory data = abi.encodeWithSignature(

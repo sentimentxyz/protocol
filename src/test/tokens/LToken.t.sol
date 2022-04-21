@@ -6,7 +6,7 @@ import {TestBase} from "../utils/TestBase.sol";
 import {console} from "../utils/console.sol";
 
 contract LTokenTest is TestBase {
-    
+
     address account;
     address owner = cheats.addr(1);
 
@@ -47,7 +47,7 @@ contract LTokenTest is TestBase {
         lErc20.lendTo(account, lendAmt);
     }
 
-    function testCollectFrom(uint lendAmt, uint liquidity, uint collectAmt) 
+    function testCollectFrom(uint lendAmt, uint liquidity, uint collectAmt)
         public
     {
         // Setup
@@ -65,8 +65,8 @@ contract LTokenTest is TestBase {
         assertTrue(isBorrowBalanceZero == (lendAmt == collectAmt));
     }
 
-    function testFailCollectFrom(uint lendAmt, uint liquidity, uint collectAmt) 
-        public 
+    function testFailCollectFrom(uint lendAmt, uint liquidity, uint collectAmt)
+        public
     {
         // Setup
         cheats.assume(collectAmt > lendAmt);
@@ -87,8 +87,8 @@ contract LTokenTest is TestBase {
         uint96 liquidity,
         uint96 borrowAmt,
         uint96 delta
-    ) 
-        public 
+    )
+        public
     {
         // Setup
         testLendTo(borrowAmt, liquidity);

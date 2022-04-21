@@ -18,7 +18,7 @@ contract LiquidationFlowTest is TestBase {
     function mockAccountRiskFactor() private {
         assertTrue(riskEngine.isAccountHealthy(account)); // Account is healthy pre-test
         cheats.mockCall(
-            address(riskEngine), 
+            address(riskEngine),
             abi.encodeWithSelector(riskEngine.isAccountHealthy.selector),
             abi.encode(false)
         );

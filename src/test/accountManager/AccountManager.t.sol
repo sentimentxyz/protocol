@@ -32,8 +32,8 @@ contract AccountManagerTest is TestBase {
     function testLiquidateHealthyAccount(
         uint96 depositAmt,
         uint borrowAmt
-    ) 
-        public 
+    )
+        public
     {
         // Setup
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
