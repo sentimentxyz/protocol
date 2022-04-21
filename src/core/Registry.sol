@@ -8,7 +8,7 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 /**
     @title Registry Contract
     @notice This contract stores:
-        1. address of all credit accounts as well their owners
+        1. Address of all credit accounts as well their owners
         2. LToken addresses and Token->LToken mapping
         3. Address of all deployed protocol contracts
 */
