@@ -9,25 +9,72 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
 
+/**
+    @title Lending Token
+    @notice Lending token with ERC4626 implementation
+*/
 contract LToken is Pausable, ERC4626 {
     using PRBMathUD60x18 for uint;
 
-    bool initialized;
+    /* -------------------------------------------------------------------------- */
+    /*                               STATE VARIABLES                              */
+    /* -------------------------------------------------------------------------- */
 
+    /// @notice Utility variable to indicate if contract is initialized
+    bool private initialized;
+
+    /// @notice Registry
     IRegistry public registry;
 
+    /// @notice Rate Model
     IRateModel public rateModel;
+
+    /// @notice Account Manager
     address public accountManager;
 
+    /// @notice Total amount of reserves
     uint public reserves;
+
+    /// @notice Total amount of borrows
     uint public borrows;
+
+    /// @notice Reserve Factor
     uint public reserveFactor;
+
+    /// @notice Block number of when the state of the LToken was last updated
     uint public lastUpdated;
 
+    /// @notice Mapping of account to borrow amount
     mapping (address => uint) public borrowsOf;
+
+    /* -------------------------------------------------------------------------- */
+    /*                                   EVENTS                                   */
+    /* -------------------------------------------------------------------------- */
 
     event ReservesRedeemed(address indexed treasury, uint value);
 
+    /* -------------------------------------------------------------------------- */
+    /*                              CUSTOM MODIFIERS                              */
+    /* -------------------------------------------------------------------------- */
+
+    modifier accountManagerOnly() {
+        if (msg.sender != accountManager) revert Errors.AccountManagerOnly();
+        _;
+    }
+
+    /* -------------------------------------------------------------------------- */
+    /*                             EXTERNAL FUNCTIONS                             */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+        @notice Contract initialization function
+        @dev Can only be invoked once
+        @param _asset Underlying ERC20 token
+        @param _name Name of LToken
+        @param _symbol Symbol of LToken
+        @param _registry Address of Registry
+        @param _reserveFactor Reserve Factor
+    */
     function init(
         ERC20 _asset,
         string calldata _name,
@@ -43,35 +90,27 @@ contract LToken is Pausable, ERC4626 {
         reserveFactor = _reserveFactor;
     }
 
-    /// @notice Initializes external dependencies
+    /**
+        @notice Initializes external dependencies
+        @param _rateModel Name of rate model contract
+    */
     function initDep(string calldata _rateModel) external adminOnly {
         rateModel = IRateModel(registry.addressFor(_rateModel));
         accountManager = registry.addressFor('ACCOUNT_MANAGER');
     }
 
-    function totalAssets() public view override returns (uint) {
-        // delta - change in total assets due to accrued interest
-        uint delta = (borrows == 0 || lastUpdated == block.number) ? 0
-            : borrows.mul(getRateFactor()).mul(1e18 - reserveFactor);
-        return asset.balanceOf(address(this)) + borrows - reserves + delta;
-    }
-
-    // Hooks
-    function afterDeposit(uint, uint) internal override { updateState(); }
-    function beforeWithdraw(uint, uint) internal override { updateState(); }
-
-
-    // Account Manager Functions
-    modifier accountManagerOnly() {
-        if (msg.sender != accountManager) revert Errors.AccountManagerOnly();
-        _;
-    }
-
+    /**
+        @notice Lends a specified amount of underlying asset to an account
+        @param account Address of account
+        @param amt Amount of token to lend
+        @return isFirstBorrow Returns if the account is borrowing the asset for
+            the first time
+    */
     function lendTo(address account, uint amt)
         external
         whenNotPaused
         accountManagerOnly
-        returns (bool isFirstBorrow) 
+        returns (bool isFirstBorrow)
     {
         updateState();
         isFirstBorrow = (borrowsOf[account] == 0);
@@ -81,6 +120,12 @@ contract LToken is Pausable, ERC4626 {
         return isFirstBorrow;
     }
 
+    /**
+        @notice Collects a specified amount of underlying asset from an account
+        @param account Address of account
+        @param amt Amount of token to collect
+        @return isNotInDebt Returns if the account has pending borrows or not
+    */
     function collectFrom(address account, uint amt)
         external
         accountManagerOnly
@@ -92,33 +137,72 @@ contract LToken is Pausable, ERC4626 {
         return (borrowsOf[account] == 0);
     }
 
+    /**
+        @notice Returns Borrow balance of given account
+        @param account Address of account
+        @return borrowBalance Amount of underlying tokens borrowed
+    */
     function getBorrowBalance(address account) external view returns (uint) {
         return previewRedeem(borrowsOf[account]);
     }
 
-    // Internal Accounting Functions
+    /* -------------------------------------------------------------------------- */
+    /*                              PUBLIC FUNCTIONS                              */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+        @notice Returns total amount of underlying assets
+            totalAssets = underlying balance + totalBorrows - totalReservers + delta
+            delta = totalBorrows * RateFactor * (1e18 - reserveFactor)
+        @return totalAssets Total amount of underlying assets
+    */
+    function totalAssets() public view override returns (uint) {
+        uint delta = (borrows == 0 || lastUpdated == block.number) ? 0
+            : borrows.mul(_getRateFactor()).mul(1e18 - reserveFactor);
+        return asset.balanceOf(address(this)) + borrows - reserves + delta;
+    }
+
+    /// @notice Updates state of the lending pool
     function updateState() public {
         if (lastUpdated == block.number) return;
-        uint rateFactor = getRateFactor();
+        uint rateFactor = _getRateFactor();
         uint interestAccrued = borrows.mul(rateFactor);
         borrows += interestAccrued;
         reserves += interestAccrued.mul(reserveFactor);
         lastUpdated = block.number;
     }
 
-    // Rate Factor = Block Delta * Interest Rate Per Block
-    // Block Delta = Number of blocks since last update
-    function getRateFactor() internal view returns (uint) {
+    /* -------------------------------------------------------------------------- */
+    /*                             INTERNAL FUNCTIONS                             */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+        @dev Rate Factor = Block Delta * Interest Rate Per Block
+            Block Delta = Number of blocks since last update
+    */
+    function _getRateFactor() internal view returns (uint) {
         return (block.number - lastUpdated).fromUint()
                 .mul(rateModel.getBorrowRatePerBlock(
-                    asset.balanceOf(address(this)), 
-                    borrows,
-                    reserves
+                        asset.balanceOf(address(this)),
+                        borrows,
+                        reserves
                     )
                 );
     }
 
-    // Admin Functions
+    function afterDeposit(uint, uint) internal override { updateState(); }
+    function beforeWithdraw(uint, uint) internal override { updateState(); }
+
+    /* -------------------------------------------------------------------------- */
+    /*                               ADMIN FUNCTIONS                              */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+        @notice Transfers reserves from the LP to the specified address
+        @dev Emits ReservesRedeemed(to, amt)
+        @param to Recipient address
+        @param amt Amount of token to transfer
+    */
     function redeemReserves(address to, uint amt) external adminOnly {
         updateState();
         reserves -= amt;

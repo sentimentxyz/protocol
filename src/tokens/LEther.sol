@@ -13,10 +13,23 @@ interface IWETH {
     function deposit() external payable;
 }
 
+/**
+    @title Lending Token for Ether
+    @notice Lending Token contract for Ether with WETH as underlying asset
+*/
 contract LEther is LToken {
     using Helpers for address;
     using PRBMathUD60x18 for uint;
 
+    /* -------------------------------------------------------------------------- */
+    /*                             EXTERNAL FUNCTIONS                             */
+    /* -------------------------------------------------------------------------- */
+
+    /**
+        @notice Wraps Eth sent by the user and deposits into the LP
+            Transfers shares to the user denoting the amount of Eth deposited
+        @dev Emits Deposit(caller, owner, assets, shares)
+    */
     function depositEth() external payable {
         uint assets = msg.value;
         uint shares = previewDeposit(assets);
@@ -26,6 +39,13 @@ contract LEther is LToken {
         emit Deposit(msg.sender, msg.sender, assets, shares);
     }
 
+    /**
+        @notice Unwraps Eth and transfers it to the caller
+            Amount of Eth transferred will be the total underlying assets that
+            are represented by the shares
+        @dev Emits Withdraw(caller, receiver, owner, assets, shares);
+        @param shares Amount of shares to redeem
+    */
     function redeemEth(uint shares) external {
         uint assets = previewRedeem(shares);
         _burn(msg.sender, shares);
@@ -33,6 +53,6 @@ contract LEther is LToken {
         IWETH(address(asset)).withdraw(assets);
         msg.sender.safeTransferEth(assets);
     }
-    
+
     receive() external payable {}
 }
