@@ -53,13 +53,6 @@ contract Account is IAccount {
             0x0
         @param _accountManager address of the account manager
     */
-
-    /**
-    @notice Initializes the account by setting the address of the account
-    manager.
-    @dev Can only be called as long as the address of the accountManager is
-    0x0.
-    @param _accountManager address of the account manager. */
     function init(address _accountManager) external {
         if (accountManager != address(0))
             revert Errors.ContractAlreadyInitialized();
