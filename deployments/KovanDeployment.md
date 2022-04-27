@@ -36,3 +36,4 @@
 | AAVE        | aWETH          | 0xec6E5B3Bd3e8CC74756Af812994361d8D1EF30F8 | aToken      |
 | Uniswap     | V3Controller   | 0x9b14a22372cd9801819391502a840773fc752df7 | Controller  |
 | Uniswap     | Router         | 0xE592427A0AEce92De3Edee1F18E0157C05861564 | V3Router    |
+| chainlink   | ChainlinkOracle| 0xe4c2a2768a7a51060508bbbce35dfc19a61bfb8e | Oracle      |
