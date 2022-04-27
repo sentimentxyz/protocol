@@ -36,6 +36,7 @@ contract AccountManagerTest is TestBase {
         public
     {
         // Setup
+        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
@@ -48,6 +49,7 @@ contract AccountManagerTest is TestBase {
     // Settle
     function testSettle(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
+        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         deposit(owner, account, address(erc20), depositAmt);

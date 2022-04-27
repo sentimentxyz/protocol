@@ -41,6 +41,7 @@ contract RiskEngineTest is TestBase {
         public
     {
         // Setup
+        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt > withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(owner, account, address(0), depositAmt);

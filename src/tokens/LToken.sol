@@ -114,8 +114,8 @@ contract LToken is Pausable, ERC4626 {
     {
         updateState();
         isFirstBorrow = (borrowsOf[account] == 0);
-        borrows += amt;
         borrowsOf[account] += convertToShares(amt);
+        borrows += amt;
         asset.transfer(account, amt);
         return isFirstBorrow;
     }

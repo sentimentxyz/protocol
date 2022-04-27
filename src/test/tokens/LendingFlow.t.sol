@@ -7,8 +7,6 @@ import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 contract LendingFlowTest is TestBase {
     using PRBMathUD60x18 for uint;
 
-    address lender = cheats.addr(1);
-
     function setUp() public {
         setupContracts();
     }

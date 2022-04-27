@@ -14,6 +14,7 @@ contract BorrowFlowTest is TestBase {
     }
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
+        cheats.assume(borrowAmt != 0);
         // Test
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
@@ -27,6 +28,7 @@ contract BorrowFlowTest is TestBase {
     }
 
     function testBorrowERC20(uint96 depositAmt, uint96 borrowAmt) public {
+        cheats.assume(borrowAmt != 0);
         // Test
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(erc20), depositAmt);

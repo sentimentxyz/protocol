@@ -27,6 +27,9 @@ contract TestBase is Test {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
+    uint lenderID = 5;
+    address lender = cheats.addr(lenderID);
+
     // Test ERC20 Tokens
     WETH weth;
     TestERC20 erc20;
@@ -180,13 +183,18 @@ contract TestBase is Test {
         internal
     {
         if (token == address(weth)) {
-            cheats.deal(address(lEth), amt);
-            cheats.prank(address(lEth));
-            weth.deposit{value: amt}();
+            cheats.deal(lender, amt);
+            cheats.prank(lender);
+            lEth.depositEth{value: amt}();
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         } else {
-            erc20.mint(registry.LTokenFor(token), amt);
+            erc20.mint(lender, amt);
+            cheats.startPrank(lender);
+            erc20.approve(address(lErc20), type(uint).max);
+            lErc20.deposit(amt, lender);
+            cheats.stopPrank();
+
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         }

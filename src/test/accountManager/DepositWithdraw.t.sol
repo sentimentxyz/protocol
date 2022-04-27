@@ -29,6 +29,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public
     {
         // Setup
+        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt
@@ -102,6 +103,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public
     {
         // Setup
+        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt
