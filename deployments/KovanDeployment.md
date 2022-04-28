@@ -15,10 +15,10 @@
 | RiskEngine       | 0x4f01fd5b2b0cc96401d350028a11afd49ce43d68 | Core           |
 | ControllerFacade | 0xf45f9761dfc708b31ba4bb6053c01ca3908cad0b | Controller     |
 | OracleFacade     | 0xb47dc78d6120a1efec42ed96d14cd4142cffde2c | Oracle         |
-| LToken           | 0xca67e62b1102f04538542e74efc3f5bf13ddf808 | Implementation |
-| LEther           | 0xd0ebeb54764e09294a7fd64039e5a79c012b2d7a | Implementation |
-| LEther           | 0x08b6676a0df0f04adefb702bb83520742d9e82a6 | Proxy/LEther   |
-| LDai             | 0xbef758405d603a918ab81f3e10fdebd492a32d59 | Proxy/LToken   |
+| LToken           | 0x3f0c6be86c012828a00a02df6a4dfe0461b8df01 | Implementation |
+| LEther           | 0xa6863d34883bd76b93c89e39a2504c1b0c83b668 | Implementation |
+| LEther           | 0x5f33f4b662134c82c639bff0f36aede452879e25 | Proxy/LEther   |
+| LDai             | 0x3452d8381d7956b3e2d801399129518942668678 | Proxy/LToken   |
 
 ## Integrations
 
