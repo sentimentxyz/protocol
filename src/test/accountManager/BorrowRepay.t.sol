@@ -30,6 +30,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
+        cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
 
