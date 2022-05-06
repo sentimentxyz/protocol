@@ -7,7 +7,7 @@
 | Registry         | 0x67aaf420ccd97f53aff4e2eaa5767d363584556a | Implementation |
 | Registry         | 0xf7a351d75a8ee354d9b9e6ee721711fdf4ae69e1 | Core/Proxy     |
 | RateModel        | 0x8349dcbe9a631b30c9da8b49b204eb7f93ec46e5 | Core           |
-| AccountManager   | 0x859adeecff435a5c1e7390e801371e0afec69507 | Implementation |
+| AccountManager   | 0x833286d4c23b25acb56111f9a3cdc08d72a24874 | Implementation |
 | AccountManager   | 0xd8acd6b4fd479fe72b1b4f3552487b1d97d0157e | Core/Proxy     |
 | Account          | 0xf0dea16e72f20315ee4ac576523c859735e66de5 | Implementation |
 | Account Beacon   | 0x9b920cbb38523788f371d5148db892c8e7b0a073 | Beacon         |
@@ -15,8 +15,8 @@
 | RiskEngine       | 0x4f01fd5b2b0cc96401d350028a11afd49ce43d68 | Core           |
 | ControllerFacade | 0xf45f9761dfc708b31ba4bb6053c01ca3908cad0b | Controller     |
 | OracleFacade     | 0xb47dc78d6120a1efec42ed96d14cd4142cffde2c | Oracle         |
-| LToken           | 0x3f0c6be86c012828a00a02df6a4dfe0461b8df01 | Implementation |
-| LEther           | 0xa6863d34883bd76b93c89e39a2504c1b0c83b668 | Implementation |
+| LToken           | 0x3734418c9438044b5c210042bb8ad97d646ed71f | Implementation |
+| LEther           | 0x20097a353397bc4e0e78c6d47aa89cf6657e5b51 | Implementation |
 | LEther           | 0x5f33f4b662134c82c639bff0f36aede452879e25 | Proxy/LEther   |
 | LDai             | 0x3452d8381d7956b3e2d801399129518942668678 | Proxy/LToken   |
 
