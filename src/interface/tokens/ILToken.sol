@@ -22,6 +22,7 @@ interface ILToken is IERC20, IERC4626, IOwnable {
     function rateModel() external returns (IRateModel);
     function accountManager() external returns (address);
 
+    function updateState() external;
     function lendTo(address account, uint value) external returns (bool);
     function getBorrowBalance(address account) external view returns (uint);
     function collectFrom(address account, uint value) external returns (bool);
