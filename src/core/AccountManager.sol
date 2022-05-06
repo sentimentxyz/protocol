@@ -328,6 +328,7 @@ contract AccountManager is Pausable, IAccountManager {
 
     function _repay(address account, address token, uint value) internal {
         ILToken LToken = ILToken(registry.LTokenFor(token));
+        LToken.updateState();
         if (value == type(uint).max) value = LToken.getBorrowBalance(account);
         account.withdraw(address(LToken), token, value);
         if (LToken.collectFrom(account, value))
