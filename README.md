@@ -2,37 +2,54 @@
 
 ## Instructions
 
-Requirements:
+### Requirements
 
 1. Rust
 2. Foundry - https://github.com/gakonst/foundry
 
-Cloning Repo:
+---
+
+### Cloning Repo
 
 ```bash
 git clone --recurse-submodules git@github.com:sentimentxyz/protocol.git
 ```
 
-Building Contracts:
+---
+
+### Building Contracts
 
 ```bash
 forge build
 ```
 
-Running tests:
+---
+
+### Running tests
+
+#### Unit/Functional tests
 
 ```bash
-forge test
+forge test --no-match-contract Integration -vvv
 ```
 
-Configuring with VSCode:
+#### Integration tests
+
+```bash
+forge test --match-contract Integration --fork-url https://rpc.ankr.com/eth -vvv
+```
+
+---
+
+#### Configuring with VSCode
+
 Create a remappings.txt and paste the mappings provided by `forge config`
 
 Example:
 
 ```bash
 controller/=lib/controller/src/
-ds-test/=lib/ds-test/src/
+forge-std/=lib/forge-std/src/
 oracle/=lib/oracle/src/
 prb-math/=lib/prb-math/contracts/
 solidity-bytes-utils/=lib/controller/lib/solidity-bytes-utils/contracts/
