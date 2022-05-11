@@ -200,13 +200,6 @@ contract TestBase is Test {
         }
     }
 
-    function assertFalse(bool condition) internal {
-        if (condition) {
-            emit log("Error: Assertion Failed");
-            fail();
-        }
-    }
-
     function isContract(address _contract) internal view returns (bool size) {
         assembly { size := gt(extcodesize(_contract), 0x0) }
     }
