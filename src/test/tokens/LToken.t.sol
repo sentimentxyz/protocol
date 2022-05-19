@@ -111,7 +111,7 @@ contract LTokenTest is TestBase {
         // Setup
         assertEq(address(registry), address(lErc20.registry()));
 
-        // Tes
+        // Test
         accountManager.initDep();
 
         // Assert
