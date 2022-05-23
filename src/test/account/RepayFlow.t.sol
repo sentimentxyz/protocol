@@ -54,4 +54,32 @@ contract RepayFlowTest is TestBase {
         );
         assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }
+
+    function testMaxRepayWETH(uint96 depositAmt, uint96 borrowAmt) public {
+        // Setup
+        cheats.assume(borrowAmt > 0);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        deposit(borrower, account, address(0), depositAmt);
+        borrow(borrower, account, address(weth), borrowAmt);
+
+        // Test
+        cheats.prank(borrower);
+        accountManager.repay(account, address(weth), type(uint).max);
+
+        assertEq(riskEngine.getBorrows(account), 0);
+    }
+
+    function testMaxRepayERC20(uint96 depositAmt, uint96 borrowAmt) public {
+        // Setup
+        cheats.assume(borrowAmt > 0);
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        deposit(borrower, account, address(erc20), depositAmt);
+        borrow(borrower, account, address(erc20), borrowAmt);
+
+        // Test
+        cheats.prank(borrower);
+        accountManager.repay(account, address(erc20), type(uint).max);
+
+        assertEq(riskEngine.getBorrows(account), 0);
+    }
 }

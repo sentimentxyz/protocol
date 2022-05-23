@@ -126,13 +126,13 @@ contract LToken is Pausable, ERC4626 {
         @param amt Amount of token to collect
         @return isNotInDebt Returns if the account has pending borrows or not
     */
-    function collectFrom(address account, uint amt)
+    function collectFrom(address account, uint amt, uint shares)
         external
         accountManagerOnly
         returns (bool)
     {
         borrows -= amt;
-        borrowsOf[account] -= convertToShares(amt);
+        borrowsOf[account] -= shares;
         return (borrowsOf[account] == 0);
     }
 
