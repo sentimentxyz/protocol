@@ -9,6 +9,7 @@ interface IAccount {
     function sweepTo(address toAddress) external;
     function removeBorrow(address token) external;
     function init(address accountManager) external;
+    function hasAsset(address) external returns (bool);
     function assets(uint) external returns (address);
     function hasNoDebt() external view returns (bool);
     function activationBlock() external view returns (uint);

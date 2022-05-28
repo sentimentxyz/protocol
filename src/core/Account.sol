@@ -33,6 +33,9 @@ contract Account is IAccount {
     /// @notice A list of borrowed ERC-20 assets present in the account
     address[] public borrows;
 
+    /// @notice A mapping of ERC-20 assets present in the account
+    mapping(address => bool) public hasAsset;
+
     /* -------------------------------------------------------------------------- */
     /*                              CUSTOM MODIFIERS                              */
     /* -------------------------------------------------------------------------- */
@@ -89,6 +92,7 @@ contract Account is IAccount {
     */
     function addAsset(address token) external accountManagerOnly {
         assets.push(token);
+        hasAsset[token] = true;
     }
 
     /**
@@ -105,6 +109,7 @@ contract Account is IAccount {
     */
     function removeAsset(address token) external accountManagerOnly {
         _remove(assets, token);
+        hasAsset[token] = false;
     }
 
     /**
@@ -156,6 +161,7 @@ contract Account is IAccount {
                 toAddress,
                 assets[i].balanceOf(address(this))
             );
+            hasAsset[assets[i]] = false;
         }
         delete assets;
         toAddress.safeTransferEth(address(this).balance);
@@ -171,7 +177,7 @@ contract Account is IAccount {
         @param token Address to remove
     */
     function _remove(address[] storage arr, address token) internal {
-         uint len = arr.length;
+        uint len = arr.length;
         for(uint i; i < len; ++i) {
             if (arr[i] == token) {
                 arr[i] = arr[arr.length - 1];

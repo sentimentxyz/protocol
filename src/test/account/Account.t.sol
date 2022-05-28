@@ -28,6 +28,7 @@ contract AccountTest is TestBase {
 
         // Assert
         assertEq(token, account.getAssets()[0]);
+        assertTrue(account.hasAsset(token));
     }
 
     function testAddAssetError(address token) public {
@@ -61,6 +62,7 @@ contract AccountTest is TestBase {
 
         // Assert
         assertEq(0, account.getAssets().length);
+        assertFalse(account.hasAsset(token));
     }
 
     function testRemoveAssetError(address token) public {
@@ -114,6 +116,7 @@ contract AccountTest is TestBase {
         assertEq(address(account).balance, 0);
         assertEq(erc20.balanceOf(address(user)), amt);
         assertGe(address(user).balance, amt);
+        assertFalse(account.hasAsset(address(erc20)));
     }
 
     function testSweepToError(address user) public {

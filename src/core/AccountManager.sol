@@ -163,8 +163,8 @@ contract AccountManager is Pausable, IAccountManager {
     {
         if (!isCollateralAllowed[token])
             revert Errors.CollateralTypeRestricted();
-        if (token.balanceOf(account) == 0)
-            IAccount(account).addAsset(address(token));
+        if (IAccount(account).hasAsset(token) == false)
+            IAccount(account).addAsset(token);
         token.safeTransferFrom(msg.sender, account, amt);
     }
 
@@ -206,7 +206,8 @@ contract AccountManager is Pausable, IAccountManager {
             revert Errors.LTokenUnavailable();
         if (!riskEngine.isBorrowAllowed(account, token, amt))
             revert Errors.RiskThresholdBreached();
-        if (token.balanceOf(account) == 0) IAccount(account).addAsset(token);
+        if (IAccount(account).hasAsset(token) == false)
+            IAccount(account).addAsset(token);
         if (ILToken(registry.LTokenFor(token)).lendTo(account, amt))
             IAccount(account).addBorrow(token);
         emit Borrow(account, msg.sender, token, amt);
@@ -346,7 +347,7 @@ contract AccountManager is Pausable, IAccountManager {
     {
         uint tokensInLen = tokensIn.length;
         for(uint i; i < tokensInLen; ++i) {
-            if (tokensIn[i].balanceOf(account) == 0)
+            if (IAccount(account).hasAsset(tokensIn[i]) == false)
                 IAccount(account).addAsset(tokensIn[i]);
         }
     }

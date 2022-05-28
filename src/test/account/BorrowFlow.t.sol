@@ -43,4 +43,35 @@ contract BorrowFlowTest is TestBase {
             uint(depositAmt) + borrowAmt
         );
     }
+
+    function testBorrowERC20AfterExternalTransfer(
+        uint96 depositAmt,
+        uint96 borrowAmt,
+        address sender,
+        uint96 transferAmt
+    )
+        public
+    {
+        // Setup
+        cheats.assume(borrowAmt != 0 && sender != address(0));
+        erc20.mint(sender, transferAmt);
+        cheats.prank(sender);
+        erc20.transfer(account, transferAmt);
+        deposit(borrower, account, address(0), depositAmt);
+
+        // Test
+        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        borrow(borrower, account, address(erc20), borrowAmt);
+
+        // Assert
+        assertTrue(!IAccount(account).hasNoDebt());
+        assertEq(erc20.balanceOf(address(lErc20)), 0);
+        assertEq(lErc20.getBorrowBalance(address(account)), borrowAmt);
+        assertEq(
+            erc20.balanceOf(address(account)),
+            uint(transferAmt) + borrowAmt
+        );
+        assertTrue(IAccount(account).hasAsset(address(erc20)));
+        assertEq(address(erc20), IAccount(account).assets(0));
+    }
 }
