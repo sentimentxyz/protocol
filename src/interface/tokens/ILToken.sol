@@ -14,13 +14,15 @@ interface ILToken is IERC20, IERC4626, IOwnable {
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _reserveFactor
+        uint _borrowFee,
+        address _treasury
     ) external;
     function initDep(string calldata) external;
 
     function registry() external returns (IRegistry);
     function rateModel() external returns (IRateModel);
     function accountManager() external returns (address);
+    function borrows() external view returns (uint);
 
     function updateState() external;
     function lendTo(address account, uint value) external returns (bool);

@@ -4,8 +4,10 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {console} from "../utils/console.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 contract AccountManagerBorrowRepayTest is TestBase {
+    using PRBMathUD60x18 for uint;
     address account;
     address public owner = cheats.addr(1);
 
@@ -16,7 +18,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrow(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -25,18 +27,24 @@ contract AccountManagerBorrowRepayTest is TestBase {
         accountManager.borrow(account, address(erc20), borrowAmt);
 
         // Assert
-        assertEq(erc20.balanceOf(account), uint(depositAmt) + uint(borrowAmt));
+        assertEq(
+            erc20.balanceOf(account),
+            uint(depositAmt) + uint(borrowAmt) - borrowFee.mul(borrowAmt)
+        );
     }
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
 
         // Test
-        borrow(owner, account, address(weth), borrowAmt);
-        assertEq(riskEngine.getBalance(account), uint(depositAmt) + borrowAmt);
+        uint borrowAmtAfterFee = borrow(owner, account, address(weth), borrowAmt);
+        assertEq(
+            riskEngine.getBalance(account),
+            uint(depositAmt) + borrowAmtAfterFee
+        );
     }
 
     function testBorrowRiskEngineError(
@@ -47,7 +55,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
+        cheats.assume(borrowAmt > MAX_LEVERAGE.mul(depositAmt));
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -65,7 +73,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
+        cheats.assume(borrowAmt > MAX_LEVERAGE.mul(depositAmt));
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(address(lEth), borrowAmt);
         cheats.prank(address(lEth));

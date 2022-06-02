@@ -4,9 +4,10 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {console} from "../utils/console.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 contract RiskEngineTest is TestBase {
-
+    using PRBMathUD60x18 for uint;
     address account;
     address owner = cheats.addr(1);
 
@@ -28,7 +29,7 @@ contract RiskEngineTest is TestBase {
         );
 
         // Assert
-        (MAX_LEVERAGE * depositAmt > borrowAmt) ?
+        (MAX_LEVERAGE.mul(depositAmt) > borrowAmt) ?
             assertTrue(isBorrowAllowed)
             : assertFalse(isBorrowAllowed);
     }
@@ -43,7 +44,7 @@ contract RiskEngineTest is TestBase {
         // Setup
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt > withdrawAmt);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
 
@@ -55,7 +56,7 @@ contract RiskEngineTest is TestBase {
         );
 
         // Assert
-        ( (MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt) ) ?
+        ( (MAX_LEVERAGE.mul(depositAmt - withdrawAmt) > borrowAmt) ) ?
             assertTrue(isWithdrawAllowed) : assertFalse(isWithdrawAllowed);
     }
 

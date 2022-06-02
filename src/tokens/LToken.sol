@@ -32,17 +32,25 @@ contract LToken is Pausable, ERC4626 {
     /// @notice Account Manager
     address public accountManager;
 
-    /// @notice Total amount of reserves
-    uint public reserves;
+    /// @notice Protocol treasury
+    address public treasury;
 
     /// @notice Total amount of borrows
     uint public borrows;
 
-    /// @notice Reserve Factor
-    uint public reserveFactor;
-
     /// @notice Block number of when the state of the LToken was last updated
     uint public lastUpdated;
+
+    /// @notice Fee charged per borrow
+    uint public borrowFeeRate;
+
+    /// @notice protocol reserves
+    /// @dev will remain unused until we introduce reserves in the system
+    uint public reserves;
+
+    /// @notice reserve factor
+    /// @dev will remain unused until we introduce reserves in the system
+    uint public reserveFactor;
 
     /// @notice Mapping of account to borrow amount
     mapping (address => uint) public borrowsOf;
@@ -73,21 +81,24 @@ contract LToken is Pausable, ERC4626 {
         @param _name Name of LToken
         @param _symbol Symbol of LToken
         @param _registry Address of Registry
-        @param _reserveFactor Reserve Factor
+        @param _borrowFeeRate Borrow Fee
+        @param _treasury Protocol treasury
     */
     function init(
         ERC20 _asset,
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _reserveFactor
+        uint _borrowFeeRate,
+        address _treasury
     ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
         initPausable(msg.sender);
         initERC4626(_asset, _name, _symbol);
         registry = _registry;
-        reserveFactor = _reserveFactor;
+        borrowFeeRate = _borrowFeeRate;
+        treasury = _treasury;
     }
 
     /**
@@ -116,7 +127,9 @@ contract LToken is Pausable, ERC4626 {
         isFirstBorrow = (borrowsOf[account] == 0);
         borrowsOf[account] += convertToShares(amt);
         borrows += amt;
-        asset.transfer(account, amt);
+        uint fee = amt.mul(borrowFeeRate);
+        asset.transfer(treasury, fee);
+        asset.transfer(account, amt - fee);
         return isFirstBorrow;
     }
 
@@ -151,14 +164,14 @@ contract LToken is Pausable, ERC4626 {
 
     /**
         @notice Returns total amount of underlying assets
-            totalAssets = underlying balance + totalBorrows - totalReservers + delta
-            delta = totalBorrows * RateFactor * (1e18 - reserveFactor)
+            totalAssets = underlying balance + totalBorrows + delta
+            delta = totalBorrows * RateFactor
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
-        uint delta = (borrows == 0 || lastUpdated == block.number) ? 0
-            : borrows.mul(_getRateFactor()).mul(1e18 - reserveFactor);
-        return asset.balanceOf(address(this)) + borrows - reserves + delta;
+        uint delta = (lastUpdated == block.number) ? 0
+            : borrows.mul(_getRateFactor());
+        return asset.balanceOf(address(this)) + borrows + delta;
     }
 
     /// @notice Updates state of the lending pool
@@ -167,7 +180,6 @@ contract LToken is Pausable, ERC4626 {
         uint rateFactor = _getRateFactor();
         uint interestAccrued = borrows.mul(rateFactor);
         borrows += interestAccrued;
-        reserves += interestAccrued.mul(reserveFactor);
         lastUpdated = block.number;
     }
 
@@ -183,29 +195,19 @@ contract LToken is Pausable, ERC4626 {
         return (block.number - lastUpdated).fromUint()
                 .mul(rateModel.getBorrowRatePerBlock(
                         asset.balanceOf(address(this)),
-                        borrows,
-                        reserves
+                        borrows
                     )
                 );
     }
 
-    function afterDeposit(uint, uint) internal override { updateState(); }
+    function beforeDeposit(uint, uint) internal override { updateState(); }
     function beforeWithdraw(uint, uint) internal override { updateState(); }
 
     /* -------------------------------------------------------------------------- */
     /*                               ADMIN FUNCTIONS                              */
     /* -------------------------------------------------------------------------- */
 
-    /**
-        @notice Transfers reserves from the LP to the specified address
-        @dev Emits ReservesRedeemed(to, amt)
-        @param to Recipient address
-        @param amt Amount of token to transfer
-    */
-    function redeemReserves(address to, uint amt) external adminOnly {
-        updateState();
-        reserves -= amt;
-        emit ReservesRedeemed(to, amt);
-        asset.transfer(to, amt);
+    function setBorrowFee(uint _borrowFeeRate) external adminOnly {
+        borrowFeeRate = _borrowFeeRate;
     }
 }

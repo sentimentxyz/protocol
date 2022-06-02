@@ -4,9 +4,12 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 
 contract AccountManagerTest is TestBase {
+    using PRBMathUD60x18 for uint96;
+    using PRBMathUD60x18 for uint;
     address account;
     address public owner = cheats.addr(1);
 
@@ -37,7 +40,7 @@ contract AccountManagerTest is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
 
@@ -50,11 +53,13 @@ contract AccountManagerTest is TestBase {
     function testSettle(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
         borrow(owner, account, address(erc20), borrowAmt);
+        erc20.mint(account, borrowAmt.mul(borrowFee));
+        mintWETH(account, borrowAmt);
 
         // Test
         cheats.prank(owner);

@@ -41,19 +41,17 @@ contract DefaultRateModel is IRateModel {
         where util = borrows / (liquidity - reserves + borrows)
         @param liquidity total balance of the underlying asset in the pool
         @param borrows balance of underlying assets borrowed from the pool
-        @param reserves balance of underlying assets reserved for the protocol
         @return uint borrow rate per block
     */
     function getBorrowRatePerBlock(
         uint liquidity,
-        uint borrows,
-        uint reserves
+        uint borrows
     )
         external
         view
         returns (uint)
     {
-        uint util = _utilization(liquidity, borrows, reserves);
+        uint util = _utilization(liquidity, borrows);
         return c3.mul(
             (
                 util.mul(c1)
@@ -66,14 +64,13 @@ contract DefaultRateModel is IRateModel {
 
     function _utilization(
         uint liquidity,
-        uint borrows,
-        uint reserves
+        uint borrows
     )
         internal
         pure
         returns (uint)
     {
-        uint totalAssets = liquidity + borrows - reserves;
+        uint totalAssets = liquidity + borrows;
         return (totalAssets == 0) ? 0 : borrows.div(totalAssets);
     }
 }
