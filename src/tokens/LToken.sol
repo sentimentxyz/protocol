@@ -151,9 +151,14 @@ contract LToken is Pausable, ERC4626, ILToken {
         accountManagerOnly
         returns (bool)
     {
+        console.log("CF1", getBorrowBalance(account));
+        console.log("CF2", getBorrowBalance(account) - amt);
         borrowData[account].balance = getBorrowBalance(account) - amt;
         borrowData[account].index = borrowIndex;
         borrows -= amt;
+        console.log("CF3", borrows, borrowData[account].balance);
+        console.log("CF4", getBorrowBalance(account));
+        console.log("CF5", borrowIndex, borrowData[account].index);
         return (borrowData[account].balance == 0);
     }
 
@@ -181,7 +186,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         uint currentBorrowIndex = borrowIndex.mul(1e18 + getRateFactor());
         uint balance = borrowData[account].balance;
         return (balance == 0) ? 0 : 
-            balance.mul(currentBorrowIndex).div(borrowData[account].index);
+            currentBorrowIndex.div(borrowData[account].index).mul(balance);
     }
 
     /// @notice Updates state of the lending pool
