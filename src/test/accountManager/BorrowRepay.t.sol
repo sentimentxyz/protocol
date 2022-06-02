@@ -4,8 +4,10 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {console} from "../utils/console.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 contract AccountManagerBorrowRepayTest is TestBase {
+    using PRBMathUD60x18 for uint;
     address account;
     address public owner = cheats.addr(1);
 
@@ -25,7 +27,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
         accountManager.borrow(account, address(erc20), borrowAmt);
 
         // Assert
-        assertEq(erc20.balanceOf(account), uint(depositAmt) + uint(borrowAmt));
+        assertEq(
+            erc20.balanceOf(account),
+            uint(depositAmt) + uint(borrowAmt) - borrowFee.mul(borrowAmt)
+        );
     }
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
@@ -35,8 +40,11 @@ contract AccountManagerBorrowRepayTest is TestBase {
         deposit(owner, account, address(0), depositAmt);
 
         // Test
-        borrow(owner, account, address(weth), borrowAmt);
-        assertEq(riskEngine.getBalance(account), uint(depositAmt) + borrowAmt);
+        uint borrowAmtAfterFee = borrow(owner, account, address(weth), borrowAmt);
+        assertEq(
+            riskEngine.getBalance(account),
+            uint(depositAmt) + borrowAmtAfterFee
+        );
     }
 
     function testBorrowRiskEngineError(

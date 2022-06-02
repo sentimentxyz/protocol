@@ -4,6 +4,8 @@ pragma solidity ^0.8.10;
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 
+import "forge-std/Test.sol";
+
 contract RepayFlowTest is TestBase {
     address public account;
     address public borrower = cheats.addr(1);
@@ -18,9 +20,12 @@ contract RepayFlowTest is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > repayAmt);
+        console.log(MAX_LEVERAGE * depositAmt, borrowAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
-        borrow(borrower, account, address(weth), borrowAmt);
+        console.log(account.balance);
+        uint borrowAmtAfterFee =
+            borrow(borrower, account, address(weth), borrowAmt);
 
         // Test
         cheats.prank(borrower);
@@ -29,7 +34,7 @@ contract RepayFlowTest is TestBase {
         // Assert
         assertEq(
             riskEngine.getBalance(account),
-            uint(depositAmt) + borrowAmt - repayAmt
+            uint(depositAmt) + borrowAmtAfterFee - repayAmt
         );
         assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }
@@ -41,7 +46,8 @@ contract RepayFlowTest is TestBase {
         cheats.assume(borrowAmt > repayAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(erc20), depositAmt);
-        borrow(borrower, account, address(erc20), borrowAmt);
+        uint borrowAmtAfterFee =
+            borrow(borrower, account, address(erc20), borrowAmt);
 
         // Test
         cheats.prank(borrower);
@@ -50,7 +56,7 @@ contract RepayFlowTest is TestBase {
         // Assert
         assertEq(
             riskEngine.getBalance(account),
-            uint(depositAmt) + borrowAmt - repayAmt
+            uint(depositAmt) + borrowAmtAfterFee - repayAmt
         );
         assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }
@@ -61,6 +67,7 @@ contract RepayFlowTest is TestBase {
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
         borrow(borrower, account, address(weth), borrowAmt);
+        mintWETH(account, borrowAmt);
 
         // Test
         cheats.prank(borrower);

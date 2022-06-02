@@ -19,16 +19,23 @@ import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IRegistry} from "../../interface/core/IRegistry.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
 contract TestBase is Test {
+    using PRBMathUD60x18 for uint;
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5;
 
     uint lenderID = 5;
     address lender = cheats.addr(lenderID);
+
+    uint treasuryID = 6;
+    address treasury = cheats.addr(treasuryID);
+
+    uint borrowFee = 10000000000000000;
 
     // Test ERC20 Tokens
     WETH weth;
@@ -110,11 +117,11 @@ contract TestBase is Test {
 
         lEthImplementation = new LEther();
         lEth = ILEther(address(new Proxy(address(lEthImplementation))));
-        lEth.init(weth, "LEther", "LEth", registry, 0);
+        lEth.init(weth, "LEther", "LEth", registry, borrowFee, treasury);
 
         lErc20Implementation = new LToken();
         lErc20 = ILToken(address(new Proxy(address(lErc20Implementation))));
-        lErc20.init(erc20, "LTestERC20", "LERC20", registry, 0);
+        lErc20.init(erc20, "LTestERC20", "LERC20", registry, borrowFee, treasury);
     }
 
     function register() private {
@@ -174,13 +181,24 @@ contract TestBase is Test {
         }
     }
 
+    function mintWETH(address account, uint amt) public {
+        uint senderID = 10;
+        address sender = cheats.addr(senderID);
+        cheats.deal(sender, amt);
+
+        cheats.startPrank(sender);
+        weth.deposit{value: amt}();
+        weth.transfer(account, amt.mul(borrowFee));
+        cheats.stopPrank();
+    }
+
     function borrow(
         address owner,
         address account,
         address token,
         uint amt
     )
-        internal
+        internal returns (uint borrowAmtAfterFee)
     {
         if (token == address(weth)) {
             cheats.deal(lender, amt);
@@ -198,6 +216,7 @@ contract TestBase is Test {
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         }
+        borrowAmtAfterFee = amt - amt.mul(borrowFee);
     }
 
     function isContract(address _contract) internal view returns (bool size) {

@@ -14,7 +14,8 @@ interface ILToken is IERC20, IERC4626, IOwnable {
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _reserveFactor
+        uint _borrowFee,
+        address _treasury
     ) external;
     function initDep(string calldata) external;
 

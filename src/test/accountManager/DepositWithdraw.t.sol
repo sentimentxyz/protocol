@@ -35,7 +35,8 @@ contract AccountManagerDepositWithdrawTest is TestBase {
             MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt
         ); // Ensure account is healthy after withdrawal
         deposit(owner, account, address(0), depositAmt);
-        borrow(owner, account, address(weth), borrowAmt);
+        uint borrowAmtAfterFee =
+            borrow(owner, account, address(weth), borrowAmt);
 
         // Test
         cheats.prank(owner);
@@ -44,7 +45,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         // Assert
         assertEq(
             riskEngine.getBalance(account),
-            uint(depositAmt) - uint(withdrawAmt) + uint(borrowAmt)
+            uint(depositAmt) - uint(withdrawAmt) + borrowAmtAfterFee
         );
     }
 
@@ -109,7 +110,8 @@ contract AccountManagerDepositWithdrawTest is TestBase {
             MAX_LEVERAGE * (depositAmt - withdrawAmt) > borrowAmt
         ); // Ensure account is healthy after withdrawal
         deposit(owner, account, address(erc20), depositAmt);
-        borrow(owner, account, address(erc20), borrowAmt);
+        uint borrowAmtAfterFee =
+            borrow(owner, account, address(erc20), borrowAmt);
 
         // Test
         cheats.prank(owner);
@@ -118,7 +120,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         // Assert
         assertEq(
             erc20.balanceOf(account),
-            uint(depositAmt) - uint(withdrawAmt) + uint(borrowAmt)
+            uint(depositAmt) - uint(withdrawAmt) + borrowAmtAfterFee
         );
     }
 
