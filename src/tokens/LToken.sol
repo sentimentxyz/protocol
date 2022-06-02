@@ -61,7 +61,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         uint balance;
     }
 
-    /// @notice Account 
+    /// @notice borrow balance and index of an account
     mapping (address => BorrowData) public borrowData;
 
     /* -------------------------------------------------------------------------- */
@@ -143,7 +143,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         @notice Collects a specified amount of underlying asset from an account
         @param account Address of account
         @param amt Amount of token to collect
-
+        @return isDebtCleared returns true when debt is cleared
     */
     function collectFrom(address account, uint amt)
         external
@@ -166,8 +166,8 @@ contract LToken is Pausable, ERC4626, ILToken {
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
-        uint debt = (lastUpdated == block.number) ? borrows : getBorrows();
-        return asset.balanceOf(address(this)) + debt;
+        return asset.balanceOf(address(this)) +
+            ((lastUpdated == block.number) ? borrows : getBorrows());
     }
 
     /// @notice Current total borrows owed to the pool
@@ -177,10 +177,11 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     /// @notice Current borrow balance for a particular account
     function getBorrowBalance(address account) public view returns (uint) {
-        uint currentBorrowIndex = borrowIndex.mul(1e18 + getRateFactor());
         uint balance = borrowData[account].balance;
         return (balance == 0) ? 0 :
-            currentBorrowIndex.div(borrowData[account].index).mul(balance);
+            (borrowIndex.mul(1e18 + getRateFactor()))
+            .div(borrowData[account].index)
+            .mul(balance);
     }
 
     /// @notice Updates state of the lending pool
