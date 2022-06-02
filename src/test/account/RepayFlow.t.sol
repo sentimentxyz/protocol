@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "forge-std/Test.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
@@ -115,25 +114,18 @@ contract RepayFlowTest is TestBase {
         uint depositAmt = 20e18;
         uint borrowAmt = 40e18;
         deposit(borrower, account, address(erc20), depositAmt);
-        // console.log("A1", lErc20.getBorrows(), lErc20.getBorrowBalance(account));
         borrow(borrower, account, address(erc20), borrowAmt);
-        // console.log("A2", lErc20.getBorrows(), lErc20.getBorrowBalance(account));
         cheats.roll(block.number + 100);
-        // console.log("A3", lErc20.getBorrows(), lErc20.getBorrowBalance(account));
 
         // Test
         cheats.prank(borrower);
         accountManager.repay(account, address(erc20), 20e18);
-        // console.log("A4", lErc20.getBorrows(), lErc20.getBorrowBalance(account));
 
-        // console.log("B1", lErc20.borrowsOf(account), lErc20.totalAssets(), lErc20.totalSupply());
+        // Increment block number
         cheats.roll(block.number + 100);
-        // console.log("B2", lErc20.borrowsOf(account), lErc20.totalAssets(), lErc20.totalSupply());
-        // console.log("A5", lErc20.getBorrows(), lErc20.getBorrowBalance(account));
 
         cheats.prank(borrower);
         accountManager.repay(account, address(erc20), type(uint).max);
-        // console.log("A6", lErc20.getBorrows(), lErc20.getBorrowBalance(account));
 
         assertEq(riskEngine.getBorrows(account), 0);
         assertEq(lErc20.getBorrows(), 0);

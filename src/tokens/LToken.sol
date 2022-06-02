@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import "forge-std/Test.sol"; // TODO
 import {Errors} from "../utils/Errors.sol";
 import {Pausable} from "../utils/Pausable.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
@@ -151,14 +150,9 @@ contract LToken is Pausable, ERC4626, ILToken {
         accountManagerOnly
         returns (bool)
     {
-        console.log("CF1", getBorrowBalance(account));
-        console.log("CF2", getBorrowBalance(account) - amt);
         borrowData[account].balance = getBorrowBalance(account) - amt;
         borrowData[account].index = borrowIndex;
         borrows -= amt;
-        console.log("CF3", borrows, borrowData[account].balance);
-        console.log("CF4", getBorrowBalance(account));
-        console.log("CF5", borrowIndex, borrowData[account].index);
         return (borrowData[account].balance == 0);
     }
 
@@ -185,7 +179,7 @@ contract LToken is Pausable, ERC4626, ILToken {
     function getBorrowBalance(address account) public view returns (uint) {
         uint currentBorrowIndex = borrowIndex.mul(1e18 + getRateFactor());
         uint balance = borrowData[account].balance;
-        return (balance == 0) ? 0 : 
+        return (balance == 0) ? 0 :
             currentBorrowIndex.div(borrowData[account].index).mul(balance);
     }
 
