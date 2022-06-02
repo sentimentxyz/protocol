@@ -43,10 +43,10 @@ contract TestBase is Test {
 
     // LTokens
     LEther lEthImplementation;
-    ILEther lEth;
+    LEther lEth;
 
     LToken lErc20Implementation;
-    ILToken lErc20;
+    LToken lErc20;
 
     // Core Contracts
     RiskEngine riskEngine;
@@ -75,7 +75,7 @@ contract TestBase is Test {
     // Contract Setup Functions
     function setupContracts() internal virtual {
         // Log block number
-        emit log_uint(block.number);
+        // emit log_uint(block.number);
 
         // Deploy Dummy ERC20
         erc20 = new TestERC20("TestERC20", "TEST", uint8(18));
@@ -116,11 +116,11 @@ contract TestBase is Test {
         accountFactory = new AccountFactory(address(beacon));
 
         lEthImplementation = new LEther();
-        lEth = ILEther(address(new Proxy(address(lEthImplementation))));
+        lEth = LEther(payable(address(new Proxy(address(lEthImplementation)))));
         lEth.init(weth, "LEther", "LEth", registry, borrowFee, treasury);
 
         lErc20Implementation = new LToken();
-        lErc20 = ILToken(address(new Proxy(address(lErc20Implementation))));
+        lErc20 = LToken(address(new Proxy(address(lErc20Implementation))));
         lErc20.init(erc20, "LTestERC20", "LERC20", registry, borrowFee, treasury);
     }
 

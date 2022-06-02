@@ -327,16 +327,12 @@ contract AccountManager is Pausable, IAccountManager {
     /*                             Internal Functions                             */
     /* -------------------------------------------------------------------------- */
 
-    function _repay(address account, address token, uint value) internal {
+    function _repay(address account, address token, uint amt) internal {
         ILToken LToken = ILToken(registry.LTokenFor(token));
         LToken.updateState();
-        uint shares;
-        if (value == type(uint256).max) {
-            shares = LToken.borrowsOf(account);
-            value = LToken.convertToAssets(shares);
-        } else shares = LToken.convertToShares(value);
-        account.withdraw(address(LToken), token, value);
-        if (LToken.collectFrom(account, value, shares))
+        if (amt == type(uint).max) amt = LToken.getBorrowBalance(account);
+        account.withdraw(address(LToken), token, amt);
+        if (LToken.collectFrom(account, amt)) 
             IAccount(account).removeBorrow(token);
         if (IERC20(token).balanceOf(account) == 0)
             IAccount(account).removeAsset(token);
