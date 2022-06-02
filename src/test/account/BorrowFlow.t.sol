@@ -21,7 +21,7 @@ contract BorrowFlowTest is TestBase {
         uint protocolFee = borrowFee.mul(borrowAmt);
 
         // Test
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
         uint borrowAmtAfterFee =
             borrow(borrower, account, address(weth), borrowAmt);
@@ -40,7 +40,7 @@ contract BorrowFlowTest is TestBase {
     function testBorrowERC20(uint96 depositAmt, uint96 borrowAmt) public {
         cheats.assume(borrowAmt != 0);
         // Test
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(borrower, account, address(erc20), depositAmt);
         uint borrowAmtAfterFee =
             borrow(borrower, account, address(erc20), borrowAmt);
@@ -71,7 +71,7 @@ contract BorrowFlowTest is TestBase {
         deposit(borrower, account, address(0), depositAmt);
 
         // Test
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         uint borrowAmtAfterFee =
             borrow(borrower, account, address(erc20), borrowAmt);
 

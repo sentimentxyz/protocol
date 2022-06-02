@@ -42,7 +42,7 @@ contract LToken is Pausable, ERC4626 {
     uint public lastUpdated;
 
     /// @notice Fee charged per borrow
-    uint public borrowFee;
+    uint public borrowFeeRate;
 
     /// @notice protocol reserves
     /// @dev will remain unused until we introduce reserves in the system
@@ -81,7 +81,7 @@ contract LToken is Pausable, ERC4626 {
         @param _name Name of LToken
         @param _symbol Symbol of LToken
         @param _registry Address of Registry
-        @param _borrowFee Borrow Fee
+        @param _borrowFeeRate Borrow Fee
         @param _treasury Protocol treasury
     */
     function init(
@@ -89,7 +89,7 @@ contract LToken is Pausable, ERC4626 {
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _borrowFee,
+        uint _borrowFeeRate,
         address _treasury
     ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
@@ -97,7 +97,7 @@ contract LToken is Pausable, ERC4626 {
         initPausable(msg.sender);
         initERC4626(_asset, _name, _symbol);
         registry = _registry;
-        borrowFee = _borrowFee;
+        borrowFeeRate = _borrowFeeRate;
         treasury = _treasury;
     }
 
@@ -127,7 +127,7 @@ contract LToken is Pausable, ERC4626 {
         isFirstBorrow = (borrowsOf[account] == 0);
         borrowsOf[account] += convertToShares(amt);
         borrows += amt;
-        uint fee = amt.mul(borrowFee);
+        uint fee = amt.mul(borrowFeeRate);
         asset.transfer(treasury, fee);
         asset.transfer(account, amt - fee);
         return isFirstBorrow;
@@ -164,8 +164,8 @@ contract LToken is Pausable, ERC4626 {
 
     /**
         @notice Returns total amount of underlying assets
-            totalAssets = underlying balance + totalBorrows - totalReservers + delta
-            delta = totalBorrows * RateFactor * (1e18 - reserveFactor)
+            totalAssets = underlying balance + totalBorrows + delta
+            delta = totalBorrows * RateFactor
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
@@ -200,31 +200,14 @@ contract LToken is Pausable, ERC4626 {
                 );
     }
 
-    function afterDeposit(uint, uint) internal override { updateState(); }
+    function beforeDeposit(uint, uint) internal override { updateState(); }
     function beforeWithdraw(uint, uint) internal override { updateState(); }
 
     /* -------------------------------------------------------------------------- */
     /*                               ADMIN FUNCTIONS                              */
     /* -------------------------------------------------------------------------- */
 
-    /**
-        @notice Transfers reserves from the LP to the specified address
-        @dev Emits ReservesRedeemed(to, amt)
-        @param to Recipient address
-        @param amt Amount of token to transfer
-    */
-    function redeemReserves(address to, uint amt) external adminOnly {
-        updateState();
-        reserves -= amt;
-        emit ReservesRedeemed(to, amt);
-        asset.transfer(to, amt);
-    }
-
-    function setBorrowFee(uint _borrowFee) external adminOnly {
-        borrowFee = _borrowFee;
-    }
-
-    function setReserveFactor(uint _reserveFactor) external adminOnly {
-        reserveFactor = _reserveFactor;
+    function setBorrowFee(uint _borrowFeeRate) external adminOnly {
+        borrowFeeRate = _borrowFeeRate;
     }
 }

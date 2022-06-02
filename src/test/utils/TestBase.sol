@@ -27,7 +27,7 @@ import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 contract TestBase is Test {
     using PRBMathUD60x18 for uint;
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
-    uint constant MAX_LEVERAGE = 4;
+    uint constant MAX_LEVERAGE = 5e18;
 
     uint lenderID = 5;
     address lender = cheats.addr(lenderID);
@@ -35,7 +35,7 @@ contract TestBase is Test {
     uint treasuryID = 6;
     address treasury = cheats.addr(treasuryID);
 
-    uint borrowFee = 10000000000000000;
+    uint borrowFee = 3e15;
 
     // Test ERC20 Tokens
     WETH weth;
