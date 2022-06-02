@@ -55,7 +55,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
+        cheats.assume(borrowAmt > (MAX_LEVERAGE + 1) * depositAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -73,7 +73,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
+        cheats.assume(borrowAmt > (MAX_LEVERAGE + 1) * depositAmt);
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(address(lEth), borrowAmt);
         cheats.prank(address(lEth));

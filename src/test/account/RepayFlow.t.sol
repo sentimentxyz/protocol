@@ -3,10 +3,10 @@ pragma solidity ^0.8.10;
 
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
-
-import "forge-std/Test.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 contract RepayFlowTest is TestBase {
+    using PRBMathUD60x18 for uint96;
     address public account;
     address public borrower = cheats.addr(1);
 
@@ -20,12 +20,10 @@ contract RepayFlowTest is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > repayAmt);
-        console.log(MAX_LEVERAGE * depositAmt, borrowAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
-        console.log(account.balance);
-        uint borrowAmtAfterFee =
-            borrow(borrower, account, address(weth), borrowAmt);
+        borrow(borrower, account, address(weth), borrowAmt);
+        mintWETH(account, borrowAmt);
 
         // Test
         cheats.prank(borrower);
@@ -34,7 +32,7 @@ contract RepayFlowTest is TestBase {
         // Assert
         assertEq(
             riskEngine.getBalance(account),
-            uint(depositAmt) + borrowAmtAfterFee - repayAmt
+            uint(depositAmt) + borrowAmt - repayAmt
         );
         assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }
@@ -46,8 +44,8 @@ contract RepayFlowTest is TestBase {
         cheats.assume(borrowAmt > repayAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(erc20), depositAmt);
-        uint borrowAmtAfterFee =
-            borrow(borrower, account, address(erc20), borrowAmt);
+        borrow(borrower, account, address(erc20), borrowAmt);
+        erc20.mint(account, borrowAmt.mul(borrowFee));
 
         // Test
         cheats.prank(borrower);
@@ -56,7 +54,7 @@ contract RepayFlowTest is TestBase {
         // Assert
         assertEq(
             riskEngine.getBalance(account),
-            uint(depositAmt) + borrowAmtAfterFee - repayAmt
+            uint(depositAmt) + borrowAmt - repayAmt
         );
         assertEq(riskEngine.getBorrows(account), borrowAmt - repayAmt);
     }

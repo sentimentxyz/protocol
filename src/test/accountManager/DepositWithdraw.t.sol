@@ -59,9 +59,9 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         // Setup
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume((MAX_LEVERAGE) * depositAmt > borrowAmt);
         cheats.assume(
-            (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
+            (depositAmt - withdrawAmt) * (MAX_LEVERAGE + 1) <= borrowAmt
         ); // Ensures withdraw amt is large enough to breach the risk threshold
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
@@ -136,7 +136,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         cheats.assume(
-            (depositAmt - withdrawAmt) * MAX_LEVERAGE <= borrowAmt
+            (depositAmt - withdrawAmt) * (MAX_LEVERAGE + 1) <= borrowAmt
         ); // Ensures withdraw amt is large enough to breach the risk threshold
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);

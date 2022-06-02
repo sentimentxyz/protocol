@@ -27,7 +27,7 @@ import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 contract TestBase is Test {
     using PRBMathUD60x18 for uint;
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
-    uint constant MAX_LEVERAGE = 5;
+    uint constant MAX_LEVERAGE = 4;
 
     uint lenderID = 5;
     address lender = cheats.addr(lenderID);
