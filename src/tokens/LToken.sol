@@ -204,8 +204,7 @@ contract LToken is Pausable, ERC4626, ILToken {
     */
     function getRateFactor() internal view returns (uint) {
         uint blockDiff = block.number - lastUpdated;
-        if (blockDiff == 0) return 0;
-        return (blockDiff * 1e18)
+        return (blockDiff == 0) ? 0 : (blockDiff * 1e18)
                 .mulWadUp(rateModel.getBorrowRatePerBlock(
                         asset.balanceOf(address(this)),
                         borrows
