@@ -177,7 +177,8 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     /// @notice Current total reserves in the pool
     function getReserves() public view returns (uint) {
-        return reserves.mulWadUp(1e18 + getRateFactor());
+        return reserves + borrows.mulWadUp(getRateFactor())
+        .mulWadUp(reserveFactor);
     }
 
     /// @notice Updates state of the lending pool
