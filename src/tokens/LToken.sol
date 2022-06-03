@@ -9,13 +9,14 @@ import {IRegistry} from "../interface/core/IRegistry.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 /**
     @title Lending Token
     @notice Lending token with ERC4626 implementation
 */
 contract LToken is Pausable, ERC4626, ILToken {
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint256;
 
     /* -------------------------------------------------------------------------- */
     /*                               STATE VARIABLES                              */
@@ -133,7 +134,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         borrowData[account].balance = getBorrowBalance(account) + amt;
         borrowData[account].index = borrowIndex;
         borrows += amt;
-        uint fee = amt.mul(borrowFeeRate);
+        uint fee = amt.mulWadDown(borrowFeeRate);
         asset.transfer(treasury, fee);
         asset.transfer(account, amt - fee);
         return isFirstBorrow;
@@ -172,24 +173,24 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     /// @notice Current total borrows owed to the pool
     function getBorrows() public view returns (uint) {
-        return borrows.mul(1e18 + getRateFactor());
+        return borrows.mulWadUp(1e18 + getRateFactor());
     }
 
     /// @notice Current borrow balance for a particular account
     function getBorrowBalance(address account) public view returns (uint) {
         uint balance = borrowData[account].balance;
         return (balance == 0) ? 0 :
-            (borrowIndex.mul(1e18 + getRateFactor()))
-            .div(borrowData[account].index)
-            .mul(balance);
+            (borrowIndex.mulWadUp(1e18 + getRateFactor()))
+            .divWadDown(borrowData[account].index)
+            .mulWadUp(balance);
     }
 
     /// @notice Updates state of the lending pool
     function updateState() public {
         if (lastUpdated == block.number) return;
-        uint rateFactor = getRateFactor();
-        borrows += borrows.mul(rateFactor);
-        borrowIndex += borrowIndex.mul(rateFactor);
+        uint rateFactor = 1e18 + getRateFactor();
+        borrows += borrows.mulWadUp(rateFactor);
+        borrowIndex += borrowIndex.mulWadUp(rateFactor);
         lastUpdated = block.number;
     }
 
@@ -202,8 +203,9 @@ contract LToken is Pausable, ERC4626, ILToken {
             Block Delta = Number of blocks since last update
     */
     function getRateFactor() internal view returns (uint) {
-        return (block.number - lastUpdated).fromUint()
-                .mul(rateModel.getBorrowRatePerBlock(
+        uint blockDiff = block.number - lastUpdated;
+        return (blockDiff == 0) ? 0 : (blockDiff * 1e18)
+                .mulWadUp(rateModel.getBorrowRatePerBlock(
                         asset.balanceOf(address(this)),
                         borrows
                     )

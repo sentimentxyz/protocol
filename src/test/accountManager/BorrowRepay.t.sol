@@ -4,10 +4,10 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {console} from "../utils/console.sol";
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract AccountManagerBorrowRepayTest is TestBase {
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint256;
     address account;
     address public owner = cheats.addr(1);
 
@@ -18,7 +18,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrow(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -29,14 +29,14 @@ contract AccountManagerBorrowRepayTest is TestBase {
         // Assert
         assertEq(
             erc20.balanceOf(account),
-            uint(depositAmt) + uint(borrowAmt) - borrowFee.mul(borrowAmt)
+            uint(depositAmt) + uint(borrowAmt) - borrowFee.mulWadDown(borrowAmt)
         );
     }
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
 
         // Test
@@ -55,7 +55,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE.mul(depositAmt));
+        cheats.assume(borrowAmt > MAX_LEVERAGE.mulWadUp(depositAmt));
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -73,7 +73,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE.mul(depositAmt));
+        cheats.assume(borrowAmt > MAX_LEVERAGE.mulWadUp(depositAmt));
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(address(lEth), borrowAmt);
         cheats.prank(address(lEth));

@@ -4,12 +4,12 @@ pragma solidity ^0.8.10;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {IControllerFacade} from "controller/core/IControllerFacade.sol";
 
 contract AccountManagerTest is TestBase {
-    using PRBMathUD60x18 for uint96;
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint256;
+    using FixedPointMathLib for uint96;
     address account;
     address public owner = cheats.addr(1);
 
@@ -40,7 +40,7 @@ contract AccountManagerTest is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
 
@@ -53,12 +53,12 @@ contract AccountManagerTest is TestBase {
     function testSettle(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
         deposit(owner, account, address(0), depositAmt);
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
         borrow(owner, account, address(erc20), borrowAmt);
-        erc20.mint(account, borrowAmt.mul(borrowFee));
+        erc20.mint(account, borrowAmt.mulWadDown(borrowFee));
         mintWETH(account, borrowAmt);
 
         // Test

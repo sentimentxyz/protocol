@@ -19,13 +19,13 @@ import {OracleFacade} from "oracle/core/OracleFacade.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IRegistry} from "../../interface/core/IRegistry.sol";
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
 contract TestBase is Test {
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint256;
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5e18;
 
@@ -188,7 +188,7 @@ contract TestBase is Test {
 
         cheats.startPrank(sender);
         weth.deposit{value: amt}();
-        weth.transfer(account, amt.mul(borrowFee));
+        weth.transfer(account, amt.mulWadDown(borrowFee));
         cheats.stopPrank();
     }
 
@@ -216,7 +216,7 @@ contract TestBase is Test {
             cheats.prank(owner);
             accountManager.borrow(account, token, amt);
         }
-        borrowAmtAfterFee = amt - amt.mul(borrowFee);
+        borrowAmtAfterFee = amt - amt.mulWadDown(borrowFee);
     }
 
     function isContract(address _contract) internal view returns (bool size) {

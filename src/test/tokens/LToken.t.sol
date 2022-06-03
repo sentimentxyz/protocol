@@ -15,7 +15,7 @@ contract LTokenTest is TestBase {
         account = openAccount(owner);
     }
 
-    function testLendTo(uint lendAmt, uint liquidity) public {
+    function testLendTo(uint96 lendAmt, uint96 liquidity) public {
         // Setup
         cheats.assume(lendAmt <= liquidity);
         erc20.mint(address(lErc20), liquidity);
@@ -31,7 +31,7 @@ contract LTokenTest is TestBase {
         assertEq(borrowBalance, lendAmt);
     }
 
-    function testFailLendTo(uint lendAmt, uint liquidity) public {
+    function testFailLendTo(uint96 lendAmt, uint96 liquidity) public {
         // Setup
         cheats.assume(lendAmt > liquidity);
         erc20.mint(address(lErc20), liquidity);
@@ -41,13 +41,13 @@ contract LTokenTest is TestBase {
         lErc20.lendTo(account, lendAmt);
     }
 
-    function testLendToAuthError(uint lendAmt) public {
+    function testLendToAuthError(uint96 lendAmt) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
         lErc20.lendTo(account, lendAmt);
     }
 
-    function testCollectFrom(uint lendAmt, uint liquidity, uint collectAmt)
+    function testCollectFrom(uint96 lendAmt, uint96 liquidity, uint96 collectAmt)
         public
     {
         // Setup
@@ -66,7 +66,7 @@ contract LTokenTest is TestBase {
         assertTrue(isBorrowBalanceZero == (lendAmt == collectAmt));
     }
 
-    function testFailCollectFrom(uint lendAmt, uint liquidity, uint collectAmt)
+    function testFailCollectFrom(uint96 lendAmt, uint96 liquidity, uint96 collectAmt)
         public
     {
         // Setup
