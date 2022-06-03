@@ -3,10 +3,12 @@ pragma solidity ^0.8.10;
 
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
+import "forge-std/Test.sol";
 
 contract AccountManagerDepositWithdrawTest is TestBase {
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint96;
+    using FixedPointMathLib for uint256;
     address account;
     address public owner = cheats.addr(1);
 
@@ -34,8 +36,10 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
-            MAX_LEVERAGE.mul(depositAmt - withdrawAmt) > borrowAmt
-        ); // Ensure account is healthy after withdrawal
+            (depositAmt - withdrawAmt +
+            (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        ); // Ensure account is healthy after withdrawal// Ensure account is healthy after withdrawal
         deposit(owner, account, address(0), depositAmt);
         uint borrowAmtAfterFee =
             borrow(owner, account, address(weth), borrowAmt);
@@ -61,9 +65,9 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         // Setup
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
         cheats.assume(
-            MAX_LEVERAGE.mul(depositAmt - withdrawAmt) <= borrowAmt
+            MAX_LEVERAGE.mulWadDown(depositAmt - withdrawAmt) <= borrowAmt
         ); // Ensures withdraw amt is large enough to breach the risk threshold
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
@@ -109,7 +113,9 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
-            MAX_LEVERAGE.mul(depositAmt - withdrawAmt) > borrowAmt
+            (depositAmt - withdrawAmt +
+            (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
         ); // Ensure account is healthy after withdrawal
         deposit(owner, account, address(erc20), depositAmt);
         uint borrowAmtAfterFee =
@@ -136,9 +142,9 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         // Setup
         cheats.assume(borrowAmt != 0);
         cheats.assume(depositAmt >= withdrawAmt);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
         cheats.assume(
-            MAX_LEVERAGE.mul(depositAmt - withdrawAmt) <= borrowAmt
+            MAX_LEVERAGE.mulWadDown(depositAmt - withdrawAmt) <= borrowAmt
         ); // Ensures withdraw amt is large enough to breach the risk threshold
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(erc20), borrowAmt);

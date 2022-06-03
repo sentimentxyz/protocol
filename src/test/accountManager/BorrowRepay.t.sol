@@ -8,6 +8,7 @@ import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract AccountManagerBorrowRepayTest is TestBase {
     using FixedPointMathLib for uint256;
+    using FixedPointMathLib for uint96;
     address account;
     address public owner = cheats.addr(1);
 
@@ -18,7 +19,11 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrow(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(depositAmt != 0 && borrowAmt != 0);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -36,7 +41,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         deposit(owner, account, address(0), depositAmt);
 
         // Test
@@ -55,7 +63,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE.mulWadUp(depositAmt));
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) < balanceToBorrowThreshold
+        );
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -73,7 +84,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE.mulWadUp(depositAmt));
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) < balanceToBorrowThreshold
+        );
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(address(lEth), borrowAmt);
         cheats.prank(address(lEth));

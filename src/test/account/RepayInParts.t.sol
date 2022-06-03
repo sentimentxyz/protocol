@@ -24,7 +24,10 @@ contract RepayInParts is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > repayAmt);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         deposit(borrower, account, address(erc20), depositAmt);
         borrow(borrower, account, address(erc20), borrowAmt);
         erc20.mint(account, type(uint128).max);
@@ -50,7 +53,10 @@ contract RepayInParts is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > borrow1);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
 
         // Lending Pool
         address lender = address(5);
@@ -97,7 +103,10 @@ contract RepayInParts is TestBase {
         // Setup
         cheats.assume(borrowAmt > repayAmt);
         cheats.assume(borrowAmt > borrow1);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
 
         // Lending Pool
         address lender = address(5);
@@ -150,7 +159,10 @@ contract RepayInParts is TestBase {
         // Setup
         cheats.assume(borrow1 > repayAmt);
         cheats.assume(borrowAmt > borrow1);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
 
         // Lending Pool
         address lender = address(5);

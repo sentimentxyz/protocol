@@ -28,6 +28,7 @@ contract TestBase is Test {
     using FixedPointMathLib for uint256;
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
     uint constant MAX_LEVERAGE = 5e18;
+    uint constant balanceToBorrowThreshold = 12e17;
 
     uint lenderID = 5;
     address lender = cheats.addr(lenderID);

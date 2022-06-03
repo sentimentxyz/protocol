@@ -34,13 +34,16 @@ contract AccountManagerTest is TestBase {
     // Liquidate
     function testLiquidateHealthyAccount(
         uint96 depositAmt,
-        uint borrowAmt
+        uint96 borrowAmt
     )
         public
     {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         deposit(owner, account, address(0), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);
 
@@ -53,7 +56,10 @@ contract AccountManagerTest is TestBase {
     function testSettle(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         deposit(owner, account, address(0), depositAmt);
         deposit(owner, account, address(erc20), depositAmt);
         borrow(owner, account, address(weth), borrowAmt);

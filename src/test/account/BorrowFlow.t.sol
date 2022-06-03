@@ -7,6 +7,7 @@ import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract BorrowFlowTest is TestBase {
     using FixedPointMathLib for uint;
+    using FixedPointMathLib for uint96;
     address public account;
     address public borrower = cheats.addr(1);
 
@@ -21,7 +22,10 @@ contract BorrowFlowTest is TestBase {
         uint protocolFee = borrowFee.mulWadDown(borrowAmt);
 
         // Test
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         deposit(borrower, account, address(0), depositAmt);
         uint borrowAmtAfterFee =
             borrow(borrower, account, address(weth), borrowAmt);
@@ -40,7 +44,10 @@ contract BorrowFlowTest is TestBase {
     function testBorrowERC20(uint96 depositAmt, uint96 borrowAmt) public {
         cheats.assume(borrowAmt != 0);
         // Test
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         deposit(borrower, account, address(erc20), depositAmt);
         uint borrowAmtAfterFee =
             borrow(borrower, account, address(erc20), borrowAmt);
@@ -71,7 +78,10 @@ contract BorrowFlowTest is TestBase {
         deposit(borrower, account, address(0), depositAmt);
 
         // Test
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
+        cheats.assume(
+            (depositAmt + (borrowAmt - borrowAmt.mulWadDown(borrowFee)))
+            .divWadDown(borrowAmt) > balanceToBorrowThreshold
+        );
         uint borrowAmtAfterFee =
             borrow(borrower, account, address(erc20), borrowAmt);
 
