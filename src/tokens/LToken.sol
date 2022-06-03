@@ -185,7 +185,7 @@ contract LToken is Pausable, ERC4626, ILToken {
     function updateState() public {
         if (lastUpdated == block.number) return;
         uint rateFactor = getRateFactor();
-        uint interestAccrued = borrows.mul(getRateFactor());
+        uint interestAccrued = borrows.mul(rateFactor);
         borrows += interestAccrued;
         reserves += interestAccrued.mul(reserveFactor);
         borrowIndex += borrowIndex.mul(rateFactor);
@@ -215,7 +215,7 @@ contract LToken is Pausable, ERC4626, ILToken {
     */
     function getRateFactor() internal view returns (uint) {
         uint blockDelta = block.number - lastUpdated;
-        return (blockDelta * 1e18).mul(
+        return (blockDelta == 0) ? 0 : (blockDelta * 1e18).mul(
                     rateModel.getBorrowRatePerBlock(
                         asset.balanceOf(address(this)),
                         borrows
