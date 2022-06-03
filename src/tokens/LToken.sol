@@ -189,7 +189,7 @@ contract LToken is Pausable, ERC4626 {
                 );
     }
 
-    function afterDeposit(uint, uint) internal override { updateState(); }
+    function beforeDeposit(uint, uint) internal override { updateState(); }
     function beforeWithdraw(uint, uint) internal override { updateState(); }
 
     /* -------------------------------------------------------------------------- */
