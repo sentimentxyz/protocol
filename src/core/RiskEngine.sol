@@ -8,9 +8,9 @@ import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
-import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 /**
     @title Risk Engine
@@ -18,7 +18,7 @@ import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
     analyze the health factor of a given account.
 */
 contract RiskEngine is Ownable, IRiskEngine {
-    using FixedPointMathLib for uint;
+    using PRBMathUD60x18 for uint;
 
     /* -------------------------------------------------------------------------- */
     /*                               STATE VARIABLES                              */
@@ -180,7 +180,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         view
         returns (uint)
     {
-        return oracle.getPrice(token).mulWadDown(value);
+        return oracle.getPrice(token).mul(value);
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows)
@@ -189,6 +189,6 @@ contract RiskEngine is Ownable, IRiskEngine {
         returns (bool)
     {
         return (accountBorrows == 0) ? true :
-            (accountBalance.divWadDown(accountBorrows) > balanceToBorrowThreshold);
+            (accountBalance.div(accountBorrows) > balanceToBorrowThreshold);
     }
 }

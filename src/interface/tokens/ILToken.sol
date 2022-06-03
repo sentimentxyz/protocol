@@ -8,27 +8,25 @@ import {IOwnable} from "../utils/IOwnable.sol";
 import {IRegistry} from "../core/IRegistry.sol";
 import {IRateModel} from "../core/IRateModel.sol";
 
-interface ILToken {
+interface ILToken is IERC20, IERC4626, IOwnable {
     function init(
         ERC20 _asset,
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _borrowFee,
-        address _treasury
+        uint _reserveFactor
     ) external;
     function initDep(string calldata) external;
 
     function registry() external returns (IRegistry);
     function rateModel() external returns (IRateModel);
     function accountManager() external returns (address);
-    
-    function borrows() external view returns (uint);
-    function getBorrows() external view returns (uint);
-    function getBorrowBalance(address) external view returns (uint);
 
     function updateState() external;
-    
     function lendTo(address account, uint value) external returns (bool);
-    function collectFrom(address account, uint amt) external returns (bool);
+    function collectFrom(address account, uint value, uint shares) external returns (bool);
+    function getBorrowBalance(address account) external view returns (uint);
+    function borrowsOf(address) external returns (uint256);
+    function convertToShares(uint256 assets) external view returns (uint256);
+    function convertToAssets(uint256 shares) external view returns (uint256);
 }

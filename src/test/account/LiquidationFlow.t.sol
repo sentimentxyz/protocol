@@ -3,10 +3,8 @@ pragma solidity ^0.8.10;
 
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
-import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract LiquidationFlowTest is TestBase {
-    using FixedPointMathLib for uint96;
     address public borrower = cheats.addr(1);
     address public maintainer = cheats.addr(2);
     address public account;
@@ -34,7 +32,6 @@ contract LiquidationFlowTest is TestBase {
         borrow(borrower, account, address(weth), amt);
         mockAccountRiskFactor();
         cheats.deal(maintainer, amt);
-        mintWETH(account, amt);
 
         // Test
         cheats.prank(maintainer);
@@ -55,7 +52,6 @@ contract LiquidationFlowTest is TestBase {
         borrow(borrower, account, address(erc20), amt);
         mockAccountRiskFactor();
         erc20.mint(maintainer, amt);
-        erc20.mint(account, amt.mulWadDown(borrowFee));
 
         // Test
         cheats.startPrank(maintainer);
@@ -81,9 +77,6 @@ contract LiquidationFlowTest is TestBase {
         mockAccountRiskFactor();
         cheats.deal(maintainer, amt);
         erc20.mint(maintainer, amt);
-
-        erc20.mint(account, amt.mulWadDown(borrowFee));
-        mintWETH(account, amt);
 
         // Test
         cheats.startPrank(maintainer);
