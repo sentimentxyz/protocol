@@ -19,7 +19,7 @@ contract RepayInParts is TestBase {
     }
 
     // Borrow - Repay - Repay Max
-    function testRepayInParts(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt)
+    function testRepayInParts1(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt)
         public
     {
         // Setup
@@ -125,6 +125,7 @@ contract RepayInParts is TestBase {
         // Repay1
         cheats.prank(borrower);
         accountManager.repay(account, address(erc20), repayAmt);
+        cheats.roll(block.number + 10);
 
         // Max Repay
         cheats.prank(borrower);
@@ -167,6 +168,7 @@ contract RepayInParts is TestBase {
         // Repay1
         cheats.prank(borrower);
         accountManager.repay(account, address(erc20), repayAmt);
+        cheats.roll(block.number + 10);
 
         // Borrow2
         cheats.startPrank(borrower);
