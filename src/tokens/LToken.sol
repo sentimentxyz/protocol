@@ -34,6 +34,12 @@ contract LToken is Pausable, ERC4626, ILToken {
     /// @notice Account Manager
     address public accountManager;
 
+    /// @notice Protocol Treasury
+    address public treasury;
+
+    /// @notice unused
+    uint public borrowFeeRate;
+
     /// @notice Total amount of borrows
     uint public borrows;
 
@@ -84,13 +90,15 @@ contract LToken is Pausable, ERC4626, ILToken {
         @param _symbol Symbol of LToken
         @param _registry Address of Registry
         @param _reserveFactor Reserve Factor
+        @param _treasury Protocol Treasury
     */
     function init(
         ERC20 _asset,
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _reserveFactor
+        uint _reserveFactor,
+        address _treasury
     ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
         initialized = true;
@@ -99,6 +107,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         registry = _registry;
         reserveFactor = _reserveFactor;
         borrowIndex = 1e18;
+        treasury = _treasury;
     }
 
     /**
@@ -155,16 +164,21 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     /**
         @notice Returns total amount of underlying assets
-            totalAssets = liquidity + totalBorrows
+            totalAssets = liquidity + totalBorrows - totalReserves
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
-        return asset.balanceOf(address(this)) + getBorrows();
+        return asset.balanceOf(address(this)) + getBorrows() - getReserves();
     }
 
     /// @notice Current total borrows owed to the pool
     function getBorrows() public view returns (uint) {
         return borrows.mul(1e18 + getRateFactor());
+    }
+
+    /// @notice Current total reserves in the pool
+    function getReserves() public view returns (uint) {
+        return reserves.mul(1e18 + getRateFactor());
     }
 
     /// @notice Updates state of the lending pool
@@ -217,15 +231,18 @@ contract LToken is Pausable, ERC4626, ILToken {
     /* -------------------------------------------------------------------------- */
 
     /**
-        @notice Transfers reserves from the LP to the specified address
+        @notice Transfers reserves from the LP to the treasury
         @dev Emits ReservesRedeemed(to, amt)
-        @param to Recipient address
         @param amt Amount of token to transfer
     */
-    function redeemReserves(address to, uint amt) external adminOnly {
+    function redeemReserves(uint amt) external adminOnly {
         updateState();
         reserves -= amt;
-        emit ReservesRedeemed(to, amt);
-        asset.transfer(to, amt);
+        emit ReservesRedeemed(treasury, amt);
+        asset.transfer(treasury, amt);
+    }
+
+    function setBorrowFeeRate(uint _borrowFeeRate) external adminOnly {
+        borrowFeeRate = _borrowFeeRate;
     }
 }
