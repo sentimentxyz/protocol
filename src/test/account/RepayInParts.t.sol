@@ -188,4 +188,29 @@ contract RepayInParts is TestBase {
         assertEq(riskEngine.getBorrows(account), 0);
         assertEq(lErc20.getBorrows(), 0);
     }
+
+    function testRepayInParts10()
+        public
+    {
+        // Setup
+        uint depositAmt = 5e17;
+        uint borrowAmt = 5e17;
+        uint repayAmt = 2e17;
+        deposit(borrower, account, address(erc20), depositAmt);
+        borrow(borrower, account, address(erc20), borrowAmt);
+        cheats.roll(block.number + 23);
+
+        // Test
+        cheats.prank(borrower);
+        accountManager.repay(account, address(erc20), repayAmt);
+
+        // Increment block number
+        cheats.roll(block.number + 15);
+
+        cheats.prank(borrower);
+        accountManager.repay(account, address(erc20), type(uint).max);
+
+        assertEq(riskEngine.getBorrows(account), 0);
+        assertEq(lErc20.getBorrows(), 0);
+    }
 }
