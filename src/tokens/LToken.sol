@@ -2,9 +2,10 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
+import {ERC4626} from "./utils/ERC4626.sol";
 import {Pausable} from "../utils/Pausable.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {ERC4626} from "./utils/ERC4626.sol";
+import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
@@ -13,8 +14,9 @@ import {IRateModel} from "../interface/core/IRateModel.sol";
     @title Lending Token
     @notice Lending token with ERC4626 implementation
 */
-contract LToken is Pausable, ERC4626 {
+contract LToken is Pausable, ERC4626, ILToken {
     using PRBMathUD60x18 for uint;
+    // using FixedPointMathLib for uint;
 
     /* -------------------------------------------------------------------------- */
     /*                               STATE VARIABLES                              */
@@ -32,11 +34,14 @@ contract LToken is Pausable, ERC4626 {
     /// @notice Account Manager
     address public accountManager;
 
-    /// @notice Total amount of reserves
-    uint public reserves;
-
     /// @notice Total amount of borrows
     uint public borrows;
+
+    /// @notice Cumulative borrow index
+    uint public borrowIndex;
+
+    /// @notice Total amount of reserves
+    uint public reserves;
 
     /// @notice Reserve Factor
     uint public reserveFactor;
@@ -44,8 +49,13 @@ contract LToken is Pausable, ERC4626 {
     /// @notice Block number of when the state of the LToken was last updated
     uint public lastUpdated;
 
+    struct BorrowData {
+        uint index;
+        uint balance;
+    }
+
     /// @notice Mapping of account to borrow amount
-    mapping (address => uint) public borrowsOf;
+    mapping (address => BorrowData) public borrowData;
 
     /* -------------------------------------------------------------------------- */
     /*                                   EVENTS                                   */
@@ -88,6 +98,7 @@ contract LToken is Pausable, ERC4626 {
         initERC4626(_asset, _name, _symbol);
         registry = _registry;
         reserveFactor = _reserveFactor;
+        borrowIndex = 1e18;
     }
 
     /**
@@ -113,9 +124,10 @@ contract LToken is Pausable, ERC4626 {
         returns (bool isFirstBorrow)
     {
         updateState();
-        isFirstBorrow = (borrowsOf[account] == 0);
-        borrowsOf[account] += convertToShares(amt);
+        isFirstBorrow = (borrowData[account].balance == 0);
         borrows += amt;
+        borrowData[account].balance = getBorrowBalance(account) + amt;
+        borrowData[account].index = borrowIndex;
         asset.transfer(account, amt);
         return isFirstBorrow;
     }
@@ -126,23 +138,15 @@ contract LToken is Pausable, ERC4626 {
         @param amt Amount of token to collect
         @return isNotInDebt Returns if the account has pending borrows or not
     */
-    function collectFrom(address account, uint amt, uint shares)
+    function collectFrom(address account, uint amt)
         external
         accountManagerOnly
         returns (bool)
     {
         borrows -= amt;
-        borrowsOf[account] -= shares;
-        return (borrowsOf[account] == 0);
-    }
-
-    /**
-        @notice Returns Borrow balance of given account
-        @param account Address of account
-        @return borrowBalance Amount of underlying tokens borrowed
-    */
-    function getBorrowBalance(address account) external view returns (uint) {
-        return previewRedeem(borrowsOf[account]);
+        borrowData[account].balance = getBorrowBalance(account) - amt;
+        borrowData[account].index = borrowIndex;
+        return (borrowData[account].balance == 0);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -151,24 +155,40 @@ contract LToken is Pausable, ERC4626 {
 
     /**
         @notice Returns total amount of underlying assets
-            totalAssets = underlying balance + totalBorrows - totalReservers + delta
-            delta = totalBorrows * RateFactor * (1e18 - reserveFactor)
+            totalAssets = liquidity + totalBorrows
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
-        uint delta = (borrows == 0 || lastUpdated == block.number) ? 0
-            : borrows.mul(_getRateFactor()).mul(1e18 - reserveFactor);
-        return asset.balanceOf(address(this)) + borrows - reserves + delta;
+        return asset.balanceOf(address(this)) + getBorrows();
+    }
+
+    /// @notice Current total borrows owed to the pool
+    function getBorrows() public view returns (uint) {
+        return borrows.mul(1e18 + getRateFactor());
     }
 
     /// @notice Updates state of the lending pool
     function updateState() public {
         if (lastUpdated == block.number) return;
-        uint rateFactor = _getRateFactor();
-        uint interestAccrued = borrows.mul(rateFactor);
+        uint rateFactor = getRateFactor();
+        uint interestAccrued = borrows.mul(getRateFactor());
         borrows += interestAccrued;
         reserves += interestAccrued.mul(reserveFactor);
+        borrowIndex += borrowIndex.mul(rateFactor);
         lastUpdated = block.number;
+    }
+
+    /**
+        @notice Returns Borrow balance of given account
+        @param account Address of account
+        @return borrowBalance Amount of underlying tokens borrowed
+    */
+    function getBorrowBalance(address account) public view returns (uint) {
+        uint balance = borrowData[account].balance;
+        return (balance == 0) ? 0 :
+            (borrowIndex.mul(1e18 + getRateFactor()))
+            .div(borrowData[account].index)
+            .mul(balance);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -179,12 +199,12 @@ contract LToken is Pausable, ERC4626 {
         @dev Rate Factor = Block Delta * Interest Rate Per Block
             Block Delta = Number of blocks since last update
     */
-    function _getRateFactor() internal view returns (uint) {
-        return (block.number - lastUpdated).fromUint()
-                .mul(rateModel.getBorrowRatePerBlock(
+    function getRateFactor() internal view returns (uint) {
+        uint blockDelta = block.number - lastUpdated;
+        return (blockDelta * 1e18).mul(
+                    rateModel.getBorrowRatePerBlock(
                         asset.balanceOf(address(this)),
-                        borrows,
-                        reserves
+                        borrows
                     )
                 );
     }
