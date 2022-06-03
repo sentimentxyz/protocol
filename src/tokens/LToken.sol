@@ -189,8 +189,8 @@ contract LToken is Pausable, ERC4626, ILToken {
     function updateState() public {
         if (lastUpdated == block.number) return;
         uint rateFactor = 1e18 + getRateFactor();
-        borrows += borrows.mulWadUp(rateFactor);
-        borrowIndex += borrowIndex.mulWadUp(rateFactor);
+        borrows = borrows.mulWadUp(rateFactor);
+        borrowIndex = borrowIndex.mulWadUp(rateFactor);
         lastUpdated = block.number;
     }
 

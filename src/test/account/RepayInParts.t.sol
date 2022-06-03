@@ -80,12 +80,15 @@ contract RepayInParts is TestBase {
 
         cheats.prank(borrower);
         accountManager.repay(account, address(erc20), type(uint).max);
+
+        assertEq(riskEngine.getBorrows(account), 0);
+        assertEq(lErc20.getBorrows(), 0);
     }
 
     // Borrow1 - Borrow2 - Repay1 - Repay Max
     function testRepayInParts3(
         uint96 depositAmt,
-        uint96 borrowAmt, 
+        uint96 borrowAmt,
         uint96 borrow1,
         uint96 repayAmt
     )
@@ -130,12 +133,15 @@ contract RepayInParts is TestBase {
         // Max Repay
         cheats.prank(borrower);
         accountManager.repay(account, address(erc20), type(uint).max);
+
+        assertEq(riskEngine.getBorrows(account), 0);
+        assertEq(lErc20.getBorrows(), 0);
     }
 
     // Borrow1 - Repay1 - Borrow2 - Repay Max
     function testRepayInParts4(
         uint96 depositAmt,
-        uint96 borrowAmt, 
+        uint96 borrowAmt,
         uint96 borrow1,
         uint96 repayAmt
     )
@@ -180,5 +186,8 @@ contract RepayInParts is TestBase {
         // Max Repay
         cheats.prank(borrower);
         accountManager.repay(account, address(erc20), type(uint).max);
+
+        assertEq(riskEngine.getBorrows(account), 0);
+        assertEq(lErc20.getBorrows(), 0);
     }
 }
