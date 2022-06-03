@@ -15,7 +15,7 @@ contract LTokenTest is TestBase {
         account = openAccount(owner);
     }
 
-    function testLendTo(uint96 lendAmt, uint96 liquidity) public {
+    function testLendTo(uint lendAmt, uint liquidity) public {
         // Setup
         cheats.assume(lendAmt <= liquidity);
         erc20.mint(address(lErc20), liquidity);
@@ -31,7 +31,7 @@ contract LTokenTest is TestBase {
         assertEq(borrowBalance, lendAmt);
     }
 
-    function testFailLendTo(uint96 lendAmt, uint96 liquidity) public {
+    function testFailLendTo(uint lendAmt, uint liquidity) public {
         // Setup
         cheats.assume(lendAmt > liquidity);
         erc20.mint(address(lErc20), liquidity);
@@ -41,13 +41,13 @@ contract LTokenTest is TestBase {
         lErc20.lendTo(account, lendAmt);
     }
 
-    function testLendToAuthError(uint96 lendAmt) public {
+    function testLendToAuthError(uint lendAmt) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
         lErc20.lendTo(account, lendAmt);
     }
 
-    function testCollectFrom(uint96 lendAmt, uint96 liquidity, uint96 collectAmt)
+    function testCollectFrom(uint lendAmt, uint liquidity, uint collectAmt)
         public
     {
         // Setup
@@ -56,7 +56,9 @@ contract LTokenTest is TestBase {
 
         // Test
         cheats.startPrank(address(accountManager));
-        bool isBorrowBalanceZero = lErc20.collectFrom(account, collectAmt);
+        bool isBorrowBalanceZero = lErc20.collectFrom(
+            account, collectAmt, lErc20.convertToShares(collectAmt)
+        );
         cheats.stopPrank();
 
         uint borrowBalance = lErc20.getBorrowBalance(account);
@@ -66,7 +68,7 @@ contract LTokenTest is TestBase {
         assertTrue(isBorrowBalanceZero == (lendAmt == collectAmt));
     }
 
-    function testFailCollectFrom(uint96 lendAmt, uint96 liquidity, uint96 collectAmt)
+    function testFailCollectFrom(uint lendAmt, uint liquidity, uint collectAmt)
         public
     {
         // Setup
@@ -75,14 +77,16 @@ contract LTokenTest is TestBase {
 
         // Test
         cheats.startPrank(address(accountManager));
-        lErc20.collectFrom(account, collectAmt);
+        lErc20.collectFrom(
+            account, collectAmt, lErc20.convertToShares(collectAmt)
+        );
         cheats.stopPrank();
     }
 
     function testCollectFromAuthError(uint lendAmt) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);
-        lErc20.collectFrom(account, lendAmt);
+        lErc20.collectFrom(account, lendAmt, 0);
     }
 
     function testGetBorrowBalance(

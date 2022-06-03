@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
+import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
-import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 /**
     @title Default Rate Model
@@ -10,7 +10,7 @@ import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
     per block
 */
 contract DefaultRateModel is IRateModel {
-    using FixedPointMathLib for uint;
+    using PRBMathUD60x18 for uint;
 
     /// @notice Constant coefficients with 18 decimals
     uint immutable c1;
@@ -41,36 +41,39 @@ contract DefaultRateModel is IRateModel {
         where util = borrows / (liquidity - reserves + borrows)
         @param liquidity total balance of the underlying asset in the pool
         @param borrows balance of underlying assets borrowed from the pool
+        @param reserves balance of underlying assets reserved for the protocol
         @return uint borrow rate per block
     */
     function getBorrowRatePerBlock(
         uint liquidity,
-        uint borrows
+        uint borrows,
+        uint reserves
     )
         external
         view
         returns (uint)
     {
-        uint util = _utilization(liquidity, borrows);
-        return c3.mulWadUp(
+        uint util = _utilization(liquidity, borrows, reserves);
+        return c3.mul(
             (
-                util.mulWadUp(c1)
-                + util.rpow(32, 1e18).mulWadUp(c1)
-                + util.rpow(64, 1e18).mulWadUp(c2)
+                util.mul(c1)
+                + util.powu(32).mul(c1)
+                + util.powu(64).mul(c2)
             )
-            .divWadUp(blocksPerYear)
+            .div(blocksPerYear)
         );
     }
 
     function _utilization(
         uint liquidity,
-        uint borrows
+        uint borrows,
+        uint reserves
     )
         internal
         pure
         returns (uint)
     {
-        uint totalAssets = liquidity + borrows;
-        return (totalAssets == 0) ? 0 : borrows.divWadDown(totalAssets);
+        uint totalAssets = liquidity + borrows - reserves;
+        return (totalAssets == 0) ? 0 : borrows.div(totalAssets);
     }
 }
