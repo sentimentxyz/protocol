@@ -6,7 +6,6 @@ import {Helpers} from "../utils/Helpers.sol";
 import {Errors} from "../utils/Errors.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 
 interface IWETH {
     function withdraw(uint) external;
@@ -19,7 +18,6 @@ interface IWETH {
 */
 contract LEther is LToken {
     using Helpers for address;
-    using PRBMathUD60x18 for uint;
 
     /* -------------------------------------------------------------------------- */
     /*                             EXTERNAL FUNCTIONS                             */
