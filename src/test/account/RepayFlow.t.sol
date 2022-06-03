@@ -109,29 +109,4 @@ contract RepayFlowTest is TestBase {
         assertEq(riskEngine.getBorrows(account), 0);
         assertEq(lErc20.borrows(), 0);
     }
-
-    function testRepayInParts(uint96 depositAmt, uint96 borrowAmt, uint96 repayAmt)
-        public
-    {
-        // Setup
-        cheats.assume(borrowAmt > repayAmt);
-        cheats.assume(MAX_LEVERAGE.mulWadDown(depositAmt) > borrowAmt);
-        deposit(borrower, account, address(erc20), depositAmt);
-        borrow(borrower, account, address(erc20), borrowAmt);
-        erc20.mint(account, type(uint128).max);
-        cheats.roll(block.number + 100);
-
-        // Test
-        cheats.prank(borrower);
-        accountManager.repay(account, address(erc20), repayAmt);
-
-        // Increment block number
-        cheats.roll(block.number + 100);
-
-        cheats.prank(borrower);
-        accountManager.repay(account, address(erc20), type(uint).max);
-
-        assertEq(riskEngine.getBorrows(account), 0);
-        assertEq(lErc20.getBorrows(), 0);
-    }
 }
