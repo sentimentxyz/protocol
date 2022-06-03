@@ -30,16 +30,19 @@ contract TestBase is Test {
     uint lenderID = 5;
     address lender = cheats.addr(lenderID);
 
+    uint treasuryID = 420;
+    address treasury = cheats.addr(treasuryID);
+
     // Test ERC20 Tokens
     WETH weth;
     TestERC20 erc20;
 
     // LTokens
     LEther lEthImplementation;
-    ILEther lEth;
+    LEther lEth;
 
     LToken lErc20Implementation;
-    ILToken lErc20;
+    LToken lErc20;
 
     // Core Contracts
     RiskEngine riskEngine;
@@ -109,12 +112,12 @@ contract TestBase is Test {
         accountFactory = new AccountFactory(address(beacon));
 
         lEthImplementation = new LEther();
-        lEth = ILEther(address(new Proxy(address(lEthImplementation))));
-        lEth.init(weth, "LEther", "LEth", registry, 0);
+        lEth = LEther(payable(address(new Proxy(address(lEthImplementation)))));
+        lEth.init(weth, "LEther", "LEth", registry, 1e17, treasury);
 
         lErc20Implementation = new LToken();
-        lErc20 = ILToken(address(new Proxy(address(lErc20Implementation))));
-        lErc20.init(erc20, "LTestERC20", "LERC20", registry, 0);
+        lErc20 = LToken(address(new Proxy(address(lErc20Implementation))));
+        lErc20.init(erc20, "LTestERC20", "LERC20", registry, 1e17, treasury);
     }
 
     function register() private {
