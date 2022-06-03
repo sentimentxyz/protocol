@@ -26,7 +26,7 @@ contract Deploy is Test {
     address constant TREASURY = 0xc6E058a257eD5EFD6F14DB90dF58754d6963d542;
     address constant WETH9 = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
     address constant DAI = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
-    address constant ETHUSD = 0x9326BFA02ADD2366b30bacB125260Af641031331; 
+    address constant ETHUSD = 0x9326BFA02ADD2366b30bacB125260Af641031331;
     address constant DAIUSD = 0x777A68032a88E5A84678A77Af2CD65A7b3c0775a;
 
     Registry registryImpl;
@@ -99,7 +99,7 @@ contract Deploy is Test {
         // LETH
         lEthImpl = new LEther();
         lEth = LEther(payable(address(new Proxy(address(lEthImpl)))));
-        lEth.init(ERC20(WETH9), "LEther", "LETH", registry, 3e15, TREASURY);
+        lEth.init(ERC20(WETH9), "LEther", "LETH", registry, 1e17, TREASURY);
         registry.setLToken(WETH9, address(lEth));
         accountManager.toggleCollateralStatus(WETH9);
         lEth.initDep("RATE_MODEL");
@@ -107,7 +107,7 @@ contract Deploy is Test {
         // LDAI
         lToken = new LToken();
         lDai = LToken(address(new Proxy(address(lToken))));
-        lDai.init(ERC20(DAI), "LDai", "LDAI", registry, 3e15, TREASURY);
+        lDai.init(ERC20(DAI), "LDai", "LDAI", registry, 1e17, TREASURY);
         registry.setLToken(DAI, address(lDai));
         accountManager.toggleCollateralStatus(DAI);
         lDai.initDep("RATE_MODEL");
