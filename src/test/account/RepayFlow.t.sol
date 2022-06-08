@@ -26,7 +26,7 @@ contract RepayFlowTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(0), depositAmt);
         borrow(borrower, account, address(weth), borrowAmt);
@@ -47,7 +47,7 @@ contract RepayFlowTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
         cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
         deposit(borrower, account, address(erc20), depositAmt);
         borrow(borrower, account, address(erc20), borrowAmt);

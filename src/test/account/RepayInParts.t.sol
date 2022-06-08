@@ -22,7 +22,7 @@ contract RepayInParts is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
         cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         deposit(borrower, account, address(erc20), depositAmt);
         borrow(borrower, account, address(erc20), borrowAmt);
@@ -93,7 +93,7 @@ contract RepayInParts is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
         cheats.assume(borrowAmt > borrow1);
         cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
 
@@ -146,9 +146,11 @@ contract RepayInParts is TestBase {
     {
         // Setup
         cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
-        cheats.assume(borrowAmt > borrow1);
+        cheats.assume(borrowAmt > borrow1 && borrow1 > 0);
 
         uint repayAmt = borrow1 / 2;
+
+        cheats.assume(repayAmt > 0);
 
         // Lending Pool
         address lender = address(5);

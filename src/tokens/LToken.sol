@@ -47,10 +47,10 @@ contract LToken is Pausable, ERC4626 {
     /// @notice Reserve factor
     uint public reserveFactor;
 
-    /// @notice Total debt shares minted
+    /// @notice Total borrow shares minted
     uint public totalBorrowShares;
 
-    /// @notice Mapping of account to borrow amount
+    /// @notice Mapping of account to borrow in terms of shares
     mapping (address => uint) public borrowsOf;
 
     /* -------------------------------------------------------------------------- */
@@ -124,7 +124,8 @@ contract LToken is Pausable, ERC4626 {
         updateState();
         isFirstBorrow = (borrowsOf[account] == 0);
 
-        uint borrowShares = convertAssetToBorrowShares(amt);
+        uint borrowShares;
+        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_ASSETS");
         totalBorrowShares += borrowShares;
         borrowsOf[account] += borrowShares;
 
@@ -144,7 +145,8 @@ contract LToken is Pausable, ERC4626 {
         accountManagerOnly
         returns (bool)
     {
-        uint borrowShares = convertAssetToBorrowShares(amt);
+        uint borrowShares;
+        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_ASSETS");
         borrowsOf[account] -= borrowShares;
         totalBorrowShares -= borrowShares;
 
