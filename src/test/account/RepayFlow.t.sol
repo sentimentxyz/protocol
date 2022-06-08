@@ -84,7 +84,7 @@ contract RepayFlowTest is TestBase {
 
         assertEq(riskEngine.getBorrows(account), 0);
     }
-    
+
     function testMaxRepayERC20WithInterest(uint96 depositAmt, uint96 borrowAmt)
         public
     {
@@ -101,6 +101,5 @@ contract RepayFlowTest is TestBase {
 
         assertEq(lErc20.getBorrowBalance(account), 0);
         assertEq(lErc20.getBorrows(), 0);
-        console.log(lErc20.getReserves());
     }
 }
