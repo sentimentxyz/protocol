@@ -101,5 +101,6 @@ contract RepayFlowTest is TestBase {
 
         assertEq(lErc20.getBorrowBalance(account), 0);
         assertEq(lErc20.getBorrows(), 0);
+        console.log(lErc20.getReserves());
     }
 }

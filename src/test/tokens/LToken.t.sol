@@ -88,7 +88,7 @@ contract LTokenTest is TestBase {
     function testGetBorrowBalance(
         uint96 liquidity,
         uint96 borrowAmt,
-        uint96 delta
+        uint24 delta
     )
         public
     {
