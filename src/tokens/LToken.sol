@@ -41,18 +41,14 @@ contract LToken is Pausable, ERC4626 {
     /// @notice Block number of when the state of the LToken was last updated
     uint public lastUpdated;
 
-    /// @notice Fee charged per borrow
-    uint public borrowFeeRate;
-
-    /// @notice protocol reserves
-    /// @dev will remain unused until we introduce reserves in the system
+    /// @notice Protocol reserves
     uint public reserves;
 
-    /// @notice reserve factor
-    /// @dev will remain unused until we introduce reserves in the system
+    /// @notice Reserve factor
     uint public reserveFactor;
 
-    uint public totalDebtSupply;
+    /// @notice Total debt shares minted
+    uint public totalBorrowShares;
 
     /// @notice Mapping of account to borrow amount
     mapping (address => uint) public borrowsOf;
@@ -128,9 +124,9 @@ contract LToken is Pausable, ERC4626 {
         updateState();
         isFirstBorrow = (borrowsOf[account] == 0);
 
-        uint debt = _convertAssetToDebt(amt);
-        totalDebtSupply += debt;
-        borrowsOf[account] += debt;
+        uint borrowShares = convertAssetToBorrowShares(amt);
+        totalBorrowShares += borrowShares;
+        borrowsOf[account] += borrowShares;
 
         borrows += amt;
         asset.transfer(account, amt);
@@ -148,9 +144,9 @@ contract LToken is Pausable, ERC4626 {
         accountManagerOnly
         returns (bool)
     {
-        uint debt = _convertAssetToDebt(amt);
-        borrowsOf[account] -= debt;
-        totalDebtSupply -= debt;
+        uint borrowShares = convertAssetToBorrowShares(amt);
+        borrowsOf[account] -= borrowShares;
+        totalBorrowShares -= borrowShares;
 
         borrows -= amt;
         return (borrowsOf[account] == 0);
@@ -162,11 +158,11 @@ contract LToken is Pausable, ERC4626 {
         @return borrowBalance Amount of underlying tokens borrowed
     */
     function getBorrowBalance(address account) external view returns (uint) {
-        return _convertDebtToAsset(borrowsOf[account]);
+        return convertBorrowSharesToAsset(borrowsOf[account]);
     }
 
     function getReserves() public view returns (uint) {
-        return reserves + borrows.mulWadUp(_getRateFactor())
+        return reserves + borrows.mulWadUp(getRateFactor())
         .mulWadUp(reserveFactor);
     }
 
@@ -181,21 +177,17 @@ contract LToken is Pausable, ERC4626 {
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
-        uint delta = (lastUpdated == block.number) ? 0
-            : borrows.mulWadUp(_getRateFactor());
-        return asset.balanceOf(address(this)) + borrows + delta - getReserves();
+        return asset.balanceOf(address(this)) + getBorrows() - getReserves();
     }
 
     function getBorrows() public view returns (uint) {
-        uint delta = (lastUpdated == block.number) ? 0
-            : borrows.mulWadUp(_getRateFactor());
-        return borrows + delta;
+        return borrows + borrows.mulWadUp(getRateFactor());
     }
 
     /// @notice Updates state of the lending pool
     function updateState() public {
         if (lastUpdated == block.number) return;
-        uint rateFactor = _getRateFactor();
+        uint rateFactor = getRateFactor();
         uint interestAccrued = borrows.mulWadUp(rateFactor);
         borrows += interestAccrued;
         reserves += interestAccrued.mulWadUp(reserveFactor);
@@ -210,7 +202,7 @@ contract LToken is Pausable, ERC4626 {
         @dev Rate Factor = Block Delta * Interest Rate Per Block
             Block Delta = Number of blocks since last update
     */
-    function _getRateFactor() internal view returns (uint) {
+    function getRateFactor() internal view returns (uint) {
         return (block.number == lastUpdated) ?
             0 :
             ((block.number - lastUpdated)*1e18)
@@ -222,13 +214,13 @@ contract LToken is Pausable, ERC4626 {
             );
     }
 
-    function _convertAssetToDebt(uint amt) internal view returns (uint) {
-        uint256 supply = totalDebtSupply;
+    function convertAssetToBorrowShares(uint amt) internal view returns (uint) {
+        uint256 supply = totalBorrowShares;
         return supply == 0 ? amt : amt.mulDivUp(supply, getBorrows());
     }
 
-    function _convertDebtToAsset(uint debt) internal view returns (uint) {
-        uint256 supply = totalDebtSupply;
+    function convertBorrowSharesToAsset(uint debt) internal view returns (uint) {
+        uint256 supply = totalBorrowShares;
         return supply == 0 ? debt : debt.mulDivDown(getBorrows(), supply);
     }
 
@@ -244,9 +236,5 @@ contract LToken is Pausable, ERC4626 {
         reserves -= amt;
         emit ReservesRedeemed(treasury, amt);
         asset.transfer(treasury, amt);
-    }
-
-    function setBorrowFee(uint _borrowFeeRate) external adminOnly {
-        borrowFeeRate = _borrowFeeRate;
     }
 }
