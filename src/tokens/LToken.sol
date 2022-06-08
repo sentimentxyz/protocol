@@ -125,7 +125,7 @@ contract LToken is Pausable, ERC4626 {
         isFirstBorrow = (borrowsOf[account] == 0);
 
         uint borrowShares;
-        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_ASSETS");
+        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_BORROW_SHARES");
         totalBorrowShares += borrowShares;
         borrowsOf[account] += borrowShares;
 
@@ -146,7 +146,7 @@ contract LToken is Pausable, ERC4626 {
         returns (bool)
     {
         uint borrowShares;
-        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_ASSETS");
+        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_BORROW_SHARES");
         borrowsOf[account] -= borrowShares;
         totalBorrowShares -= borrowShares;
 
