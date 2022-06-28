@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-import {Errors} from "../../utils/Errors.sol";
-import {IERC20} from "../../interface/tokens/IERC20.sol";
-import {IAccount} from "../../interface/core/IAccount.sol";
-import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
+import {Errors} from "../../../utils/Errors.sol";
+import {IERC20} from "../../../interface/tokens/IERC20.sol";
+import {IAccount} from "../../../interface/core/IAccount.sol";
+import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
 
 interface IStableSwapPool {
     function get_dy(uint256, uint256, uint256) external view returns (uint256);
