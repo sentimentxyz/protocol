@@ -25,7 +25,7 @@ jobs:
         run: forge test --no-match-contract Integration -vvv
 
       - name: Run Mainnet Integration tests
-        run: forge test --match-contract Integration --fork-url https://rpc.ankr.com/eth -vvv
+        run: forge test --match-contract Integration --no-match-contract ArbiIntegration --fork-url https://rpc.ankr.com/eth -vvv
 
       - name: Run Arbitrum Integration tests
         run: forge test --match-contract ArbiIntegration --fork-url https://rpc.ankr.com/arbitrum -vvv
