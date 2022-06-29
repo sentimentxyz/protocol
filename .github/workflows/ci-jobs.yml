@@ -28,4 +28,4 @@ jobs:
         run: forge test --match-contract Integration --no-match-contract ArbiIntegration --fork-url https://rpc.ankr.com/eth -vvv
 
       - name: Run Arbitrum Integration tests
-        run: forge test --match-contract ArbiIntegration --fork-url https://rpc.ankr.com/arbitrum -vvv
+        run: forge test --match-contract ArbiIntegration --fork-url https://arb1.arbitrum.io/rpc -vvv
