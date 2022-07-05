@@ -1,6 +1,6 @@
 name: Compile and Test
 
-on: 
+on:
   push:
     branches: [ main ]
   pull_request:
@@ -23,7 +23,9 @@ jobs:
 
       - name: Run tests
         run: forge test --no-match-contract Integration -vvv
-      
-      - name: Run Integration tests
-        run: forge test --match-contract Integration --fork-url https://rpc.ankr.com/eth -vvv
-        
+
+      - name: Run Mainnet Integration tests
+        run: forge test --match-contract Integration --no-match-contract ArbiIntegration --fork-url https://rpc.ankr.com/eth -vvv
+
+      - name: Run Arbitrum Integration tests
+        run: forge test --match-contract ArbiIntegration --fork-url https://arb1.arbitrum.io/rpc -vvv
