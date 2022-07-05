@@ -40,8 +40,8 @@ contract AccountManager is Pausable, IAccountManager {
     /// @notice Account Factory
     IAccountFactory public accountFactory;
 
-    /// @notice List of inactive accounts
-    address[] public inactiveAccounts;
+    /// @notice List of inactive accounts per user
+    mapping(address => address[]) public inactiveAccountsOf;
 
     /// @notice Mapping of collateral enabled tokens
     mapping(address => bool) public isCollateralAllowed;
@@ -89,13 +89,14 @@ contract AccountManager is Pausable, IAccountManager {
     */
     function openAccount(address owner) external whenNotPaused {
         address account;
-        if (inactiveAccounts.length == 0) {
+        uint length = inactiveAccountsOf[owner].length;
+        if (length == 0) {
             account = accountFactory.create(address(this));
             IAccount(account).init(address(this));
             registry.addAccount(account, owner);
         } else {
-            account = inactiveAccounts[inactiveAccounts.length - 1];
-            inactiveAccounts.pop();
+            account = inactiveAccountsOf[owner][length - 1];
+            inactiveAccountsOf[owner].pop();
             registry.updateAccount(account, owner);
         }
         IAccount(account).activate();
@@ -113,10 +114,10 @@ contract AccountManager is Pausable, IAccountManager {
         if (account.activationBlock() == block.number)
             revert Errors.AccountDeactivationFailure();
         if (!account.hasNoDebt()) revert Errors.OutstandingDebt();
-        account.sweepTo(msg.sender);
         account.deactivate();
         registry.closeAccount(_account);
-        inactiveAccounts.push(_account);
+        inactiveAccountsOf[msg.sender].push(_account);
+        account.sweepTo(msg.sender);
         emit AccountClosed(_account, msg.sender);
     }
 
@@ -321,14 +322,6 @@ contract AccountManager is Pausable, IAccountManager {
             else balance = borrows[i].balanceOf(account);
             if ( balance > 0 ) repay(account, borrows[i], type(uint).max);
         }
-    }
-
-    /**
-        @notice Returns a list of inactive accounts
-        @return inactiveAccounts List of inactive Accounts
-    */
-    function getInactiveAccounts() external view returns (address[] memory) {
-        return inactiveAccounts;
     }
 
     /* -------------------------------------------------------------------------- */

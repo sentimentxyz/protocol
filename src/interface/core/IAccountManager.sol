@@ -31,7 +31,6 @@ interface IAccountManager {
     function initDep() external;
     function openAccount(address owner) external;
     function closeAccount(address account) external;
-    function getInactiveAccounts() external view returns (address[] memory);
     function repay(address account, address token, uint value) external;
     function borrow(address account, address token, uint value) external;
     function deposit(address account, address token, uint value) external;
