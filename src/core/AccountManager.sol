@@ -324,6 +324,21 @@ contract AccountManager is Pausable, IAccountManager {
         }
     }
 
+    /**
+        @notice Fetches inactive accounts of a user
+        @param user Address of user
+        @return address[] List of inactive accounts
+    */
+    function getInactiveAccounts(
+        address user
+    )
+        external
+        view
+        returns (address[] memory)
+    {
+        return inactiveAccountsOf[user];
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                             Internal Functions                             */
     /* -------------------------------------------------------------------------- */
