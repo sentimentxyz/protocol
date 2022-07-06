@@ -13,6 +13,7 @@ library Helpers {
         address to,
         uint256 value
     ) internal {
+        if (!isContract(token)) revert Errors.TokenNotContract();
         (bool success, bytes memory data) = address(token).call(
             abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value)
         );
@@ -24,6 +25,7 @@ library Helpers {
         address to,
         uint256 value
     ) internal {
+        if (!isContract(token)) revert Errors.TokenNotContract();
         (bool success, bytes memory data) = address(token).call(
             abi.encodeWithSelector(IERC20.transfer.selector, to, value)
         );
@@ -35,6 +37,7 @@ library Helpers {
         address to,
         uint256 value
     ) internal {
+        if (!isContract(token)) revert Errors.TokenNotContract();
         (bool success, bytes memory data) = address(token).call(
             abi.encodeWithSelector(IERC20.approve.selector, to, value)
         );
@@ -56,6 +59,7 @@ library Helpers {
     }
 
     function withdraw(address account, address to, address token, uint value) internal {
+        if (!isContract(token)) revert Errors.TokenNotContract();
         (bool success, bytes memory data) = IAccount(account).exec(token, 0,
                 abi.encodeWithSelector(IERC20.transfer.selector, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
@@ -69,5 +73,9 @@ library Helpers {
 
     function isEth(address token) internal pure returns (bool) {
         return token == address(0);
+    }
+
+    function isContract(address token) internal view returns (bool) {
+        return token.code.length > 0;
     }
 }

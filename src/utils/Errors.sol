@@ -8,6 +8,7 @@ library Errors {
     error OutstandingDebt();
     error AccountsNotFound();
     error AccountOwnerOnly();
+    error TokenNotContract();
     error ContractNotPaused();
     error LTokenUnavailable();
     error EthTransferFailure();
