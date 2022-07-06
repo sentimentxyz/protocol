@@ -380,6 +380,4 @@ contract AccountManager is Pausable, IAccountManager {
     function toggleCollateralStatus(address token) external adminOnly {
         isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
-
-    receive() external payable {}
 }
