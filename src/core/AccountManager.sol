@@ -226,9 +226,17 @@ contract AccountManager is Pausable, IAccountManager {
         public
         onlyOwner(account)
     {
-        if (registry.LTokenFor(token) == address(0))
+        ILToken LToken = ILToken(registry.LTokenFor(token));
+        if (address(LToken) == address(0))
             revert Errors.LTokenUnavailable();
-        _repay(account, token, amt);
+        LToken.updateState();
+        if (amt == type(uint256).max) amt = LToken.getBorrowBalance(account);
+        account.withdraw(address(LToken), token, amt);
+        if (LToken.collectFrom(account, amt))
+            IAccount(account).removeBorrow(token);
+        if (IERC20(token).balanceOf(account) == 0)
+            IAccount(account).removeAsset(token);
+        emit Repay(account, msg.sender, token, amt);
     }
 
     /**
@@ -326,18 +334,6 @@ contract AccountManager is Pausable, IAccountManager {
     /* -------------------------------------------------------------------------- */
     /*                             Internal Functions                             */
     /* -------------------------------------------------------------------------- */
-
-    function _repay(address account, address token, uint amt) internal {
-        ILToken LToken = ILToken(registry.LTokenFor(token));
-        LToken.updateState();
-        if (amt == type(uint256).max) amt = LToken.getBorrowBalance(account);
-        account.withdraw(address(LToken), token, amt);
-        if (LToken.collectFrom(account, amt))
-            IAccount(account).removeBorrow(token);
-        if (IERC20(token).balanceOf(account) == 0)
-            IAccount(account).removeAsset(token);
-        emit Repay(account, msg.sender, token, amt);
-    }
 
     function _updateTokensIn(address account, address[] memory tokensIn)
         internal
