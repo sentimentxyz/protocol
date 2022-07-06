@@ -10,6 +10,7 @@ library Errors {
     error TokenNotContract();
     error ContractNotPaused();
     error LTokenUnavailable();
+    error LiquidationFailed();
     error EthTransferFailure();
     error AccountManagerOnly();
     error RiskThresholdBreached();

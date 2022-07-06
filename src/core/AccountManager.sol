@@ -364,8 +364,17 @@ contract AccountManager is Pausable, IAccountManager {
         address[] memory accountBorrows = account.getBorrows();
         uint borrowLen = accountBorrows.length;
 
+        ILToken LToken;
+        uint amt;
+
         for(uint i; i < borrowLen; ++i) {
-            _repay(_account, accountBorrows[i], type(uint).max);
+            address token = accountBorrows[i];
+            LToken = ILToken(registry.LTokenFor(token));
+            amt = LToken.getBorrowBalance(_account);
+            token.safeTransferFrom(msg.sender, address(LToken), amt);
+            if (!LToken.collectFrom(_account, amt))
+                revert Errors.LiquidationFailed();
+            account.removeBorrow(token);
         }
         account.sweepTo(msg.sender);
     }
