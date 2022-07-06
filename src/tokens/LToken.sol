@@ -41,7 +41,7 @@ contract LToken is Pausable, ERC4626, ILToken {
     /// @notice Total amount of borrows
     uint public borrows;
 
-    /// @notice Block number of when the state of the LToken was last updated
+    /// @notice Timestamp of when the state of the LToken was last updated
     uint public lastUpdated;
 
     /// @notice Protocol reserves
@@ -198,12 +198,12 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     /// @notice Updates state of the lending pool
     function updateState() public {
-        if (lastUpdated == block.number) return;
+        if (lastUpdated == block.timestamp) return;
         uint rateFactor = getRateFactor();
         uint interestAccrued = borrows.mulWadUp(rateFactor);
         borrows += interestAccrued;
         reserves += interestAccrued.mulWadUp(reserveFactor);
-        lastUpdated = block.number;
+        lastUpdated = block.timestamp;
     }
 
     /* -------------------------------------------------------------------------- */
@@ -215,11 +215,11 @@ contract LToken is Pausable, ERC4626, ILToken {
             Block Delta = Number of blocks since last update
     */
     function getRateFactor() internal view returns (uint) {
-        return (block.number == lastUpdated) ?
+        return (block.timestamp == lastUpdated) ?
             0 :
-            ((block.number - lastUpdated)*1e18)
+            ((block.timestamp - lastUpdated)*1e18)
             .mulWadUp(
-                rateModel.getBorrowRatePerBlock(
+                rateModel.getBorrowRatePerSecond(
                     asset.balanceOf(address(this)),
                     borrows
                 )

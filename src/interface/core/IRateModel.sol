@@ -2,7 +2,7 @@
 pragma solidity 0.8.15;
 
 interface IRateModel {
-    function getBorrowRatePerBlock(
+    function getBorrowRatePerSecond(
         uint liquidity,
         uint borrows
     ) external view returns (uint);
