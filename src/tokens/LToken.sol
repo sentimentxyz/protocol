@@ -144,7 +144,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         @notice Collects a specified amount of underlying asset from an account
         @param account Address of account
         @param amt Amount of token to collect
-        @return isNotInDebt Returns if the account has pending borrows or not
+        @return bool Returns true if account has no debt
     */
     function collectFrom(address account, uint amt)
         external
