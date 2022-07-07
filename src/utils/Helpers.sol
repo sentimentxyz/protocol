@@ -32,18 +32,6 @@ library Helpers {
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
     }
 
-    function safeApprove(
-        address token,
-        address to,
-        uint256 value
-    ) internal {
-        if (!isContract(token)) revert Errors.TokenNotContract();
-        (bool success, bytes memory data) = address(token).call(
-            abi.encodeWithSelector(IERC20.approve.selector, to, value)
-        );
-        require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED");
-    }
-
     function safeTransferEth(address to, uint256 value) internal {
         (bool success, ) = to.call{value: value}(new bytes(0));
         if(!success) revert Errors.EthTransferFailure();
@@ -69,10 +57,6 @@ library Helpers {
         (bool success, bytes memory data) = IAccount(account).exec(token, 0,
             abi.encodeWithSelector(IERC20.approve.selector, spender, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED");
-    }
-
-    function isEth(address token) internal pure returns (bool) {
-        return token == address(0);
     }
 
     function isContract(address token) internal view returns (bool) {
