@@ -100,6 +100,13 @@ contract LToken is Pausable, ERC4626, ILToken {
         address _treasury
     ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
+
+        if (
+            address(_asset) == address(0) ||
+            address(_registry) == address(0) ||
+            _treasury == address(0)
+        ) revert Errors.ZeroAddress();
+
         initialized = true;
         initPausable(msg.sender);
         initERC4626(_asset, _name, _symbol);
