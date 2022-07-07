@@ -74,10 +74,10 @@ contract AccountManager is Pausable, IAccountManager {
 
     /// @notice Initializes external dependencies
     function initDep() external adminOnly {
-        riskEngine = IRiskEngine(registry.addressFor('RISK_ENGINE'));
-        controller = IControllerFacade(registry.addressFor('CONTROLLER'));
+        riskEngine = IRiskEngine(registry.getAddress('RISK_ENGINE'));
+        controller = IControllerFacade(registry.getAddress('CONTROLLER'));
         accountFactory =
-            IAccountFactory(registry.addressFor('ACCOUNT_FACTORY'));
+            IAccountFactory(registry.getAddress('ACCOUNT_FACTORY'));
     }
 
     /**

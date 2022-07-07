@@ -189,6 +189,21 @@ contract Registry is Ownable, IRegistry {
         assembly { mstore(userAccounts, index) }
     }
 
+    /**
+        @notice Returns address of a specified contract deployed by the protocol
+        @dev Reverts if there is no contract deployed
+        @param id Name of the contract, Eg: ACCOUNT_MANAGER
+        @return value Address of deployed contract
+    */
+    function getAddress(string calldata id)
+        external
+        view
+        returns (address value)
+    {
+        if ((value = addressFor[id]) == address(0))
+            revert Errors.ZeroAddress();
+    }
+
     /* -------------------------------------------------------------------------- */
     /*                              HELPER FUNCTIONS                              */
     /* -------------------------------------------------------------------------- */

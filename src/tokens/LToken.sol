@@ -114,8 +114,8 @@ contract LToken is Pausable, ERC4626, ILToken {
         @param _rateModel Name of rate model contract
     */
     function initDep(string calldata _rateModel) external adminOnly {
-        rateModel = IRateModel(registry.addressFor(_rateModel));
-        accountManager = registry.addressFor('ACCOUNT_MANAGER');
+        rateModel = IRateModel(registry.getAddress(_rateModel));
+        accountManager = registry.getAddress('ACCOUNT_MANAGER');
     }
 
     /**
