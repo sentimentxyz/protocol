@@ -21,5 +21,5 @@ interface IAccount {
         address target,
         uint amt,
         bytes calldata data
-    ) payable external returns (bool, bytes memory);
+    ) external returns (bool, bytes memory);
 }

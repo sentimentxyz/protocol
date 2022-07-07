@@ -148,7 +148,6 @@ contract Account is IAccount {
     */
     function exec(address target, uint amt, bytes calldata data)
         external
-        payable
         accountManagerOnly
         returns (bool, bytes memory)
     {
