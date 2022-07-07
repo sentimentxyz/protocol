@@ -38,12 +38,12 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
     }
 
     function setUp() public {
+        lendingPool = addressProvider.getLendingPool();
         setupContracts();
         setupOracles();
         setupAaveController();
         setupWethController();
         account = openAccount(user);
-        lendingPool = addressProvider.getLendingPool();
     }
 
     function testDepositWeth(uint64 amt) public {

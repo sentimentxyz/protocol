@@ -35,12 +35,12 @@ contract AaveV3ArbiIntegrationTest is ArbiIntegrationTestBase {
     }
 
     function setUp() public {
+        pool = addressProvider.getPool();
         setupContracts();
         setupOracles();
         setupAaveController();
         setupWethController();
         account = openAccount(user);
-        pool = addressProvider.getPool();
     }
 
     function testDepositWeth(uint64 amt) public {

@@ -32,12 +32,12 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
     }
 
     function setUp() public {
+        lendingPool = addressProvider.getLendingPool();
         setupContracts();
         setupOracles();
         setupAaveController();
         setupWethController();
         account = openAccount(user);
-        lendingPool = addressProvider.getLendingPool();
     }
 
     function testDepositEth(uint64 amt) public {
