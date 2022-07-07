@@ -366,6 +366,7 @@ contract AccountManager is Pausable, IAccountManager {
         for(uint i; i < borrowLen; ++i) {
             address token = accountBorrows[i];
             LToken = ILToken(registry.LTokenFor(token));
+            LToken.updateState();
             amt = LToken.getBorrowBalance(_account);
             token.safeTransferFrom(msg.sender, address(LToken), amt);
             if (!LToken.collectFrom(_account, amt))
