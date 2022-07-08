@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.15;
 
-/// @notice Modern and gas efficient ERC20 + EIP-2612 implementation.
-/// @author Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/tokens/ERC20.sol)
-/// @author Modified from Uniswap (https://github.com/Uniswap/uniswap-v2-core/blob/master/contracts/UniswapV2ERC20.sol)
+import {Errors} from "../../utils/Errors.sol";
+
+/// @notice ERC20 + EIP-2612 implementation.
+/// @author Modified from Solmate (https://github.com/Rari-Capital/solmate/blob/main/src/tokens/ERC20.sol)
 /// @dev Do not manually set balances without updating totalSupply, as the sum of all user balances must not exceed it.
 abstract contract ERC20 {
     /*//////////////////////////////////////////////////////////////
@@ -74,17 +75,7 @@ abstract contract ERC20 {
     }
 
     function transfer(address to, uint256 amount) public virtual returns (bool) {
-        balanceOf[msg.sender] -= amount;
-
-        // Cannot overflow because the sum of all user
-        // balances can't exceed the max uint256 value.
-        unchecked {
-            balanceOf[to] += amount;
-        }
-
-        emit Transfer(msg.sender, to, amount);
-
-        return true;
+        return _transfer(msg.sender, to, amount);
     }
 
     function transferFrom(
@@ -96,17 +87,7 @@ abstract contract ERC20 {
 
         if (allowed != type(uint256).max) allowance[from][msg.sender] = allowed - amount;
 
-        balanceOf[from] -= amount;
-
-        // Cannot overflow because the sum of all user
-        // balances can't exceed the max uint256 value.
-        unchecked {
-            balanceOf[to] += amount;
-        }
-
-        emit Transfer(from, to, amount);
-
-        return true;
+        return _transfer(from, to, amount);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -179,6 +160,25 @@ abstract contract ERC20 {
     /*//////////////////////////////////////////////////////////////
                         INTERNAL MINT/BURN LOGIC
     //////////////////////////////////////////////////////////////*/
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal returns (bool) {
+        if (to == address(0)) revert Errors.ZeroAddress();
+
+        balanceOf[from] -= amount;
+
+        // Cannot overflow because the sum of all user
+        // balances can't exceed the max uint256 value.
+        unchecked {
+            balanceOf[to] += amount;
+        }
+
+        emit Transfer(from, to, amount);
+        return true;
+    }
 
     function _mint(address to, uint256 amount) internal virtual {
         totalSupply += amount;
