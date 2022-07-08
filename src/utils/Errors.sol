@@ -6,14 +6,12 @@ library Errors {
     error ZeroAddress();
     error ContractPaused();
     error OutstandingDebt();
-    error AccountsNotFound();
     error AccountOwnerOnly();
     error TokenNotContract();
     error ContractNotPaused();
     error LTokenUnavailable();
     error EthTransferFailure();
     error AccountManagerOnly();
-    error PriceFeedUnavailable();
     error RiskThresholdBreached();
     error FunctionCallRestricted();
     error AccountNotLiquidatable();
