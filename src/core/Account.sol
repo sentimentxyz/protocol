@@ -71,6 +71,13 @@ contract Account is IAccount {
     }
 
     /**
+        @notice Deactivates an account by setting the activationBlock to 0
+    */
+    function deactivate() external accountManagerOnly {
+        activationBlock = 0;
+    }
+
+    /**
         @notice Returns a list of ERC-20 assets deposited and borrowed by the owner
         @return assets List of addresses
     */

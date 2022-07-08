@@ -114,6 +114,7 @@ contract AccountManager is Pausable, IAccountManager {
             revert Errors.AccountDeactivationFailure();
         if (!account.hasNoDebt()) revert Errors.OutstandingDebt();
         account.sweepTo(msg.sender);
+        account.deactivate();
         registry.closeAccount(_account);
         inactiveAccounts.push(_account);
         emit AccountClosed(_account, msg.sender);

@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 interface IAccount {
     function activate() external;
+    function deactivate() external;
     function addAsset(address token) external;
     function addBorrow(address token) external;
     function removeAsset(address token) external;

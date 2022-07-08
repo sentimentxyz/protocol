@@ -35,6 +35,7 @@ contract OpenCloseFlowTest is TestBase {
         // Assert
         assertEq(registry.accountsOwnedBy(user).length, 0);
         assertEq(address(accountManager), IAccount(account).accountManager());
+        assertEq(0, IAccount(account).activationBlock());
     }
 
     function testReassign() public {
