@@ -34,7 +34,7 @@ contract RiskEngine is Ownable, IRiskEngine {
     IAccountManager public accountManager;
 
     /// @notice Balance:Borrow, Default = 1.2
-    uint public constant balanceToBorrowThreshold = 12 * 1e17;
+    uint public constant balanceToBorrowThreshold = 1.2e18;
 
     /* -------------------------------------------------------------------------- */
     /*                                 CONSTRUCTOR                                */
