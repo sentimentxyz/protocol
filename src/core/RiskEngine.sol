@@ -55,8 +55,8 @@ contract RiskEngine is Ownable, IRiskEngine {
 
     /// @notice Initializes external dependencies
     function initDep() external adminOnly {
-        oracle = IOracle(registry.addressFor('ORACLE'));
-        accountManager = IAccountManager(registry.addressFor('ACCOUNT_MANAGER'));
+        oracle = IOracle(registry.getAddress('ORACLE'));
+        accountManager = IAccountManager(registry.getAddress('ACCOUNT_MANAGER'));
     }
 
     /**
