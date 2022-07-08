@@ -20,6 +20,6 @@ interface IAccount {
     function exec(
         address target,
         uint amt,
-        bytes memory data
+        bytes calldata data
     ) payable external returns (bool, bytes memory);
 }
