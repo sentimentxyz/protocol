@@ -369,8 +369,7 @@ contract AccountManager is Pausable, IAccountManager {
             LToken.updateState();
             amt = LToken.getBorrowBalance(_account);
             token.safeTransferFrom(msg.sender, address(LToken), amt);
-            if (!LToken.collectFrom(_account, amt))
-                revert Errors.LiquidationFailed();
+            LToken.collectFrom(_account, amt);
             account.removeBorrow(token);
         }
         account.sweepTo(msg.sender);
