@@ -34,6 +34,7 @@ contract OpenCloseFlowTest is TestBase {
 
         // Assert
         assertEq(registry.accountsOwnedBy(user).length, 0);
+        assertEq(accountManager.getInactiveAccounts(user).length, 1);
         assertEq(address(accountManager), IAccount(account).accountManager());
         assertEq(0, IAccount(account).activationBlock());
     }
@@ -48,6 +49,7 @@ contract OpenCloseFlowTest is TestBase {
         // Assert
         assertEq(account, account2);
         assertEq(account, registry.accountsOwnedBy(user)[0]);
+        assertEq(accountManager.getInactiveAccounts(user).length, 0);
         assertEq(address(accountManager), IAccount(account).accountManager());
     }
 
