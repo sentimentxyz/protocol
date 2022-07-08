@@ -3,6 +3,7 @@ pragma solidity ^0.8.10;
 
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
+import {Errors} from "../utils/Errors.sol";
 
 /**
     @title Default Rate Model
@@ -28,6 +29,8 @@ contract DefaultRateModel is IRateModel {
         @param _blocksPerYear blocks in a year, default value = 2102400 * 1e18
     */
     constructor(uint _c1, uint _c2, uint _c3, uint _blocksPerYear) {
+        if (_c1 == 0 || _c2 == 0 || _c3 == 0 || _blocksPerYear == 0)
+            revert Errors.IncorrectConstructorArgs();
         c1 = _c1;
         c2 = _c2;
         c3 = _c3;
