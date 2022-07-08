@@ -60,7 +60,7 @@ contract LToken is Pausable, ERC4626, ILToken {
     /*                                   EVENTS                                   */
     /* -------------------------------------------------------------------------- */
 
-    event ReservesRedeemed(address indexed treasury, uint value);
+    event ReservesRedeemed(address indexed treasury, uint amt);
 
     /* -------------------------------------------------------------------------- */
     /*                              CUSTOM MODIFIERS                              */

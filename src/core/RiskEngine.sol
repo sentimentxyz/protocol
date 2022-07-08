@@ -175,12 +175,12 @@ contract RiskEngine is Ownable, IRiskEngine {
         return totalBorrows;
     }
 
-    function _valueInWei(address token, uint value)
+    function _valueInWei(address token, uint amt)
         internal
         view
         returns (uint)
     {
-        return oracle.getPrice(token).mul(value);
+        return oracle.getPrice(token).mul(amt);
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows)

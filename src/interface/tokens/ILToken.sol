@@ -25,8 +25,8 @@ interface ILToken {
     function accountManager() external returns (address);
 
     function updateState() external;
-    function lendTo(address account, uint value) external returns (bool);
-    function collectFrom(address account, uint value) external returns (bool);
+    function lendTo(address account, uint amt) external returns (bool);
+    function collectFrom(address account, uint amt) external returns (bool);
 
     function getBorrows() external view returns (uint);
     function getBorrowBalance(address account) external view returns (uint);
