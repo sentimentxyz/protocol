@@ -7,14 +7,17 @@ import {ERC20} from "solmate/tokens/ERC20.sol";
 import {ERC4626} from "./utils/ERC4626.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
+import {ILToken} from "../interface/tokens/ILToken.sol";
 
 /**
     @title Lending Token
     @notice Lending token with ERC4626 implementation
 */
-contract LToken is Pausable, ERC4626 {
-    using FixedPointMathLib for uint256;
+contract LToken is Pausable, ERC4626, ILToken {
+    using FixedPointMathLib for uint;
+    using SafeTransferLib for ERC20;
 
     /* -------------------------------------------------------------------------- */
     /*                               STATE VARIABLES                              */
@@ -137,7 +140,7 @@ contract LToken is Pausable, ERC4626 {
         borrowsOf[account] += borrowShares;
 
         borrows += amt;
-        asset.transfer(account, amt);
+        asset.safeTransfer(account, amt);
         return isFirstBorrow;
     }
 
@@ -244,6 +247,6 @@ contract LToken is Pausable, ERC4626 {
         updateState();
         reserves -= amt;
         emit ReservesRedeemed(treasury, amt);
-        asset.transfer(treasury, amt);
+        asset.safeTransfer(treasury, amt);
     }
 }
