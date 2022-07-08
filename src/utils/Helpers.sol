@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity ^0.8.10;
+pragma solidity 0.8.15;
 
 import {Errors} from "./Errors.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";

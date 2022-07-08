@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity 0.8.15;
 
 import {LToken} from "./LToken.sol";
 import {Helpers} from "../utils/Helpers.sol";

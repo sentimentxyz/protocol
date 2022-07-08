@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.10;
+pragma solidity 0.8.15;
 
 import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
