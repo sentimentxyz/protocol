@@ -211,8 +211,8 @@ contract LToken is Pausable, ERC4626, ILToken {
     /* -------------------------------------------------------------------------- */
 
     /**
-        @dev Rate Factor = Block Delta * Interest Rate Per Block
-            Block Delta = Number of blocks since last update
+        @dev Rate Factor = Timestamp Delta * 1e18 (Scales timestamp delta to 18 decimals) * Interest Rate Per Block
+            Timestamp Delta = Number of seconds since last update
     */
     function getRateFactor() internal view returns (uint) {
         return (block.timestamp == lastUpdated) ?
