@@ -13,6 +13,7 @@ abstract contract Ownable {
     );
 
     function initOwnable(address _admin) internal {
+        if (_admin == address(0)) revert Errors.ZeroAddress();
         admin = _admin;
     }
 
@@ -22,6 +23,7 @@ abstract contract Ownable {
     }
 
     function transferOwnership(address newAdmin) external virtual adminOnly {
+        if (newAdmin == address(0)) revert Errors.ZeroAddress();
         emit OwnershipTransferred(admin, newAdmin);
         admin = newAdmin;
     }
