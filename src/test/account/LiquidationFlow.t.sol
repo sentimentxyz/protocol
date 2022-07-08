@@ -32,9 +32,12 @@ contract LiquidationFlowTest is TestBase {
         borrow(borrower, account, address(weth), amt);
         mockAccountRiskFactor();
         cheats.deal(maintainer, amt);
+        cheats.prank(maintainer);
+        weth.deposit{value: amt}();
 
         // Test
-        cheats.prank(maintainer);
+        cheats.startPrank(maintainer);
+        weth.approve(address(accountManager), type(uint).max);
         accountManager.liquidate(account);
 
         // Assert
@@ -42,7 +45,8 @@ contract LiquidationFlowTest is TestBase {
         assertTrue(IAccount(account).hasNoDebt());
         assertEq(riskEngine.getBalance(account), 0);
         assertEq(riskEngine.getBorrows(account), 0);
-        assertEq(maintainer.balance, uint(2) * amt);
+        assertEq(maintainer.balance, amt);
+        assertEq(weth.balanceOf(maintainer), amt);
     }
 
     function testLiquidationERC20(uint96 amt) public {
@@ -76,10 +80,13 @@ contract LiquidationFlowTest is TestBase {
         borrow(borrower, account, address(erc20), amt);
         mockAccountRiskFactor();
         cheats.deal(maintainer, amt);
+        cheats.prank(maintainer);
+        weth.deposit{value: amt}();
         erc20.mint(maintainer, amt);
 
         // Test
         cheats.startPrank(maintainer);
+        weth.approve(address(accountManager), type(uint).max);
         erc20.approve(address(accountManager), type(uint).max);
         accountManager.liquidate(account);
         cheats.stopPrank();
@@ -90,7 +97,8 @@ contract LiquidationFlowTest is TestBase {
         assertTrue(IAccount(account).hasNoDebt());
         assertEq(riskEngine.getBalance(account), 0);
         assertEq(riskEngine.getBorrows(account), 0);
-        assertEq(maintainer.balance, uint(2) * amt);
+        assertEq(maintainer.balance, amt);
         assertEq(erc20.balanceOf(maintainer), uint(2) * amt);
+        assertEq(weth.balanceOf(maintainer), amt);
     }
 }
