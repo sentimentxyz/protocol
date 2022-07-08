@@ -16,7 +16,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrow(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt && borrowAmt > 0);
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 

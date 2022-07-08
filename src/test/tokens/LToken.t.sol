@@ -17,7 +17,7 @@ contract LTokenTest is TestBase {
 
     function testLendTo(uint96 lendAmt, uint96 liquidity) public {
         // Setup
-        cheats.assume(lendAmt <= liquidity);
+        cheats.assume(lendAmt <= liquidity && lendAmt > 0);
         erc20.mint(address(lErc20), liquidity);
 
         // Test
@@ -51,7 +51,7 @@ contract LTokenTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(collectAmt <= lendAmt);
+        cheats.assume(collectAmt <= lendAmt && lendAmt > 0 && collectAmt > 0);
         testLendTo(lendAmt, liquidity);
 
         // Test
@@ -88,7 +88,7 @@ contract LTokenTest is TestBase {
     function testGetBorrowBalance(
         uint96 liquidity,
         uint96 borrowAmt,
-        uint96 delta
+        uint24 delta
     )
         public
     {

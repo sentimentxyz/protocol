@@ -2,20 +2,19 @@
 pragma solidity ^0.8.10;
 
 import {Errors} from "../utils/Errors.sol";
-import {ERC4626} from "./utils/ERC4626.sol";
 import {Pausable} from "../utils/Pausable.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {ILToken} from "../interface/tokens/ILToken.sol";
+import {ERC4626} from "./utils/ERC4626.sol";
 import {IRegistry} from "../interface/core/IRegistry.sol";
-import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 /**
     @title Lending Token
     @notice Lending token with ERC4626 implementation
 */
-contract LToken is Pausable, ERC4626, ILToken {
-    using FixedPointMathLib for uint;
+contract LToken is Pausable, ERC4626 {
+    using FixedPointMathLib for uint256;
 
     /* -------------------------------------------------------------------------- */
     /*                               STATE VARIABLES                              */
@@ -33,34 +32,26 @@ contract LToken is Pausable, ERC4626, ILToken {
     /// @notice Account Manager
     address public accountManager;
 
-    /// @notice Protocol Treasury
+    /// @notice Protocol treasury
     address public treasury;
-
-    /// @notice unused
-    uint public borrowFeeRate;
 
     /// @notice Total amount of borrows
     uint public borrows;
 
-    /// @notice Cumulative borrow index
-    uint public borrowIndex;
-
-    /// @notice Total amount of reserves
-    uint public reserves;
-
-    /// @notice Reserve Factor
-    uint public reserveFactor;
-
     /// @notice Block number of when the state of the LToken was last updated
     uint public lastUpdated;
 
-    struct BorrowData {
-        uint index;
-        uint balance;
-    }
+    /// @notice Protocol reserves
+    uint public reserves;
 
-    /// @notice Mapping of account to borrow amount
-    mapping (address => BorrowData) public borrowData;
+    /// @notice Reserve factor
+    uint public reserveFactor;
+
+    /// @notice Total borrow shares minted
+    uint public totalBorrowShares;
+
+    /// @notice Mapping of account to borrow in terms of shares
+    mapping (address => uint) public borrowsOf;
 
     /* -------------------------------------------------------------------------- */
     /*                                   EVENTS                                   */
@@ -88,8 +79,8 @@ contract LToken is Pausable, ERC4626, ILToken {
         @param _name Name of LToken
         @param _symbol Symbol of LToken
         @param _registry Address of Registry
-        @param _reserveFactor Reserve Factor
-        @param _treasury Protocol Treasury
+        @param _reserveFactor Borrow Fee
+        @param _treasury Protocol treasury
     */
     function init(
         ERC20 _asset,
@@ -105,7 +96,6 @@ contract LToken is Pausable, ERC4626, ILToken {
         initERC4626(_asset, _name, _symbol);
         registry = _registry;
         reserveFactor = _reserveFactor;
-        borrowIndex = 1e18;
         treasury = _treasury;
     }
 
@@ -132,10 +122,14 @@ contract LToken is Pausable, ERC4626, ILToken {
         returns (bool isFirstBorrow)
     {
         updateState();
-        isFirstBorrow = (borrowData[account].balance == 0);
+        isFirstBorrow = (borrowsOf[account] == 0);
+
+        uint borrowShares;
+        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_BORROW_SHARES");
+        totalBorrowShares += borrowShares;
+        borrowsOf[account] += borrowShares;
+
         borrows += amt;
-        borrowData[account].balance = getBorrowBalance(account) + amt;
-        borrowData[account].index = borrowIndex;
         asset.transfer(account, amt);
         return isFirstBorrow;
     }
@@ -151,10 +145,27 @@ contract LToken is Pausable, ERC4626, ILToken {
         accountManagerOnly
         returns (bool)
     {
+        uint borrowShares;
+        require((borrowShares = convertAssetToBorrowShares(amt)) != 0, "ZERO_BORROW_SHARES");
+        borrowsOf[account] -= borrowShares;
+        totalBorrowShares -= borrowShares;
+
         borrows -= amt;
-        borrowData[account].balance = getBorrowBalance(account) - amt;
-        borrowData[account].index = borrowIndex;
-        return (borrowData[account].balance == 0);
+        return (borrowsOf[account] == 0);
+    }
+
+    /**
+        @notice Returns Borrow balance of given account
+        @param account Address of account
+        @return borrowBalance Amount of underlying tokens borrowed
+    */
+    function getBorrowBalance(address account) external view returns (uint) {
+        return convertBorrowSharesToAsset(borrowsOf[account]);
+    }
+
+    function getReserves() public view returns (uint) {
+        return reserves + borrows.mulWadUp(getRateFactor())
+        .mulWadUp(reserveFactor);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -163,22 +174,16 @@ contract LToken is Pausable, ERC4626, ILToken {
 
     /**
         @notice Returns total amount of underlying assets
-            totalAssets = liquidity + totalBorrows - totalReserves
+            totalAssets = underlying balance + totalBorrows + delta
+            delta = totalBorrows * RateFactor
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
         return asset.balanceOf(address(this)) + getBorrows() - getReserves();
     }
 
-    /// @notice Current total borrows owed to the pool
     function getBorrows() public view returns (uint) {
-        return borrows.mulWadUp(1e18 + getRateFactor());
-    }
-
-    /// @notice Current total reserves in the pool
-    function getReserves() public view returns (uint) {
-        return reserves + borrows.mulWadUp(getRateFactor())
-        .mulWadUp(reserveFactor);
+        return borrows + borrows.mulWadUp(getRateFactor());
     }
 
     /// @notice Updates state of the lending pool
@@ -188,21 +193,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         uint interestAccrued = borrows.mulWadUp(rateFactor);
         borrows += interestAccrued;
         reserves += interestAccrued.mulWadUp(reserveFactor);
-        borrowIndex += borrowIndex.mulWadUp(rateFactor);
         lastUpdated = block.number;
-    }
-
-    /**
-        @notice Returns Borrow balance of given account
-        @param account Address of account
-        @return borrowBalance Amount of underlying tokens borrowed
-    */
-    function getBorrowBalance(address account) public view returns (uint) {
-        uint balance = borrowData[account].balance;
-        return (balance == 0) ? 0 :
-            (borrowIndex.mulWadUp(1e18 + getRateFactor()))
-            .divWadDown(borrowData[account].index)
-            .mulWadUp(balance);
     }
 
     /* -------------------------------------------------------------------------- */
@@ -214,13 +205,25 @@ contract LToken is Pausable, ERC4626, ILToken {
             Block Delta = Number of blocks since last update
     */
     function getRateFactor() internal view returns (uint) {
-        uint blockDelta = block.number - lastUpdated;
-        return (blockDelta == 0) ? 0 : (blockDelta * 1e18).mulWadUp(
-                    rateModel.getBorrowRatePerBlock(
-                        asset.balanceOf(address(this)),
-                        borrows
-                    )
-                );
+        return (block.number == lastUpdated) ?
+            0 :
+            ((block.number - lastUpdated)*1e18)
+            .mulWadUp(
+                rateModel.getBorrowRatePerBlock(
+                    asset.balanceOf(address(this)),
+                    borrows
+                )
+            );
+    }
+
+    function convertAssetToBorrowShares(uint amt) internal view returns (uint) {
+        uint256 supply = totalBorrowShares;
+        return supply == 0 ? amt : amt.mulDivUp(supply, getBorrows());
+    }
+
+    function convertBorrowSharesToAsset(uint debt) internal view returns (uint) {
+        uint256 supply = totalBorrowShares;
+        return supply == 0 ? debt : debt.mulDivDown(getBorrows(), supply);
     }
 
     function beforeDeposit(uint, uint) internal override { updateState(); }
@@ -230,19 +233,10 @@ contract LToken is Pausable, ERC4626, ILToken {
     /*                               ADMIN FUNCTIONS                              */
     /* -------------------------------------------------------------------------- */
 
-    /**
-        @notice Transfers reserves from the LP to the treasury
-        @dev Emits ReservesRedeemed(to, amt)
-        @param amt Amount of token to transfer
-    */
     function redeemReserves(uint amt) external adminOnly {
         updateState();
         reserves -= amt;
         emit ReservesRedeemed(treasury, amt);
         asset.transfer(treasury, amt);
-    }
-
-    function setBorrowFeeRate(uint _borrowFeeRate) external adminOnly {
-        borrowFeeRate = _borrowFeeRate;
     }
 }
