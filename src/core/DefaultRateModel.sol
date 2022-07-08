@@ -41,7 +41,7 @@ contract DefaultRateModel is IRateModel {
         @notice Calculates Borrow rate per block
         Borrow Rate Per Block =
         c3 * (util * c1 + util^32 * c1 + util^64 * c2) / blocksPerYear
-        where util = borrows / (liquidity - reserves + borrows)
+        where util = borrows / (liquidity + borrows)
         @param liquidity total balance of the underlying asset in the pool
         @param borrows balance of underlying assets borrowed from the pool
         @return uint borrow rate per block
