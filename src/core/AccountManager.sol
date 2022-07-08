@@ -329,7 +329,7 @@ contract AccountManager is Pausable, IAccountManager {
         @param user Address of user
         @return address[] List of inactive accounts
     */
-    function getInactiveAccounts(
+    function getInactiveAccountsOf(
         address user
     )
         external
