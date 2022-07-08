@@ -10,7 +10,7 @@ contract Proxy is BaseProxy {
     bytes32 private constant _IMPL_SLOT =
         bytes32(uint256(keccak256("eip1967.proxy.implementation")) - 1);
 
-    event Upgraded(address newImplementation);
+    event Upgraded(address indexed newImplementation);
 
     constructor(address _logic) {
         _setImplementation(_logic);
