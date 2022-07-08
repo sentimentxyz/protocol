@@ -9,12 +9,15 @@ import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
 import {AaveV2Controller} from "controller/aave/AaveV2Controller.sol";
 import {IProtocolDataProvider}
     from "controller/aave/IProtocolDataProvider.sol";
+import {ILendingPoolAddressProvider} from "./interface/ILendingPoolAddressProvider.sol";
 
 contract AaveV2IntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
 
-    address lendingPool = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+    ILendingPoolAddressProvider addressProvider =
+        ILendingPoolAddressProvider(0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5);
+    address lendingPool;
     address aaveDataProvider = 0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d;
     address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
     address aDai = 0x028171bCA77440897B824Ca71D1c56caC55b68A3;
@@ -35,6 +38,7 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
     }
 
     function setUp() public {
+        lendingPool = addressProvider.getLendingPool();
         setupContracts();
         setupOracles();
         setupAaveController();

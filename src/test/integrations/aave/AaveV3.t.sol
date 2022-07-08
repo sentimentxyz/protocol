@@ -7,16 +7,18 @@ import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {ArbiIntegrationTestBase} from "../utils/ArbiIntegrationTestBase.sol";
 import {AaveV3Controller} from "controller/aave/AaveV3Controller.sol";
-
+import {IPoolAddressProvider} from "./interface/IPoolAddressProvider.sol";
 
 /// @notice runs only on arbitrum
 contract AaveV3ArbiIntegrationTest is ArbiIntegrationTestBase {
     address account;
     address user = cheats.addr(1);
 
+    IPoolAddressProvider addressProvider =
+        IPoolAddressProvider(0xa97684ead0e402dC232d5A977953DF7ECBaB3CDb);
     address aWeth = 0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8;
     address aDai = 0x82E64f49Ed5EC1bC6e43DAD4FC8Af9bb3A2312EE;
-    address pool = 0x794a61358D6845594F94dc1DB02A252b5b4814aD;
+    address pool;
 
     ATokenOracle aTokenOracle;
     AaveV3Controller aaveController;
@@ -33,6 +35,7 @@ contract AaveV3ArbiIntegrationTest is ArbiIntegrationTestBase {
     }
 
     function setUp() public {
+        pool = addressProvider.getPool();
         setupContracts();
         setupOracles();
         setupAaveController();

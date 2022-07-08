@@ -7,12 +7,16 @@ import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
 import {AaveEthController} from "controller/aave/AaveEthController.sol";
+import {ILendingPoolAddressProvider} from "./interface/ILendingPoolAddressProvider.sol";
 
 contract AaveEthIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
 
-    address lendingPool = 0x7d2768dE32b0b80b7a3454c06BdAc94A69DDc7A9;
+    ILendingPoolAddressProvider addressProvider =
+        ILendingPoolAddressProvider(0xB53C1a33016B2DC2fF3653530bfF1848a515c8c5);
+
+    address lendingPool;
     address aWeth = 0x030bA81f1c18d280636F32af80b9AAd02Cf0854e;
     address aaveWethGateway = 0xcc9a0B7c43DC2a5F023Bb9b738E45B0Ef6B06E04;
 
@@ -28,6 +32,7 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
     }
 
     function setUp() public {
+        lendingPool = addressProvider.getLendingPool();
         setupContracts();
         setupOracles();
         setupAaveController();
