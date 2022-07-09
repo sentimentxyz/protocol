@@ -31,10 +31,10 @@ interface IAccountManager {
     function initDep() external;
     function openAccount(address owner) external;
     function closeAccount(address account) external;
-    function repay(address account, address token, uint value) external;
-    function borrow(address account, address token, uint value) external;
-    function deposit(address account, address token, uint value) external;
-    function withdraw(address account, address token, uint value) external;
+    function repay(address account, address token, uint amt) external;
+    function borrow(address account, address token, uint amt) external;
+    function deposit(address account, address token, uint amt) external;
+    function withdraw(address account, address token, uint amt) external;
     function depositEth(address account) payable external;
     function withdrawEth(address, uint) external;
     function liquidate(address) external;
@@ -49,10 +49,10 @@ interface IAccountManager {
         address account,
         address token,
         address spender,
-        uint value
+        uint amt
     ) external;
     function toggleCollateralStatus(address token) external;
-    function getInactiveAccounts(
+    function getInactiveAccountsOf(
         address owner
     ) external view returns (address[] memory);
 }

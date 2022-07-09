@@ -6,8 +6,8 @@ interface IRiskEngine {
     function getBorrows(address account) external view returns (uint);
     function getBalance(address account) external view returns (uint);
     function isAccountHealthy(address account) external view returns (bool);
-    function isBorrowAllowed(address account, address token, uint value)
+    function isBorrowAllowed(address account, address token, uint amt)
         external view returns (bool);
-    function isWithdrawAllowed(address account, address token, uint value)
+    function isWithdrawAllowed(address account, address token, uint amt)
         external view returns (bool);
 }
