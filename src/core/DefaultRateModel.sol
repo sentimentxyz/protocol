@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
 import {Errors} from "../utils/Errors.sol";
 
@@ -11,7 +11,7 @@ import {Errors} from "../utils/Errors.sol";
     per block
 */
 contract DefaultRateModel is IRateModel {
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint;
 
     /// @notice Constant coefficients with 18 decimals
     uint immutable c1;
@@ -55,13 +55,13 @@ contract DefaultRateModel is IRateModel {
         returns (uint)
     {
         uint util = _utilization(liquidity, borrows);
-        return c3.mul(
+        return c3.mulWadDown(
             (
-                util.mul(c1)
-                + util.powu(32).mul(c1)
-                + util.powu(64).mul(c2)
+                util.mulWadDown(c1)
+                + util.rpow(32, 1e18).mulWadDown(c1)
+                + util.rpow(64, 1e18).mulWadDown(c2)
             )
-            .div(secsPerYear)
+            .divWadDown(secsPerYear)
         );
     }
 
@@ -71,6 +71,6 @@ contract DefaultRateModel is IRateModel {
         returns (uint)
     {
         uint totalAssets = liquidity + borrows;
-        return (totalAssets == 0) ? 0 : borrows.div(totalAssets);
+        return (totalAssets == 0) ? 0 : borrows.divWadDown(totalAssets);
     }
 }
