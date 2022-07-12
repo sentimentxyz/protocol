@@ -5,6 +5,7 @@ import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {UniV2LpOracle} from "oracle/uniswap/UniV2LPOracle.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
 import {UniV2Controller} from "controller/uniswap/UniV2Controller.sol";
+import {IUniV2Factory} from "controller/uniswap/IUniV2Factory.sol";
 
 contract UniV2LpIntegrationTest is IntegrationTestBase {
     address account;
@@ -12,12 +13,13 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
 
     address constant UNIV2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
     address constant WETH_USDT_LP = 0x0d4a11d5EEaaC28EC3F61d100daF4d40471f1852;
+    address constant FACTORY = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
 
     UniV2Controller uniV2Controller;
     UniV2LpOracle uniLPOracle;
 
     function setupUniV2Controller() private {
-        uniV2Controller = new UniV2Controller(controller);
+        uniV2Controller = new UniV2Controller(WETH, IUniV2Factory(FACTORY), controller);
         controller.updateController(UNIV2_ROUTER, uniV2Controller);
         controller.toggleTokenAllowance(WETH_USDT_LP);
 

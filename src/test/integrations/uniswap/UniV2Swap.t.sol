@@ -4,12 +4,14 @@ pragma solidity 0.8.15;
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
 import {UniV2Controller} from "controller/uniswap/UniV2Controller.sol";
+import {IUniV2Factory} from "controller/uniswap/IUniV2Factory.sol";
 
 contract UniV2SwapIntegrationTest is IntegrationTestBase {
     address account;
     address user = cheats.addr(1);
 
     address constant UNIV2_ROUTER = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    address constant FACTORY = 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f;
 
     // Path Arrays
     address[] wethToUsdt = [WETH, USDT];
@@ -18,7 +20,7 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
     UniV2Controller uniV2Controller;
 
     function setupUniV2Controller() private {
-        uniV2Controller = new UniV2Controller(controller);
+        uniV2Controller = new UniV2Controller(WETH, IUniV2Factory(FACTORY), controller);
         controller.updateController(UNIV2_ROUTER, uniV2Controller);
         controller.toggleTokenAllowance(WETH);
     }
