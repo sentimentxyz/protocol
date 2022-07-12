@@ -21,6 +21,8 @@ contract DefaultRateModel is IRateModel {
     /// @notice Number of seconds per year
     uint immutable secsPerYear;
 
+    uint constant scale = 1e18;
+
     /**
         @notice Contract constructor
         @param _c1 constant coefficient, default value = 1 * 1e17
@@ -58,8 +60,8 @@ contract DefaultRateModel is IRateModel {
         return c3.mulWadDown(
             (
                 util.mulWadDown(c1)
-                + util.rpow(32, 1e18).mulWadDown(c1)
-                + util.rpow(64, 1e18).mulWadDown(c2)
+                + util.rpow(32, scale).mulWadDown(c1)
+                + util.rpow(64, scale).mulWadDown(c2)
             )
             .divWadDown(secsPerYear)
         );
