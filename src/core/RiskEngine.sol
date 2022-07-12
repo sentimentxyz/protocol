@@ -180,7 +180,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         view
         returns (uint)
     {
-        return oracle.getPrice(token).mulWadUp(amt);
+        return oracle.getPrice(token).mulWadDown(amt);
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows)
@@ -189,6 +189,6 @@ contract RiskEngine is Ownable, IRiskEngine {
         returns (bool)
     {
         return (accountBorrows == 0) ? true :
-            (accountBalance.divWadUp(accountBorrows) > balanceToBorrowThreshold);
+            (accountBalance.divWadDown(accountBorrows) > balanceToBorrowThreshold);
     }
 }
