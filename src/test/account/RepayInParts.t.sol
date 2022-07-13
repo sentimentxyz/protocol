@@ -4,10 +4,10 @@ pragma solidity 0.8.15;
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract RepayInParts is TestBase {
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint;
 
     address public account;
     address public borrower = cheats.addr(1);
@@ -23,7 +23,10 @@ contract RepayInParts is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(borrower, account, address(erc20), depositAmt);
         borrow(borrower, account, address(erc20), borrowAmt);
         cheats.roll(block.number + 100);
@@ -48,7 +51,10 @@ contract RepayInParts is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > borrow1);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
 
         // Lending Pool
         address lender = address(5);
@@ -95,7 +101,10 @@ contract RepayInParts is TestBase {
         // Setup
         cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
         cheats.assume(borrowAmt > borrow1);
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
 
         // Lending Pool
         address lender = address(5);
@@ -145,8 +154,11 @@ contract RepayInParts is TestBase {
         public
     {
         // Setup
-        cheats.assume(MAX_LEVERAGE.mul(depositAmt) > borrowAmt);
         cheats.assume(borrowAmt > borrow1 && borrow1 > 0);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
 
         uint repayAmt = borrow1 / 2;
 

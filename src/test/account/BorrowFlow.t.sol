@@ -3,8 +3,10 @@ pragma solidity 0.8.15;
 
 import {TestBase} from "../utils/TestBase.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract BorrowFlowTest is TestBase {
+    using FixedPointMathLib for uint;
     address public account;
     address public borrower = cheats.addr(1);
 
@@ -16,7 +18,10 @@ contract BorrowFlowTest is TestBase {
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         cheats.assume(borrowAmt != 0);
         // Test
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(borrower, account, address(0), depositAmt);
         borrow(borrower, account, address(weth), borrowAmt);
 
@@ -30,7 +35,10 @@ contract BorrowFlowTest is TestBase {
     function testBorrowERC20(uint96 depositAmt, uint96 borrowAmt) public {
         cheats.assume(borrowAmt != 0);
         // Test
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(borrower, account, address(erc20), depositAmt);
         borrow(borrower, account, address(erc20), borrowAmt);
 
@@ -60,7 +68,10 @@ contract BorrowFlowTest is TestBase {
         deposit(borrower, account, address(0), depositAmt);
 
         // Test
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         borrow(borrower, account, address(erc20), borrowAmt);
 
         // Assert
