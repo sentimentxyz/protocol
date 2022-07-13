@@ -4,8 +4,10 @@ pragma solidity 0.8.15;
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
 import {console} from "../utils/console.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract AccountManagerBorrowRepayTest is TestBase {
+    using FixedPointMathLib for uint;
     address account;
     address public owner = cheats.addr(1);
 
@@ -16,7 +18,11 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrow(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt && borrowAmt > 0);
+        cheats.assume(borrowAmt > 0);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -31,7 +37,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt != 0);
-        cheats.assume(depositAmt * MAX_LEVERAGE > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(owner, account, address(0), depositAmt);
 
         // Test
@@ -47,7 +56,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) <=
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(owner, account, address(erc20), depositAmt);
         erc20.mint(registry.LTokenFor(address(erc20)), borrowAmt);
 
@@ -65,7 +77,10 @@ contract AccountManagerBorrowRepayTest is TestBase {
     {
         // Setup
         cheats.assume(depositAmt != 0 && borrowAmt != 0);
-        cheats.assume(borrowAmt > MAX_LEVERAGE * depositAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) <=
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(owner, account, address(0), depositAmt);
         cheats.deal(address(lEth), borrowAmt);
         cheats.prank(address(lEth));

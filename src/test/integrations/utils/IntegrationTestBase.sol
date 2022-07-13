@@ -10,6 +10,7 @@ import {AggregatorV3Interface}
     from "oracle/chainlink/AggregatorV3Interface.sol";
 import {CurveCryptoSwapController}
     from "controller/curve/CurveCryptoSwapController.sol";
+import {ICurveTriCryptoOracle} from "oracle/curve/CurveTriCryptoOracle.sol";
 
 contract IntegrationTestBase is TestBase {
 
@@ -23,6 +24,8 @@ contract IntegrationTestBase is TestBase {
     ChainlinkOracle chainlinkOracle;
 
     // Ethereum Contracts
+    ICurveTriCryptoOracle constant curveTriCryptoOracle =
+        ICurveTriCryptoOracle(0xE8b2989276E2Ca8FDEA2268E3551b2b4B2418950);
     address constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address constant DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
@@ -48,7 +51,7 @@ contract IntegrationTestBase is TestBase {
         controller.updateController(tricryptoPool, curveController);
         controller.toggleTokenAllowance(USDT);
 
-        curveOracle = new CurveTriCryptoOracle(tricryptoPool);
+        curveOracle = new CurveTriCryptoOracle(curveTriCryptoOracle);
         oracle.setOracle(crv3crypto, curveOracle);
     }
 

@@ -2,14 +2,14 @@
 pragma solidity 0.8.15;
 
 import {TestBase} from "../utils/TestBase.sol";
-import {IAccount} from "../../interface/core/IAccount.sol";
-import {PRBMathUD60x18} from "prb-math/PRBMathUD60x18.sol";
-import {AccountManager} from "../../core/AccountManager.sol";
-import {Registry} from "../../core/Registry.sol";
 import {LToken} from "../../tokens/LToken.sol";
+import {Registry} from "../../core/Registry.sol";
+import {IAccount} from "../../interface/core/IAccount.sol";
+import {AccountManager} from "../../core/AccountManager.sol";
+import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract RepayFlowTest is TestBase {
-    using PRBMathUD60x18 for uint;
+    using FixedPointMathLib for uint;
     address public account;
     address public borrower = cheats.addr(1);
 
@@ -27,7 +27,10 @@ contract RepayFlowTest is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(borrower, account, address(0), depositAmt);
         borrow(borrower, account, address(weth), borrowAmt);
 
@@ -48,7 +51,10 @@ contract RepayFlowTest is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(borrower, account, address(erc20), depositAmt);
         borrow(borrower, account, address(erc20), borrowAmt);
 
@@ -67,7 +73,10 @@ contract RepayFlowTest is TestBase {
     function testMaxRepayWETH(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt > 0);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(borrower, account, address(0), depositAmt);
         borrow(borrower, account, address(weth), borrowAmt);
 
@@ -81,21 +90,10 @@ contract RepayFlowTest is TestBase {
     function testMaxRepayERC20(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
         cheats.assume(borrowAmt > 0);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
-        deposit(borrower, account, address(erc20), depositAmt);
-        borrow(borrower, account, address(erc20), borrowAmt);
-
-        // Test
-        cheats.prank(borrower);
-        accountManager.repay(account, address(erc20), type(uint).max);
-
-        assertEq(riskEngine.getBorrows(account), 0);
-    }
-
-    function testMaxRepayERC200(uint96 depositAmt, uint96 borrowAmt) public {
-        // Setup
-        cheats.assume(borrowAmt > 0);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         deposit(borrower, account, address(erc20), depositAmt);
         borrow(borrower, account, address(erc20), borrowAmt);
 
@@ -111,7 +109,11 @@ contract RepayFlowTest is TestBase {
     {
         // Setup
         cheats.assume(borrowAmt1 > 0 && borrowAmt2 > 0);
-        cheats.assume(MAX_LEVERAGE * depositAmt > borrowAmt1 && MAX_LEVERAGE * depositAmt > borrowAmt2);
+        cheats.assume(
+            (uint(depositAmt) + borrowAmt1 + borrowAmt2)
+            .divWadDown(uint(borrowAmt1) + borrowAmt2) >
+            riskEngine.balanceToBorrowThreshold()
+        );
         erc20.mint(lender, type(uint96).max);
         cheats.startPrank(lender);
         erc20.approve(address(lErc20), type(uint).max);
