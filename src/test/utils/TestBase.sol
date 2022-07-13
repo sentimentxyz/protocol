@@ -168,9 +168,9 @@ contract TestBase is Test {
             cheats.prank(owner);
             accountManager.depositEth{value: amt}(account);
         } else {
-            erc20.mint(owner, amt);
+            TestERC20(token).mint(owner, amt);
             cheats.startPrank(owner);
-            erc20.approve(address(accountManager), type(uint).max);
+            TestERC20(token).approve(address(accountManager), type(uint).max);
             accountManager.deposit(account, token, amt);
             cheats.stopPrank();
         }

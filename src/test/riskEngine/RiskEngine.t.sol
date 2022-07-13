@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.15;
 
+import {TestERC20} from "../utils/TestERC20.sol";
+import {console} from "../utils/console.sol";
 import {Errors} from "../../utils/Errors.sol";
 import {TestBase} from "../utils/TestBase.sol";
-import {console} from "../utils/console.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
 contract RiskEngineTest is TestBase {
@@ -83,5 +84,22 @@ contract RiskEngineTest is TestBase {
         cheats.prank(caller);
         cheats.expectRevert(Errors.AdminOnly.selector);
         riskEngine.initDep();
+    }
+
+    function testGetAccountBalance(uint8 decimals) public {
+        // Setup
+        cheats.assume(decimals <= 18 && decimals > 0);
+
+        TestERC20 testERC20 = new TestERC20("TestERC20", "TEST", decimals);
+        accountManager.toggleCollateralStatus(address(testERC20));
+
+        deposit(owner, account, address(0), 1 ether);
+        deposit(owner, account, address(testERC20), 1000 * 10 ** decimals);
+
+        // Test
+        uint bal = riskEngine.getBalance(account);
+
+        // Assert
+        assertEq(bal, 1001e18);
     }
 }

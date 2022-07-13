@@ -180,7 +180,12 @@ contract RiskEngine is Ownable, IRiskEngine {
         view
         returns (uint)
     {
-        return oracle.getPrice(token).mulWadDown(amt);
+        return oracle.getPrice(token)
+            .mulWadDown(
+                amt * (10 ** (18 - (
+                    (token == address(0)) ? 18 : IERC20(token).decimals()
+                )))
+            );
     }
 
     function _isAccountHealthy(uint accountBalance, uint accountBorrows)
