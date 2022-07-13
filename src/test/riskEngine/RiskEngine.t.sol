@@ -87,9 +87,7 @@ contract RiskEngineTest is TestBase {
     }
 
     function testGetAccountBalance(uint8 decimals) public {
-        // Setup
-        cheats.assume(decimals <= 18 && decimals > 0);
-
+        cheats.assume(decimals <= 36);
         TestERC20 testERC20 = new TestERC20("TestERC20", "TEST", decimals);
         accountManager.toggleCollateralStatus(address(testERC20));
 
