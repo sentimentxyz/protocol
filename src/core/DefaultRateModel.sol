@@ -57,13 +57,13 @@ contract DefaultRateModel is IRateModel {
         returns (uint)
     {
         uint util = _utilization(liquidity, borrows);
-        return c3.mulWadDown(
+        return c3.mulDivDown(
             (
                 util.mulWadDown(c1)
                 + util.rpow(32, SCALE).mulWadDown(c1)
                 + util.rpow(64, SCALE).mulWadDown(c2)
-            )
-            .divWadDown(secsPerYear)
+            ),
+            secsPerYear
         );
     }
 
