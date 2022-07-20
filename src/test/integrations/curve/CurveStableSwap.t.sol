@@ -5,7 +5,7 @@ import {Errors} from "../../../utils/Errors.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
-import {StableSwapController} from "controller/curve/StableSwapController.sol";
+import {StableSwap3PoolController} from "controller/curve/StableSwap3PoolController.sol";
 
 interface IStableSwapPool {
     function get_dy(int128, int128, uint256) external view returns (uint256);
@@ -17,10 +17,10 @@ contract CurveStableSwapIntegrationTest is IntegrationTestBase {
 
     address pool = 0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7;
 
-    StableSwapController stableSwapController;
+    StableSwap3PoolController stableSwapController;
 
     function setupStableSwapController() private {
-        stableSwapController = new StableSwapController(controller);
+        stableSwapController = new StableSwap3PoolController(controller);
         controller.updateController(pool, stableSwapController);
         controller.toggleTokenAllowance(DAI);
     }
