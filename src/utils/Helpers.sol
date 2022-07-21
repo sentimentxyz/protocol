@@ -11,11 +11,11 @@ library Helpers {
         address token,
         address from,
         address to,
-        uint256 value
+        uint256 amt
     ) internal {
         if (!isContract(token)) revert Errors.TokenNotContract();
         (bool success, bytes memory data) = address(token).call(
-            abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, value)
+            abi.encodeWithSelector(IERC20.transferFrom.selector, from, to, amt)
         );
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FROM_FAILED");
     }
@@ -23,17 +23,17 @@ library Helpers {
     function safeTransfer(
         address token,
         address to,
-        uint256 value
+        uint256 amt
     ) internal {
         if (!isContract(token)) revert Errors.TokenNotContract();
         (bool success, bytes memory data) = address(token).call(
-            abi.encodeWithSelector(IERC20.transfer.selector, to, value)
+            abi.encodeWithSelector(IERC20.transfer.selector, to, amt)
         );
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
     }
 
-    function safeTransferEth(address to, uint256 value) internal {
-        (bool success, ) = to.call{value: value}(new bytes(0));
+    function safeTransferEth(address to, uint256 amt) internal {
+        (bool success, ) = to.call{value: amt}(new bytes(0));
         if(!success) revert Errors.EthTransferFailure();
     }
 
@@ -41,21 +41,21 @@ library Helpers {
         return IERC20(token).balanceOf(owner);
     }
 
-    function withdrawEth(address account, address to, uint value) internal {
-        (bool success, ) = IAccount(account).exec(to, value, new bytes(0));
+    function withdrawEth(address account, address to, uint amt) internal {
+        (bool success, ) = IAccount(account).exec(to, amt, new bytes(0));
         if(!success) revert Errors.EthTransferFailure();
     }
 
-    function withdraw(address account, address to, address token, uint value) internal {
+    function withdraw(address account, address to, address token, uint amt) internal {
         if (!isContract(token)) revert Errors.TokenNotContract();
         (bool success, bytes memory data) = IAccount(account).exec(token, 0,
-                abi.encodeWithSelector(IERC20.transfer.selector, to, value));
+                abi.encodeWithSelector(IERC20.transfer.selector, to, amt));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "TRANSFER_FAILED");
     }
 
-    function safeApprove(address account, address token, address spender, uint value) internal {
+    function safeApprove(address account, address token, address spender, uint amt) internal {
         (bool success, bytes memory data) = IAccount(account).exec(token, 0,
-            abi.encodeWithSelector(IERC20.approve.selector, spender, value));
+            abi.encodeWithSelector(IERC20.approve.selector, spender, amt));
         require(success && (data.length == 0 || abi.decode(data, (bool))), "APPROVE_FAILED");
     }
 

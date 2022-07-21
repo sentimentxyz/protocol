@@ -14,13 +14,13 @@ interface IAccountManager {
         address indexed account,
         address indexed owner,
         address indexed token,
-        uint value
+        uint amt
     );
     event Borrow(
         address indexed account,
         address indexed owner,
         address indexed token,
-        uint value
+        uint amt
     );
 
     function registry() external returns (IRegistry);
