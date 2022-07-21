@@ -78,4 +78,11 @@ contract OpenCloseFlowTest is TestBase {
         cheats.expectRevert(Errors.AccountDeactivationFailure.selector);
         accountManager.closeAccount(account);
     }
+
+     function testOpenAccountZeroAddressError() public {
+        // Test
+        cheats.prank(user);
+        cheats.expectRevert(Errors.ZeroAddress.selector);
+        accountManager.openAccount(address(0));
+    }
 }
