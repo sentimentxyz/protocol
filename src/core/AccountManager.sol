@@ -88,7 +88,7 @@ contract AccountManager is Pausable, IAccountManager {
         @param owner Owner of the newly opened account
     */
     function openAccount(address owner) external whenNotPaused {
-        if(owner == address(0)) revert Errors.ZeroAddress();
+        if (owner == address(0)) revert Errors.ZeroAddress();
         address account;
         uint length = inactiveAccountsOf[owner].length;
         if (length == 0) {
