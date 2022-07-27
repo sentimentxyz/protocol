@@ -62,4 +62,13 @@ library Helpers {
     function isContract(address token) internal view returns (bool) {
         return token.code.length > 0;
     }
+
+    function functionDelegateCall(
+        address target,
+        bytes calldata data
+    ) internal {
+        if (!isContract(target)) Errors.AddressNotContract;
+        (bool success, ) = target.delegatecall(data);
+        require(success, "CALL_FAILED");
+    }
 }

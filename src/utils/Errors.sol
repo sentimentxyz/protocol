@@ -8,6 +8,7 @@ library Errors {
     error OutstandingDebt();
     error AccountOwnerOnly();
     error TokenNotContract();
+    error AddressNotContract();
     error ContractNotPaused();
     error LTokenUnavailable();
     error LiquidationFailed();
