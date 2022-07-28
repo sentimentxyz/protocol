@@ -36,7 +36,7 @@ import {UniV2LpOracle} from "oracle/uniswap/UniV2LPOracle.sol";
 
 contract Deploy is Test {
     // Kovan
-    address constant TREASURY = 0xc6E058a257eD5EFD6F14DB90dF58754d6963d542;
+    address constant TREASURY = 0x92f473Ef0Cd07080824F5e6B0859ac49b3AEb215;
 
     // arbi erc20
     address constant WETH9 = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
@@ -246,7 +246,6 @@ contract Deploy is Test {
     }
 
     function deployControllers() internal {
-        // IController controllerFacade = IController(address(controller));
         // aave
         aaveEthController = new AaveEthController(aWETH);
         aaveController = new AaveV3Controller(controller);
@@ -319,5 +318,15 @@ contract Deploy is Test {
         console.log("LDai", address(lDai));
         console.log("WETH Oracle", address(wethOracle));
         console.log("ChainlinkOracle", address(chainlinkOracle));
+        console.log("Uniswap Controller", address(uniSwapController));
+        console.log("Sushi swap Controller", address(sushiSwapController));
+        console.log("Aave Controller", address(aaveController));
+        console.log("Aave Eth Controller", address(aaveEthController));
+        console.log("WETH Controller", address(wethController));
+        console.log("Curve Stable Swap Controller", address(curveStableSwapController));
+        console.log("Curve Crypto Swap Controller", address(curveTriCryptoController));
+        console.log("AToken Oracle", address(aTokenOracle));
+        console.log("SLP Oracle", address(SLPOracle));
+        console.log("stable2crvOracle", address(stable2crvOracle));
     }
 }
