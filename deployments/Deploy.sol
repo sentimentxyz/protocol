@@ -47,8 +47,8 @@ contract Deploy is Test {
 
     // chainlink price feed
     address constant SEQUENCER = 0xFdB631F5EE196F0ed6FAa767959853A9F217697D;
-    address constant ETHUSD = 0x9326BFA02ADD2366b30bacB125260Af641031331;
-    address constant DAIUSD = 0x777A68032a88E5A84678A77Af2CD65A7b3c0775a;
+    address constant ETHUSD = 0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612;
+    address constant DAIUSD = 0xc5C8E77B397E531B8EC06BFb0048328B30E9eCfB;
     address constant WBTCUSD = 0x6ce185860a4963106506C203335A2910413708e9;
     address constant USDCUSD = 0x50834F3163758fcC1Df9973b6e91f0F0F0434aD3;
     address constant USDTUSD = 0x3f3f5dF88dC9F13eac63DF89EC16ef6e7E25DdE7;
@@ -75,7 +75,7 @@ contract Deploy is Test {
 
     // Protocol
     Registry registryImpl;
-    Registry registry = Registry(0x0326e647408D4705373F66E5c59C65Cfd1fDF9d7);
+    Registry registry;
     Account account;
     AccountManager accountManagerImpl;
     AccountManager accountManager;
@@ -134,7 +134,9 @@ contract Deploy is Test {
         deployOracles();
         printOracles();
 
-        // // Deploy LTokens
+        initDependencies();
+
+        // Deploy LTokens
         deployLEther();
         deployLDAI();
         deployLWBTC();
@@ -216,7 +218,7 @@ contract Deploy is Test {
         LWBTC = LToken(address(new Proxy(address(lToken))));
         LWBTC.init(ERC20(WBTC), "LWrapped Bitcoin", "LWBTC", registry, 1e17, TREASURY);
         registry.setLToken(WBTC, address(LWBTC));
-        lDai.initDep("RATE_MODEL");
+        LWBTC.initDep("RATE_MODEL");
     }
 
     function deployWETHOracle() internal {
@@ -227,12 +229,16 @@ contract Deploy is Test {
 
     function deployChainlinkOracle() internal {
         chainlinkOracle = new ArbiChainlinkOracle(
-            AggregatorV3Interface(SEQUENCER), AggregatorV3Interface(ETHUSD)
+            AggregatorV3Interface(ETHUSD), AggregatorV3Interface(SEQUENCER)
         );
         configureChainLinkOracle(DAI, DAIUSD);
         configureChainLinkOracle(WBTC, WBTCUSD);
         configureChainLinkOracle(USDC, USDCUSD);
         configureChainLinkOracle(USDT, USDTUSD);
+        oracle.setOracle(DAI, chainlinkOracle);
+        oracle.setOracle(WBTC, chainlinkOracle);
+        oracle.setOracle(USDT, chainlinkOracle);
+        oracle.setOracle(USDC, chainlinkOracle);
     }
 
     function configureChainLinkOracle(address token, address feed) internal {
@@ -295,8 +301,8 @@ contract Deploy is Test {
         SLPOracle = new UniV2LpOracle(oracle);
         oracle.setOracle(SLP, SLPOracle);
 
-        // curveTriCryptoOracle = new CurveTriCryptoOracle();
-        // oracle.setOracle(TRICYRPTO, curveTriCryptoOracle);
+        curveTriCryptoOracle = new CurveTriCryptoOracle();
+        oracle.setOracle(TRICYRPTO, curveTriCryptoOracle);
 
         stable2crvOracle = new Stable2CurveOracle(oracle);
         oracle.setOracle(TWOPOOL, stable2crvOracle);
