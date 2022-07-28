@@ -39,8 +39,8 @@ contract Deploy is Test {
     address constant TREASURY = 0x92f473Ef0Cd07080824F5e6B0859ac49b3AEb215;
 
     // arbi erc20
-    address constant WETH9 = 0xd0A1E359811322d97991E03f863a0C30C2cF029C;
-    address constant DAI = 0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa;
+    address constant WETH9 = 0x82aF49447D8a07e3bd95BD0d56f35241523fBab1;
+    address constant DAI = 0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1;
     address constant WBTC = 0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f;
     address constant USDC = 0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8;
     address constant USDT = 0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9;
@@ -75,7 +75,7 @@ contract Deploy is Test {
 
     // Protocol
     Registry registryImpl;
-    Registry registry;
+    Registry registry = Registry(0x0326e647408D4705373F66E5c59C65Cfd1fDF9d7);
     Account account;
     AccountManager accountManagerImpl;
     AccountManager accountManager;
@@ -121,21 +121,24 @@ contract Deploy is Test {
         deployRiskEngine();
         deployAccountFactory();
         deployRateModel();
-
         enableCollateral();
+        printProtocol();
 
         // Deploy Controllers
         deployControllerFacade();
         deployControllers();
+        printControllers();
 
         // Deploy Oracles
         deployOracleFacade();
         deployOracles();
+        printOracles();
 
-        // Deploy LTokens
+        // // Deploy LTokens
         deployLEther();
         deployLDAI();
         deployLWBTC();
+        printLTokens();
 
         vm.stopBroadcast();
     }
@@ -299,8 +302,7 @@ contract Deploy is Test {
         oracle.setOracle(TWOPOOL, stable2crvOracle);
     }
 
-    function printAddresses() internal view {
-        // Log Contract Addresses
+    function printProtocol() internal view {
         console.log("Registry Impl", address(registryImpl));
         console.log("Registry", address(registry));
         console.log("Account", address(account));
@@ -310,14 +312,27 @@ contract Deploy is Test {
         console.log("Beacon", address(beacon));
         console.log("Account Factory", address(accountFactory));
         console.log("Rate Model", address(rateModel));
+    }
+
+    function printOracles() internal view {
         console.log("Oracle Facade", address(oracle));
-        console.log("Controller Facade", address(controller));
+        console.log("WETH Oracle", address(wethOracle));
+        console.log("ChainlinkOracle", address(chainlinkOracle));
+        console.log("AToken Oracle", address(aTokenOracle));
+        console.log("SLP Oracle", address(SLPOracle));
+        console.log("stable2crvOracle", address(stable2crvOracle));
+    }
+
+    function printLTokens() internal view {
         console.log("LEther Impl", address(lEthImpl));
         console.log("LEther", address(lEth));
         console.log("LToken", address(lToken));
         console.log("LDai", address(lDai));
-        console.log("WETH Oracle", address(wethOracle));
-        console.log("ChainlinkOracle", address(chainlinkOracle));
+        console.log("LWBTC", address(LWBTC));
+    }
+
+    function printControllers() internal view {
+        console.log("Controller Facade", address(controller));
         console.log("Uniswap Controller", address(uniSwapController));
         console.log("Sushi swap Controller", address(sushiSwapController));
         console.log("Aave Controller", address(aaveController));
@@ -325,8 +340,5 @@ contract Deploy is Test {
         console.log("WETH Controller", address(wethController));
         console.log("Curve Stable Swap Controller", address(curveStableSwapController));
         console.log("Curve Crypto Swap Controller", address(curveTriCryptoController));
-        console.log("AToken Oracle", address(aTokenOracle));
-        console.log("SLP Oracle", address(SLPOracle));
-        console.log("stable2crvOracle", address(stable2crvOracle));
     }
 }
