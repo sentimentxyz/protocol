@@ -32,6 +32,7 @@ import {StableSwap2PoolController} from "controller/curve/StableSwap2PoolControl
 import {ATokenOracle} from "oracle/aave/ATokenOracle.sol";
 import {Stable2CurveOracle} from "oracle/curve/Stable2CurveOracle.sol";
 import {CurveTriCryptoOracle} from "oracle/curve/CurveTriCryptoOracle.sol";
+import {ICurveTriCryptoOracle} from "oracle/curve/CurveTriCryptoOracle.sol";
 import {UniV2LpOracle} from "oracle/uniswap/UniV2LPOracle.sol";
 
 contract Deploy is Test {
@@ -72,6 +73,7 @@ contract Deploy is Test {
     address constant TWOPOOL = 0x7f90122BF0700F9E7e1F688fe926940E8839F353;
     address constant TRIPOOL = 0x960ea3e3C7FB317332d990873d354E18d7645590;
     address constant TRICRYPTO = 0x8e0B8c8BB9db49a46697F3a5Bb8A308e744821D2;
+    address constant TRICRYPTOPRICE = 0xE76BF7161d362a47863Bf53265A3298cB4199954;
 
     // Protocol
     Registry registryImpl;
@@ -301,8 +303,8 @@ contract Deploy is Test {
         SLPOracle = new UniV2LpOracle(oracle);
         oracle.setOracle(SLP, SLPOracle);
 
-        curveTriCryptoOracle = new CurveTriCryptoOracle();
-        oracle.setOracle(TRICYRPTO, curveTriCryptoOracle);
+        curveTriCryptoOracle = new CurveTriCryptoOracle(ICurveTriCryptoOracle(TRICRYPTOPRICE));
+        oracle.setOracle(TRICRYPTO, curveTriCryptoOracle);
 
         stable2crvOracle = new Stable2CurveOracle(oracle);
         oracle.setOracle(TWOPOOL, stable2crvOracle);
