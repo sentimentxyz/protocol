@@ -33,6 +33,7 @@ import {ATokenOracle} from "oracle/aave/ATokenOracle.sol";
 import {Stable2CurveOracle} from "oracle/curve/Stable2CurveOracle.sol";
 import {CurveTriCryptoOracle} from "oracle/curve/CurveTriCryptoOracle.sol";
 import {ICurveTriCryptoOracle} from "oracle/curve/CurveTriCryptoOracle.sol";
+import {ICurvePool} from "oracle/curve/CurveTriCryptoOracle.sol";
 import {UniV2LpOracle} from "oracle/uniswap/UniV2LPOracle.sol";
 
 contract Deploy is Test {
@@ -311,7 +312,7 @@ contract Deploy is Test {
         SLPOracle = new UniV2LpOracle(oracle);
         oracle.setOracle(SLP, SLPOracle);
 
-        curveTriCryptoOracle = new CurveTriCryptoOracle(ICurveTriCryptoOracle(TRICRYPTOPRICE));
+        curveTriCryptoOracle = new CurveTriCryptoOracle(ICurveTriCryptoOracle(TRICRYPTOPRICE), ICurvePool(TRIPOOL));
         oracle.setOracle(TRICRYPTO, curveTriCryptoOracle);
 
         stable2crvOracle = new Stable2CurveOracle(oracle);
