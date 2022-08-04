@@ -11,6 +11,7 @@ import {AggregatorV3Interface}
 import {CurveCryptoSwapController}
     from "controller/curve/CurveCryptoSwapController.sol";
 import {ICurveTriCryptoOracle} from "oracle/curve/CurveTriCryptoOracle.sol";
+import {ICurvePool} from "oracle/curve/CurveTriCryptoOracle.sol";
 
 contract IntegrationTestBase is TestBase {
 
@@ -47,11 +48,11 @@ contract IntegrationTestBase is TestBase {
     }
 
     function setupCurveController() internal {
-        curveController = new CurveCryptoSwapController(controller);
+        curveController = new CurveCryptoSwapController();
         controller.updateController(tricryptoPool, curveController);
         controller.toggleTokenAllowance(USDT);
 
-        curveOracle = new CurveTriCryptoOracle(curveTriCryptoOracle);
+        curveOracle = new CurveTriCryptoOracle(curveTriCryptoOracle, ICurvePool(tricryptoPool));
         oracle.setOracle(crv3crypto, curveOracle);
     }
 
