@@ -36,7 +36,6 @@ import {ICurveTriCryptoOracle} from "oracle/curve/CurveTriCryptoOracle.sol";
 import {UniV2LpOracle} from "oracle/uniswap/UniV2LPOracle.sol";
 
 contract Deploy is Test {
-    // Kovan
     address constant TREASURY = 0x92f473Ef0Cd07080824F5e6B0859ac49b3AEb215;
 
     // arbi erc20
@@ -92,6 +91,7 @@ contract Deploy is Test {
     LToken lToken;
     LToken lDai;
     LToken LWBTC;
+    LToken LUSDT;
 
     // Controllers
     ControllerFacade controller;
@@ -142,6 +142,7 @@ contract Deploy is Test {
         deployLEther();
         deployLDAI();
         deployLWBTC();
+        deployLUSDT();
         printLTokens();
 
         vm.stopBroadcast();
@@ -221,6 +222,13 @@ contract Deploy is Test {
         LWBTC.init(ERC20(WBTC), "LWrapped Bitcoin", "LWBTC", registry, 1e17, TREASURY);
         registry.setLToken(WBTC, address(LWBTC));
         LWBTC.initDep("RATE_MODEL");
+    }
+
+    function deployLUSDT() internal {
+        LUSDT = LToken(address(new Proxy(address(lToken))));
+        LUSDT.init(ERC20(USDT), "LTether USD", "LUSDT", registry, 1e17, TREASURY);
+        registry.setLToken(USDT, address(LUSDT));
+        LUSDT.initDep("RATE_MODEL");
     }
 
     function deployWETHOracle() internal {
