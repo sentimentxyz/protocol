@@ -25,6 +25,8 @@ import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
 contract TestBase is Test {
+    address constant PRECOMPILE = 0x0000000000000000000000000000000000000009;
+
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
 
     uint lenderID = 5;
