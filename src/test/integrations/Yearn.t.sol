@@ -21,7 +21,7 @@ contract YearnIntegrationTest is IntegrationTestBase {
         controller.updateController(yearnVault, yearnController);
 
         yTokenOracle = new YTokenOracle(oracle);
-        oracle.setOracle(yearnVault, yTokenOracle);
+        oracle.setERC20Oracle(yearnVault, yTokenOracle);
     }
 
     function setUp() public {

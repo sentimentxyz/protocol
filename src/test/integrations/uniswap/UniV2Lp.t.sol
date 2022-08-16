@@ -24,7 +24,7 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
         controller.toggleTokenAllowance(WETH_USDT_LP);
 
         uniLPOracle = new UniV2LpOracle(oracle);
-        oracle.setOracle(WETH_USDT_LP, uniLPOracle);
+        oracle.setERC20Oracle(WETH_USDT_LP, uniLPOracle);
     }
 
     function setUp() public {

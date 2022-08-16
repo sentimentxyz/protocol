@@ -16,6 +16,7 @@ import {ERC20} from "solmate/tokens/ERC20.sol";
 import {Registry} from "../../core/Registry.sol";
 import {RiskEngine} from "../../core/RiskEngine.sol";
 import {OracleFacade} from "oracle/core/OracleFacade.sol";
+import {IOracle} from "oracle/core/IOracle.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {AccountFactory} from "../../core/AccountFactory.sol";
 import {IRegistry} from "../../interface/core/IRegistry.sol";
@@ -144,7 +145,7 @@ contract TestBase is Test {
         // Mock Oracle to return 1e18 for all calls
         cheats.mockCall(
             address(oracle),
-            abi.encodeWithSelector(OracleFacade.getPrice.selector),
+            abi.encodeWithSelector(IOracle.getPrice.selector),
             abi.encode(1e18)
         );
     }

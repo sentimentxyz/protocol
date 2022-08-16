@@ -3,6 +3,7 @@ pragma solidity 0.8.15;
 
 import {Errors} from "../utils/Errors.sol";
 import {Helpers} from "../utils/Helpers.sol";
+import {ERC721Holder} from "../utils/ERC721Holder.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
 
 /**
@@ -10,7 +11,7 @@ import {IAccount} from "../interface/core/IAccount.sol";
     @notice Contract that acts as a dynamic and distributed asset reserve
         which holds a user’s collateral and loaned assets
 */
-contract Account is IAccount {
+contract Account is IAccount, ERC721Holder {
     using Helpers for address;
 
     /* -------------------------------------------------------------------------- */
@@ -29,6 +30,9 @@ contract Account is IAccount {
 
     /// @notice A list of ERC-20 assets (Collaterals + Borrows) present in the account
     address[] public assets;
+
+    /// @notice A list of ERC-721 assets present in the account
+    address[] public erc721Assets;
 
     /// @notice A list of borrowed ERC-20 assets present in the account
     address[] public borrows;
@@ -85,6 +89,14 @@ contract Account is IAccount {
         return assets;
     }
 
+        /**
+        @notice Returns a list of ERC-721 assets deposited and borrowed by the owner
+        @return assets List of addresses
+    */
+    function getERC721Assets() external view returns (address[] memory) {
+        return erc721Assets;
+    }
+
     /**
         @notice Returns a list of ERC-20 assets borrowed by the owner
         @return borrows List of addresses
@@ -102,6 +114,11 @@ contract Account is IAccount {
         hasAsset[token] = true;
     }
 
+    function addERC721Asset(address token) external accountManagerOnly {
+        erc721Assets.push(token);
+        hasAsset[token] = true;
+    }
+
     /**
         @notice Adds a given ERC-20 token to the borrows list
         @param token Address of the ERC-20 token to add
@@ -116,6 +133,11 @@ contract Account is IAccount {
     */
     function removeAsset(address token) external accountManagerOnly {
         _remove(assets, token);
+        hasAsset[token] = false;
+    }
+
+    function removeERC721Asset(address token) external accountManagerOnly {
+        _remove(erc721Assets, token);
         hasAsset[token] = false;
     }
 
@@ -171,6 +193,12 @@ contract Account is IAccount {
         }
         delete assets;
         toAddress.safeTransferEth(address(this).balance);
+
+        assetsLen = erc721Assets.length;
+        for (uint i; i < assetsLen; i++) {
+            erc721Assets[i].erc721SafeTransferAll(address(this), toAddress);
+        }
+        delete erc721Assets;
     }
 
     /* -------------------------------------------------------------------------- */

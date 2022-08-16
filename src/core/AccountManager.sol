@@ -191,6 +191,17 @@ contract AccountManager is Pausable, IAccountManager {
             IAccount(account).removeAsset(token);
     }
 
+    function withdrawERC721(address account, address token, uint tokenId)
+        external
+        onlyOwner(account)
+    {
+        account.withdrawERC721(msg.sender, token, tokenId);
+        if (!riskEngine.isAccountHealthy(account))
+            revert Errors.RiskThresholdBreached();
+        if (token.balanceOf(account) == 0)
+            IAccount(account).removeAsset(token);
+    }
+
     /**
         @notice Transfers a specified amount of token from the LP to the account
         @dev Specified token must have a LP
@@ -350,7 +361,9 @@ contract AccountManager is Pausable, IAccountManager {
         uint tokensInLen = tokensIn.length;
         for(uint i; i < tokensInLen; ++i) {
             if (IAccount(account).hasAsset(tokensIn[i]) == false)
-                IAccount(account).addAsset(tokensIn[i]);
+                if (tokensIn[i].isERC721Asset())
+                    IAccount(account).addERC721Asset(tokensIn[i]);
+                else IAccount(account).addAsset(tokensIn[i]);
         }
     }
 
@@ -360,7 +373,9 @@ contract AccountManager is Pausable, IAccountManager {
         uint tokensOutLen = tokensOut.length;
         for(uint i; i < tokensOutLen; ++i) {
             if (tokensOut[i].balanceOf(account) == 0)
-                IAccount(account).removeAsset(tokensOut[i]);
+                if (tokensOut[i].isERC721Asset())
+                    IAccount(account).removeERC721Asset(tokensOut[i]);
+                else IAccount(account).removeAsset(tokensOut[i]);
         }
     }
 

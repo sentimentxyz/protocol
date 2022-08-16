@@ -25,8 +25,8 @@ contract AaveV3ArbiIntegrationTest is ArbiIntegrationTestBase {
 
     function setupAaveController() internal {
         aTokenOracle = new ATokenOracle(oracle);
-        oracle.setOracle(aWeth, aTokenOracle);
-        oracle.setOracle(aDai, aTokenOracle);
+        oracle.setERC20Oracle(aWeth, aTokenOracle);
+        oracle.setERC20Oracle(aDai, aTokenOracle);
 
         aaveController = new AaveV3Controller(controller);
         controller.updateController(pool, aaveController);

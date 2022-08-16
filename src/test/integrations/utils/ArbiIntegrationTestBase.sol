@@ -23,7 +23,7 @@ contract ArbiIntegrationTestBase is TestBase {
         controller.toggleTokenAllowance(WETH);
 
         wethOracle = new WETHOracle();
-        oracle.setOracle(WETH, wethOracle);
+        oracle.setERC20Oracle(WETH, wethOracle);
     }
 
     function setupOracles() internal {

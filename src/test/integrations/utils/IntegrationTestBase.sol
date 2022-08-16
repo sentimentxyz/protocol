@@ -44,7 +44,7 @@ contract IntegrationTestBase is TestBase {
         controller.toggleTokenAllowance(WETH);
 
         wethOracle = new WETHOracle();
-        oracle.setOracle(WETH, wethOracle);
+        oracle.setERC20Oracle(WETH, wethOracle);
     }
 
     function setupCurveController() internal {
@@ -53,13 +53,13 @@ contract IntegrationTestBase is TestBase {
         controller.toggleTokenAllowance(USDT);
 
         curveOracle = new CurveTriCryptoOracle(curveTriCryptoOracle, ICurvePool(tricryptoPool));
-        oracle.setOracle(crv3crypto, curveOracle);
+        oracle.setERC20Oracle(crv3crypto, curveOracle);
     }
 
     function setupChainLinkOracles() internal {
         chainlinkOracle = new ChainlinkOracle(AggregatorV3Interface(ETHUSD));
-        oracle.setOracle(USDT, chainlinkOracle);
-        oracle.setOracle(DAI, chainlinkOracle);
+        oracle.setERC20Oracle(USDT, chainlinkOracle);
+        oracle.setERC20Oracle(DAI, chainlinkOracle);
         chainlinkOracle.setFeed(USDT, AggregatorV3Interface(USDTUSD));
         chainlinkOracle.setFeed(DAI, AggregatorV3Interface(DAIUSD));
     }

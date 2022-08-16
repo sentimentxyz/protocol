@@ -25,7 +25,7 @@ contract AaveEthIntegrationTest is IntegrationTestBase {
 
     function setupAaveController() internal {
         aTokenOracle = new ATokenOracle(oracle);
-        oracle.setOracle(aWeth, aTokenOracle);
+        oracle.setERC20Oracle(aWeth, aTokenOracle);
 
         aaveEthController = new AaveEthController(aWeth);
         controller.updateController(aaveWethGateway, aaveEthController);

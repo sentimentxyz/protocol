@@ -3,7 +3,7 @@ pragma solidity 0.8.15;
 
 import {Errors} from "../utils/Errors.sol";
 import {Ownable} from "../utils/Ownable.sol";
-import {IOracle} from "oracle/core/IOracle.sol";
+import {IOracleFacade} from "oracle/core/IOracleFacade.sol";
 import {IERC20} from "../interface/tokens/IERC20.sol";
 import {ILToken} from "../interface/tokens/ILToken.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
@@ -28,7 +28,7 @@ contract RiskEngine is Ownable, IRiskEngine {
     IRegistry public immutable registry;
 
     /// @notice Oracle Facade
-    IOracle public oracle;
+    IOracleFacade public oracle;
 
     /// @notice Account Manager
     IAccountManager public accountManager;
@@ -55,7 +55,7 @@ contract RiskEngine is Ownable, IRiskEngine {
 
     /// @notice Initializes external dependencies
     function initDep() external adminOnly {
-        oracle = IOracle(registry.getAddress('ORACLE'));
+        oracle = IOracleFacade(registry.getAddress('ORACLE'));
         accountManager = IAccountManager(registry.getAddress('ACCOUNT_MANAGER'));
     }
 
@@ -156,6 +156,11 @@ contract RiskEngine is Ownable, IRiskEngine {
                 assets[i],
                 IERC20(assets[i]).balanceOf(account)
             );
+        }
+        assets = IAccount(account).getERC721Assets();
+        assetsLen = assets.length;
+        for(uint i; i < assetsLen; ++i) {
+            totalBalance += oracle.getPrice(assets[i], account);
         }
         return totalBalance + account.balance;
     }

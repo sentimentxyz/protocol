@@ -28,8 +28,8 @@ contract CompoundIntegrationTest is IntegrationTestBase {
         controller.updateController(cUSDT, compoundController);
 
         cTokenOracle = new CTokenOracle(oracle, cEth);
-        oracle.setOracle(cEth, cTokenOracle);
-        oracle.setOracle(cUSDT, cTokenOracle);
+        oracle.setERC20Oracle(cEth, cTokenOracle);
+        oracle.setERC20Oracle(cUSDT, cTokenOracle);
     }
 
     function setUp() public {
