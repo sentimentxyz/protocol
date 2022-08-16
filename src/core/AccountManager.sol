@@ -191,6 +191,13 @@ contract AccountManager is Pausable, IAccountManager {
             IAccount(account).removeAsset(token);
     }
 
+    /**
+        @notice Transfers a specified tokenID of an erc721 token from the account
+            to the owner of the account
+        @param account Address of account
+        @param token Address of token
+        @param tokenId Token ID to withdraw
+    */
     function withdrawERC721(address account, address token, uint tokenId)
         external
         onlyOwner(account)

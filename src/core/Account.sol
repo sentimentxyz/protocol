@@ -89,7 +89,7 @@ contract Account is IAccount, ERC721Holder {
         return assets;
     }
 
-        /**
+    /**
         @notice Returns a list of ERC-721 assets deposited and borrowed by the owner
         @return assets List of addresses
     */
@@ -114,6 +114,10 @@ contract Account is IAccount, ERC721Holder {
         hasAsset[token] = true;
     }
 
+    /**
+        @notice Adds a given ERC-721 token to the ERC721 assets list
+        @param token Address of the ERC-721 token to add
+    */
     function addERC721Asset(address token) external accountManagerOnly {
         erc721Assets.push(token);
         hasAsset[token] = true;
@@ -136,6 +140,10 @@ contract Account is IAccount, ERC721Holder {
         hasAsset[token] = false;
     }
 
+    /**
+        @notice Removes a given ERC-721 token from the erc721 assets list
+        @param token Address of the ERC-721 token to remove
+    */
     function removeERC721Asset(address token) external accountManagerOnly {
         _remove(erc721Assets, token);
         hasAsset[token] = false;
