@@ -18,6 +18,7 @@ enum ExitKind {
         BPT_IN_FOR_EXACT_TOKENS_OUT,
         REMOVE_TOKEN
 }
+enum SwapKind { GIVEN_IN, GIVEN_OUT }
 
 contract BalancerIntegrationTest is IntegrationTestBase {
     address account;
@@ -36,6 +37,7 @@ contract BalancerIntegrationTest is IntegrationTestBase {
         controller.updateController(balancerVault, balancerController);
         controller.toggleTokenAllowance(balancerStablePool);
         controller.toggleTokenAllowance(balancerWeightedPool);
+        controller.toggleTokenAllowance(USDC);
 
         stableBalancerOracle = new StableBalancerLPOracle(oracle, IVaultOracle(balancerVault));
         weightedBalancerOracle = new WeightedBalancerLPOracle(oracle, IVaultOracle(balancerVault));
@@ -211,5 +213,46 @@ contract BalancerIntegrationTest is IntegrationTestBase {
         assertEq(IERC20(balancerStablePool).balanceOf(account), 0);
         assertGt(IERC20(USDT).balanceOf(account), 0);
         assertEq(IAccount(account).assets(0), USDT);
+    }
+
+    function testSwapEthUSDC(uint64 amt) public {
+        // Setup
+        cheats.assume(amt > 1e8 gwei);
+        deposit(user, account, address(0), amt);
+
+        IVault.SingleSwap memory swap = IVault.SingleSwap(
+            0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019,
+            uint8(SwapKind.GIVEN_IN),
+            IAsset(address(0)),
+            IAsset(USDC),
+            amt,
+            "0"
+        );
+
+        IVault.FundManagement memory fund = IVault.FundManagement(
+            account,
+            false,
+            payable(account),
+            false
+        );
+
+        // Encode calldata
+        bytes memory data = abi.encodeWithSelector(
+            0x52bbbe29,
+            swap,
+            fund,
+            1,
+            type(uint).max
+        );
+
+        // Test
+        cheats.startPrank(user);
+        accountManager.exec(account, balancerVault, amt, data);
+        cheats.stopPrank();
+
+        // Assert
+        assertEq(account.balance, 0);
+        assertGt(IERC20(USDC).balanceOf(account), 0);
+        assertEq(IAccount(account).assets(0), USDC);
     }
 }
