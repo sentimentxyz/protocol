@@ -6,11 +6,18 @@ import {IVault} from "controller/balancer/IVault.sol";
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
-import {StableBalancerLPOracle, IVault as IVault2} from "oracle/balancer/StableBalancerLPOracle.sol";
-import {WeightedBalancerLPOracle, IVault as IVault3} from "oracle/balancer/BalancerLPOracle.sol";
-import "controller/balancer/BalancerController.sol";
+import {StableBalancerLPOracle} from "oracle/balancer/StableBalancerLPOracle.sol";
+import {WeightedBalancerLPOracle} from "oracle/balancer/WeightedBalancerLPOracle.sol";
+import {IVault as IVaultOracle} from "oracle/balancer/IVault.sol";
+import {BalancerController, IAsset} from "controller/balancer/BalancerController.sol";
 
 enum JoinKind { INIT, EXACT_TOKENS_IN_FOR_BPT_OUT, TOKEN_IN_FOR_EXACT_BPT_OUT }
+enum ExitKind {
+        EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,
+        EXACT_BPT_IN_FOR_TOKENS_OUT,
+        BPT_IN_FOR_EXACT_TOKENS_OUT,
+        REMOVE_TOKEN
+}
 
 contract BalancerIntegrationTest is IntegrationTestBase {
     address account;
@@ -30,8 +37,8 @@ contract BalancerIntegrationTest is IntegrationTestBase {
         controller.toggleTokenAllowance(balancerStablePool);
         controller.toggleTokenAllowance(balancerWeightedPool);
 
-        stableBalancerOracle = new StableBalancerLPOracle(oracle, IVault2(balancerVault));
-        weightedBalancerOracle = new WeightedBalancerLPOracle(oracle, IVault3(balancerVault));
+        stableBalancerOracle = new StableBalancerLPOracle(oracle, IVaultOracle(balancerVault));
+        weightedBalancerOracle = new WeightedBalancerLPOracle(oracle, IVaultOracle(balancerVault));
         oracle.setOracle(balancerStablePool, stableBalancerOracle);
         oracle.setOracle(balancerWeightedPool, weightedBalancerOracle);
     }
@@ -54,9 +61,9 @@ contract BalancerIntegrationTest is IntegrationTestBase {
         uint usdtAmount = IERC20(USDT).balanceOf(account);
 
         IAsset[] memory assets = new IAsset[](3);
-        assets[0] = IAsset(0x6B175474E89094C44Da98b954EedeAC495271d0F);
-        assets[1] = IAsset(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48);
-        assets[2] = IAsset(0xdAC17F958D2ee523a2206206994597C13D831ec7);
+        assets[0] = IAsset(DAI);
+        assets[1] = IAsset(USDC);
+        assets[2] = IAsset(USDT);
 
         uint256[] memory amounts = new uint256[](3);
         amounts[0] = 0;
@@ -89,9 +96,8 @@ contract BalancerIntegrationTest is IntegrationTestBase {
         assertEq(IAccount(account).assets(0), balancerStablePool);
     }
 
-    function testVaultJoinWeightedPool() public {
+    function testVaultJoinWeightedPool(uint64 amt) public {
         // Setup
-        uint amt = 1e18;
         cheats.assume(amt > 1e8 gwei);
         deposit(user, account, address(0), amt);
 
@@ -123,8 +129,87 @@ contract BalancerIntegrationTest is IntegrationTestBase {
         cheats.stopPrank();
 
         // Assert
-        assertEq(IERC20(USDT).balanceOf(account), 0);
+        assertEq(account.balance, 0);
         assertGt(IERC20(balancerWeightedPool).balanceOf(account), 0);
         assertEq(IAccount(account).assets(0), balancerWeightedPool);
+    }
+
+    function testVaultExitWeightedPool(uint64 amt) public {
+        // Setup
+        testVaultJoinWeightedPool(amt);
+
+        IAsset[] memory assets = new IAsset[](2);
+        assets[0] = IAsset(USDC);
+        assets[1] = IAsset(address(0));
+
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = 0;
+        amounts[1] = 1;
+
+        // Encode calldata
+        bytes memory data = abi.encodeWithSelector(
+            0x8bdb3913,
+            0x96646936b91d6b9d7d0c47c496afbf3d6ec7b6f8000200000000000000000019,
+            account,
+            account,
+            IVault.ExitPoolRequest(
+                assets,
+                amounts,
+                abi.encode(ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, IERC20(balancerWeightedPool).balanceOf(account), 1),
+                false
+            )
+        );
+
+        // Test
+        cheats.startPrank(user);
+        accountManager.approve(account, balancerWeightedPool, balancerVault, type(uint).max);
+        accountManager.exec(account, balancerVault, 0, data);
+        cheats.stopPrank();
+
+        // Assert
+        assertEq(IERC20(balancerWeightedPool).balanceOf(account), 0);
+        assertGt(account.balance, 0);
+        assertEq(IAccount(account).getAssets().length, 0);
+    }
+
+    function testVaultExitStablePool() public {
+        // Setup
+        uint64 amt = 1e18;
+        testVaultJoinStablePool(amt);
+
+        IAsset[] memory assets = new IAsset[](3);
+        assets[0] = IAsset(DAI);
+        assets[1] = IAsset(USDC);
+        assets[2] = IAsset(USDT);
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 0;
+        amounts[1] = 0;
+        amounts[2] = 1;
+
+        // Encode calldata
+        bytes memory data = abi.encodeWithSelector(
+            0x8bdb3913,
+            0x06df3b2bbb68adc8b0e302443692037ed9f91b42000000000000000000000063,
+            account,
+            account,
+            IVault.ExitPoolRequest(
+                assets,
+                amounts,
+                abi.encode(ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT, IERC20(balancerStablePool).balanceOf(account), 2),
+                false
+            )
+        );
+
+        // Test
+        cheats.startPrank(user);
+        accountManager.approve(account, balancerStablePool, balancerVault, type(uint).max);
+        accountManager.exec(account, balancerVault, 0, data);
+        cheats.stopPrank();
+
+        // Assert
+        assertEq(IERC20(balancerStablePool).balanceOf(account), 0);
+        assertGt(IERC20(USDT).balanceOf(account), 0);
+        assertEq(IAccount(account).assets(0), USDT);
     }
 }
