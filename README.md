@@ -35,23 +35,22 @@ forge test --no-match-contract Integration -vvv
 
 #### Integration tests
 
+##### Ethereum mainnet
+
 ```bash
-forge test --match-contract Integration --fork-url https://rpc.ankr.com/eth -vvv
+forge test --match-contract Integration --no-match-contract ArbiIntegration --fork-url https://rpc.ankr.com/eth
+```
+
+##### Arbitrum mainnet
+
+```bash
+forge test --match-contract ArbiIntegration --fork-url https://arb1.arbitrum.io/rpc -vvv
 ```
 
 ---
 
-#### Configuring with VSCode
-
-Create a remappings.txt and paste the mappings provided by `forge config`
-
-Example:
+#### Configuring mappings
 
 ```bash
-controller/=lib/controller/src/
-forge-std/=lib/forge-std/src/
-oracle/=lib/oracle/src/
-prb-math/=lib/prb-math/contracts/
-solidity-bytes-utils/=lib/controller/lib/solidity-bytes-utils/contracts/
-solmate/=lib/solmate/src/
+forge config > remappings.txt
 ```
