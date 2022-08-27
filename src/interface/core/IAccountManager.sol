@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.15;
+pragma solidity ^0.8.15;
 
 import {IRegistry} from "./IRegistry.sol";
 import {IRiskEngine} from "./IRiskEngine.sol";
