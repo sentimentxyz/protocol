@@ -2,14 +2,14 @@
 pragma solidity 0.8.15;
 
 import {console} from "forge-std/console.sol";
-import {IVault} from "controller/balancer/IVault.sol";
+import {IVault, IAsset} from "controller/balancer/IVault.sol";
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
 import {StableBalancerLPOracle} from "oracle/balancer/StableBalancerLPOracle.sol";
 import {WeightedBalancerLPOracle} from "oracle/balancer/WeightedBalancerLPOracle.sol";
 import {IVault as IVaultOracle} from "oracle/balancer/IVault.sol";
-import {BalancerController, IAsset} from "controller/balancer/BalancerController.sol";
+import {BalancerController} from "controller/balancer/BalancerController.sol";
 
 enum JoinKind { INIT, EXACT_TOKENS_IN_FOR_BPT_OUT, TOKEN_IN_FOR_EXACT_BPT_OUT }
 enum ExitKind {
