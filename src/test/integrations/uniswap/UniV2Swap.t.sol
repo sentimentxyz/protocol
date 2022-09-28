@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
