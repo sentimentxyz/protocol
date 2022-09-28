@@ -318,10 +318,7 @@ contract AccountManager is Pausable, IAccountManager {
     function settle(address account) external onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i; i < borrows.length; i++) {
-            uint balance;
-            if (borrows[i] == address(0)) balance = account.balance;
-            else balance = borrows[i].balanceOf(account);
-            if ( balance > 0 ) repay(account, borrows[i], type(uint).max);
+            repay(account, borrows[i], type(uint).max);
         }
     }
 
