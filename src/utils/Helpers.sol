@@ -67,7 +67,7 @@ library Helpers {
         address target,
         bytes calldata data
     ) internal {
-        if (!isContract(target)) Errors.AddressNotContract;
+        if (!isContract(target)) revert Errors.AddressNotContract();
         (bool success, ) = target.delegatecall(data);
         require(success, "CALL_FAILED");
     }
