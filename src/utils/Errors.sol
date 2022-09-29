@@ -3,6 +3,8 @@ pragma solidity ^0.8.17;
 
 library Errors {
     error AdminOnly();
+    error ZeroShares();
+    error ZeroAssets();
     error ZeroAddress();
     error ContractPaused();
     error OutstandingDebt();
