@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.15;
+pragma solidity ^0.8.17;
 
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {IRateModel} from "../interface/core/IRateModel.sol";
