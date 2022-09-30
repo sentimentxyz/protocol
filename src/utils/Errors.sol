@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 library Errors {
     error AdminOnly();
     error ZeroAddress();
+    error MinimumShares();
     error ContractPaused();
     error OutstandingDebt();
     error AccountOwnerOnly();

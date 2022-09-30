@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.17;
 
+import {Errors} from "../../utils/Errors.sol";
 import {ERC20 as CustomERC20} from "./ERC20.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
@@ -32,12 +33,16 @@ abstract contract ERC4626 is CustomERC20 {
 
     ERC20 public asset;
 
+    uint MIN_MINT;
+
     function initERC4626(
         ERC20 _asset,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        uint _min_mint
     ) internal {
         asset = _asset;
+        MIN_MINT = _min_mint;
         initERC20(_name, _symbol, asset.decimals());
     }
 
@@ -54,7 +59,11 @@ abstract contract ERC4626 is CustomERC20 {
         // Need to transfer before minting or ERC777s could reenter.
         asset.safeTransferFrom(msg.sender, address(this), assets);
 
-        _mint(receiver, shares);
+        if (totalSupply == 0) {
+            if (shares <= MIN_MINT) revert Errors.MinimumShares();
+            _mint(address(0), MIN_MINT);
+            _mint(receiver, shares - MIN_MINT);
+        } else _mint(receiver, shares);
 
         emit Deposit(msg.sender, receiver, assets, shares);
     }
@@ -67,7 +76,11 @@ abstract contract ERC4626 is CustomERC20 {
         // Need to transfer before minting or ERC777s could reenter.
         asset.safeTransferFrom(msg.sender, address(this), assets);
 
-        _mint(receiver, shares);
+        if (totalSupply == 0) {
+            if (shares <= MIN_MINT) revert Errors.MinimumShares();
+            _mint(address(0), MIN_MINT);
+            _mint(receiver, shares - MIN_MINT);
+        } else _mint(receiver, shares);
 
         emit Deposit(msg.sender, receiver, assets, shares);
     }
