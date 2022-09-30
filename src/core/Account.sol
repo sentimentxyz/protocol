@@ -4,6 +4,7 @@ pragma solidity ^0.8.17;
 import {Errors} from "../utils/Errors.sol";
 import {Helpers} from "../utils/Helpers.sol";
 import {IAccount} from "../interface/core/IAccount.sol";
+import {IERC20} from "../interface/tokens/IERC20.sol";
 
 /**
     @title Sentiment Account
@@ -162,12 +163,15 @@ contract Account is IAccount {
     */
     function sweepTo(address toAddress) external accountManagerOnly {
         uint assetsLen = assets.length;
+        uint balance;
         for(uint i; i < assetsLen; ++i) {
-            assets[i].safeTransfer(
-                toAddress,
-                assets[i].balanceOf(address(this))
-            );
-            hasAsset[assets[i]] = false;
+            if ((balance = assets[i].balanceOf(address(this))) > 0) {
+                try IERC20(assets[i]).transfer(toAddress, balance) {
+                    hasAsset[assets[i]] = false;
+                } catch {}
+            } else {
+                hasAsset[assets[i]] = false;
+            }
         }
         delete assets;
         toAddress.safeTransferEth(address(this).balance);
