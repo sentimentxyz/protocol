@@ -28,11 +28,14 @@ contract LEther is LToken {
             Transfers shares to the user denoting the amount of Eth deposited
         @dev Emits Deposit(caller, owner, assets, shares)
     */
-    function depositEth() external payable {
+    function depositEth() external payable returns (uint shares) {
         uint assets = msg.value;
-        uint shares = previewDeposit(assets);
-        require(shares != 0, "ZERO_SHARES");
+
+        beforeDeposit(assets, shares);
+        if ((shares = previewDeposit(assets)) == 0) revert Errors.ZeroShares();
+
         IWETH(address(asset)).deposit{value: assets}();
+
         _mint(msg.sender, shares);
         emit Deposit(msg.sender, msg.sender, assets, shares);
     }
@@ -44,10 +47,13 @@ contract LEther is LToken {
         @dev Emits Withdraw(caller, receiver, owner, assets, shares);
         @param shares Amount of shares to redeem
     */
-    function redeemEth(uint shares) external {
-        uint assets = previewRedeem(shares);
+    function redeemEth(uint shares) external returns (uint assets) {
+        if ((assets = previewRedeem(shares)) == 0) revert Errors.ZeroAssets();
+        beforeWithdraw(assets, shares);
+
         _burn(msg.sender, shares);
         emit Withdraw(msg.sender, msg.sender, msg.sender, assets, shares);
+
         IWETH(address(asset)).withdraw(assets);
         msg.sender.safeTransferEth(assets);
     }
