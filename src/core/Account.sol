@@ -165,13 +165,9 @@ contract Account is IAccount {
         uint assetsLen = assets.length;
         uint balance;
         for(uint i; i < assetsLen; ++i) {
-            if ((balance = assets[i].balanceOf(address(this))) > 0) {
-                try IERC20(assets[i]).transfer(toAddress, balance) {
-                    hasAsset[assets[i]] = false;
-                } catch {}
-            } else {
+            try IERC20(assets[i]).transfer(toAddress, balance) {} catch {}
+            if(assets[i].balanceOf(address(this)) == 0)
                 hasAsset[assets[i]] = false;
-            }
         }
         delete assets;
         toAddress.safeTransferEth(address(this).balance);
