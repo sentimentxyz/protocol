@@ -31,7 +31,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             (uint(depositAmt) + borrowAmt - withdrawAmt).divWadDown(borrowAmt) >
@@ -59,7 +59,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
@@ -110,7 +110,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             (uint(depositAmt) + borrowAmt - withdrawAmt).divWadDown(borrowAmt) >
@@ -138,7 +138,7 @@ contract AccountManagerDepositWithdrawTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(depositAmt >= withdrawAmt);
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >

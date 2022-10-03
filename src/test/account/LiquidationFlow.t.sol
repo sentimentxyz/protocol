@@ -50,7 +50,7 @@ contract LiquidationFlowTest is TestBase {
     }
 
     function testLiquidationERC20(uint96 amt) public {
-        cheats.assume(amt != 0);
+        cheats.assume(amt > 10 ** (18 - 2));
         // Setup
         deposit(borrower, account, address(erc20), amt);
         borrow(borrower, account, address(erc20), amt);
@@ -73,7 +73,7 @@ contract LiquidationFlowTest is TestBase {
 
     function testLiquidationComposite(uint96 amt) public {
         // Setup
-        cheats.assume(amt != 0);
+        cheats.assume(amt > 10 ** (18 - 2));
         deposit(borrower, account, address(0), amt);
         borrow(borrower, account, address(weth), amt);
         deposit(borrower, account, address(erc20), amt);

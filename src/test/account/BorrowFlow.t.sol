@@ -16,7 +16,7 @@ contract BorrowFlowTest is TestBase {
     }
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         // Test
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
@@ -33,7 +33,7 @@ contract BorrowFlowTest is TestBase {
     }
 
     function testBorrowERC20(uint96 depositAmt, uint96 borrowAmt) public {
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         // Test
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
@@ -61,7 +61,7 @@ contract BorrowFlowTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt != 0 && sender != address(0));
+        cheats.assume(borrowAmt > 10 ** (18 - 2) && sender != address(0));
         erc20.mint(sender, transferAmt);
         cheats.prank(sender);
         erc20.transfer(account, transferAmt);

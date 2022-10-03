@@ -26,7 +26,7 @@ contract RepayFlowTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()
@@ -50,7 +50,7 @@ contract RepayFlowTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()
@@ -89,7 +89,7 @@ contract RepayFlowTest is TestBase {
 
     function testMaxRepayERC20(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(borrowAmt > 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()
@@ -104,11 +104,11 @@ contract RepayFlowTest is TestBase {
         assertEq(riskEngine.getBorrows(account), 0);
     }
 
-    function testMaxRepayERC20WithInterest(uint96 depositAmt, uint48 borrowAmt1, uint48 borrowAmt2)
+    function testMaxRepayERC20WithInterest(uint96 depositAmt, uint56 borrowAmt1, uint56 borrowAmt2)
         public
     {
         // Setup
-        cheats.assume(borrowAmt1 > 0 && borrowAmt2 > 0);
+        cheats.assume(uint256(borrowAmt1) + borrowAmt2 > 10 ** (18 - 2) && borrowAmt1 > 0 && borrowAmt2 > 0);
         cheats.assume(
             (uint(depositAmt) + borrowAmt1 + borrowAmt2)
             .divWadDown(uint(borrowAmt1) + borrowAmt2) >

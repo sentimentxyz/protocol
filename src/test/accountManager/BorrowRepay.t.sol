@@ -36,7 +36,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
 
     function testBorrowEth(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()
@@ -55,7 +55,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(depositAmt != 0 && borrowAmt != 0);
+        cheats.assume(depositAmt != 0 && borrowAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) <=
             riskEngine.balanceToBorrowThreshold()
@@ -76,7 +76,7 @@ contract AccountManagerBorrowRepayTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(depositAmt != 0 && borrowAmt != 0);
+        cheats.assume(depositAmt != 0 && borrowAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) <=
             riskEngine.balanceToBorrowThreshold()

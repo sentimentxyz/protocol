@@ -22,7 +22,7 @@ contract RepayInParts is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()
@@ -50,7 +50,7 @@ contract RepayInParts is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > borrow1);
+        cheats.assume(borrowAmt > borrow1 && borrow1 > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()
@@ -99,7 +99,7 @@ contract RepayInParts is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > repayAmt && repayAmt > 0);
+        cheats.assume(borrowAmt > repayAmt && repayAmt > 10 ** (18 - 2));
         cheats.assume(borrowAmt > borrow1);
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
@@ -154,7 +154,7 @@ contract RepayInParts is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt > borrow1 && borrow1 > 0);
+        cheats.assume(borrowAmt > borrow1 && borrow1 > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()

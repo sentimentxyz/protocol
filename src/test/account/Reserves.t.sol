@@ -18,7 +18,7 @@ contract ReserveTests is TestBase {
     }
 
     function testReserves(uint96 deposit, uint96 borrow) public {
-        cheats.assume(borrow > 0);
+        cheats.assume(borrow > 10 ** (18 - 2));
         cheats.assume(
             (uint(deposit) + borrow).divWadDown(borrow) >
             riskEngine.balanceToBorrowThreshold()
@@ -49,7 +49,7 @@ contract ReserveTests is TestBase {
     }
 
     function testReserves2(uint96 deposit, uint96 borrow) public {
-        cheats.assume(borrow > 0);
+        cheats.assume(borrow > 10 ** (18 - 2));
         cheats.assume(
             (uint(deposit) + borrow).divWadDown(borrow) >
             riskEngine.balanceToBorrowThreshold()
