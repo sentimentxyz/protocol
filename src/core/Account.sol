@@ -163,10 +163,11 @@ contract Account is IAccount {
     */
     function sweepTo(address toAddress) external accountManagerOnly {
         uint assetsLen = assets.length;
-        uint balance;
         for(uint i; i < assetsLen; ++i) {
-            try IERC20(assets[i]).transfer(toAddress, balance) {} catch {}
-            if(assets[i].balanceOf(address(this)) == 0)
+            try IERC20(assets[i]).transfer(
+                toAddress, assets[i].balanceOf(address(this))
+            ) {} catch {}
+            if (assets[i].balanceOf(address(this)) == 0)
                 hasAsset[assets[i]] = false;
         }
         delete assets;
