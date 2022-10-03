@@ -2,6 +2,7 @@
 pragma solidity ^0.8.17;
 
 import {TestBase} from "../utils/TestBase.sol";
+import {Errors} from "../../utils/Errors.sol";
 
 contract LendingFlowTest is TestBase {
 
@@ -71,5 +72,19 @@ contract LendingFlowTest is TestBase {
         assertEq(erc20.balanceOf(address(lErc20)), 0);
         assertEq(lErc20.balanceOf(lender), 0);
 
+    }
+
+    function testDepositMaxSupplyError(uint64 supply, uint64 depositAmt) public {
+        // Setup
+        cheats.assume(supply < depositAmt && depositAmt > 10 ** (18 - 2));
+        erc20.mint(lender, depositAmt);
+        lErc20.updateMaxSupply(supply);
+
+        // Test
+        cheats.startPrank(lender);
+        erc20.approve(address(lErc20), type(uint).max);
+        cheats.expectRevert(Errors.MaxSupply.selector);
+        lErc20.deposit(depositAmt, lender);
+        cheats.stopPrank();
     }
 }
