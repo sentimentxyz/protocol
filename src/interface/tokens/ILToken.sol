@@ -14,7 +14,7 @@ interface ILToken {
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _reserveFactor,
+        uint _originationFee,
         address treasury,
         uint _min_mint
     ) external;
