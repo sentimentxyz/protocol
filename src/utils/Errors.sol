@@ -6,6 +6,7 @@ library Errors {
     error ZeroShares();
     error ZeroAssets();
     error ZeroAddress();
+    error MinimumShares();
     error ContractPaused();
     error OutstandingDebt();
     error AccountOwnerOnly();

@@ -20,7 +20,7 @@ contract RiskEngineTest is TestBase {
 
     function testIsBorrowAllowed(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(depositAmt != 0 && borrowAmt != 0);
+        cheats.assume(depositAmt != 0 && borrowAmt > 10 ** (18 - 2));
         deposit(owner, account, address(0), depositAmt);
 
         // Test
@@ -45,7 +45,7 @@ contract RiskEngineTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(depositAmt > withdrawAmt);
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >

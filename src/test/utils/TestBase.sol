@@ -112,11 +112,11 @@ contract TestBase is Test {
 
         lEthImplementation = new LEther();
         lEth = LEther(payable(address(new Proxy(address(lEthImplementation)))));
-        lEth.init(weth, "LEther", "LEth", registry, 1e17, treasury);
+        lEth.init(weth, "LEther", "LEth", registry, 1e17, treasury, 0);
 
         lErc20Implementation = new LToken();
         lErc20 = LToken(address(new Proxy(address(lErc20Implementation))));
-        lErc20.init(erc20, "LTestERC20", "LERC20", registry, 1e17, treasury);
+        lErc20.init(erc20, "LTestERC20", "LERC20", registry, 1e17, treasury, 0);
     }
 
     function register() private {

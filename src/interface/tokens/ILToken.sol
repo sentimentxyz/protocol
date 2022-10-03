@@ -15,7 +15,8 @@ interface ILToken {
         string calldata _symbol,
         IRegistry _registry,
         uint _reserveFactor,
-        address treasury
+        address treasury,
+        uint _min_mint
     ) external;
 
     function initDep(string calldata) external;

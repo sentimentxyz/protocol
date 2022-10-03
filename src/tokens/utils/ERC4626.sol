@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity ^0.8.17;
 
+import {Errors} from "../../utils/Errors.sol";
 import {ERC20 as CustomERC20} from "./ERC20.sol";
 import {ERC20} from "solmate/tokens/ERC20.sol";
 import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
@@ -32,12 +33,17 @@ abstract contract ERC4626 is CustomERC20 {
 
     ERC20 public asset;
 
+    /// @dev 10 ** (decimals - 6)
+    uint reserveShares;
+
     function initERC4626(
         ERC20 _asset,
         string memory _name,
-        string memory _symbol
+        string memory _symbol,
+        uint _reserveShares
     ) internal {
         asset = _asset;
+        reserveShares = _reserveShares;
         initERC20(_name, _symbol, asset.decimals());
     }
 
@@ -51,6 +57,12 @@ abstract contract ERC4626 is CustomERC20 {
         // Check for rounding error since we round down in previewDeposit.
         require((shares = previewDeposit(assets)) != 0, "ZERO_SHARES");
 
+        if (totalSupply == 0 && decimals >= 6) {
+            if (shares <= 10 ** (decimals - 2)) revert Errors.MinimumShares();
+            _mint(address(0), reserveShares);
+            shares -= reserveShares;
+        }
+
         // Need to transfer before minting or ERC777s could reenter.
         asset.safeTransferFrom(msg.sender, address(this), assets);
 
@@ -63,6 +75,12 @@ abstract contract ERC4626 is CustomERC20 {
         beforeDeposit(assets, shares);
 
         assets = previewMint(shares); // No need to check for rounding error, previewMint rounds up.
+
+        if (totalSupply == 0 && decimals >= 6) {
+            if (shares <= 10 ** (decimals - 2)) revert Errors.MinimumShares();
+            _mint(address(0), reserveShares);
+            shares -= reserveShares;
+        }
 
         // Need to transfer before minting or ERC777s could reenter.
         asset.safeTransferFrom(msg.sender, address(this), assets);

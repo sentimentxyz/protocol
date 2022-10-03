@@ -55,7 +55,7 @@ contract OpenCloseFlowTest is TestBase {
 
     function testCloseAccountOutstandingDebtError(uint96 value) public {
         // Setup
-        cheats.assume(value != 0);
+        cheats.assume(value > 10 ** (18 - 2));
         deposit(user, account, address(erc20), value);
         borrow(user, account, address(erc20), value);
         cheats.roll(block.number + 1);

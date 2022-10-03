@@ -11,7 +11,7 @@ contract LendingFlowTest is TestBase {
 
     function testDepositEth(uint64 amt) public {
         // Setup
-        cheats.assume(amt != 0);
+        cheats.assume(amt > 10 ** (18 - 2));
         cheats.deal(lender, amt);
 
         // Test
@@ -41,7 +41,7 @@ contract LendingFlowTest is TestBase {
 
     function testDepositERC20(uint64 amt) public {
         // Setup
-        cheats.assume(amt != 0);
+        cheats.assume(amt > 10 ** (18 - 2));
         erc20.mint(lender, amt);
 
         // Test
@@ -58,7 +58,7 @@ contract LendingFlowTest is TestBase {
 
     function testWithdrawERC20(uint64 amt) public {
         // Setup
-        cheats.assume(amt != 0);
+        cheats.assume(amt > 10 ** (18 - 2));
         testDepositERC20(amt);
         uint shares = lErc20.balanceOf(lender);
 

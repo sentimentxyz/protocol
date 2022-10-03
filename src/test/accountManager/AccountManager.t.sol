@@ -38,7 +38,7 @@ contract AccountManagerTest is TestBase {
         public
     {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()
@@ -54,7 +54,7 @@ contract AccountManagerTest is TestBase {
     // Settle
     function testSettle(uint96 depositAmt, uint96 borrowAmt) public {
         // Setup
-        cheats.assume(borrowAmt != 0);
+        cheats.assume(borrowAmt > 10 ** (18 - 2));
         cheats.assume(
             (uint(depositAmt) + borrowAmt).divWadDown(borrowAmt) >
             riskEngine.balanceToBorrowThreshold()

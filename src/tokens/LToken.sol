@@ -84,6 +84,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         @param _registry Address of Registry
         @param _reserveFactor Borrow Fee
         @param _treasury Protocol treasury
+        @param _reserveShares Minimum amount of shares minted to zero address
     */
     function init(
         ERC20 _asset,
@@ -91,7 +92,8 @@ contract LToken is Pausable, ERC4626, ILToken {
         string calldata _symbol,
         IRegistry _registry,
         uint _reserveFactor,
-        address _treasury
+        address _treasury,
+        uint _reserveShares
     ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
 
@@ -103,7 +105,7 @@ contract LToken is Pausable, ERC4626, ILToken {
 
         initialized = true;
         initPausable(msg.sender);
-        initERC4626(_asset, _name, _symbol);
+        initERC4626(_asset, _name, _symbol, _reserveShares);
         registry = _registry;
         reserveFactor = _reserveFactor;
         treasury = _treasury;
