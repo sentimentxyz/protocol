@@ -179,11 +179,12 @@ abstract contract ERC4626 is CustomERC20 {
     //////////////////////////////////////////////////////////////*/
 
     function maxDeposit(address) public view virtual returns (uint256) {
-        return type(uint256).max;
+        return convertToAssets(maxMint(address(0)));
     }
 
     function maxMint(address) public view virtual returns (uint256) {
-        return type(uint256).max;
+        if (totalSupply >= maxSupply) return 0;
+        return maxSupply - totalSupply;
     }
 
     function maxWithdraw(address owner) public view virtual returns (uint256) {
