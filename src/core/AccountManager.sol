@@ -12,13 +12,14 @@ import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {IControllerFacade} from "controller/core/IControllerFacade.sol";
+import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
 
 /**
     @title Account Manager
     @notice Sentiment Account Manager,
         All account interactions go via the account manager
 */
-contract AccountManager is Pausable, IAccountManager {
+contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     using Helpers for address;
 
     /* -------------------------------------------------------------------------- */
@@ -110,7 +111,7 @@ contract AccountManager is Pausable, IAccountManager {
             Emits AccountClosed(account, owner) event
         @param _account Address of account to be closed
     */
-    function closeAccount(address _account) public onlyOwner(_account) {
+    function closeAccount(address _account) public nonReentrant onlyOwner(_account) {
         IAccount account = IAccount(_account);
         if (account.activationBlock() == block.number)
             revert Errors.AccountDeactivationFailure();
@@ -161,6 +162,7 @@ contract AccountManager is Pausable, IAccountManager {
     */
     function deposit(address account, address token, uint amt)
         external
+        nonReentrant
         whenNotPaused
         onlyOwner(account)
     {
@@ -182,6 +184,7 @@ contract AccountManager is Pausable, IAccountManager {
     */
     function withdraw(address account, address token, uint amt)
         external
+        nonReentrant
         onlyOwner(account)
     {
         if (!riskEngine.isWithdrawAllowed(account, token, amt))
@@ -247,7 +250,7 @@ contract AccountManager is Pausable, IAccountManager {
             Emits AccountLiquidated(account, owner) event
         @param account Address of account
     */
-    function liquidate(address account) external {
+    function liquidate(address account) external nonReentrant {
         if (riskEngine.isAccountHealthy(account))
             revert Errors.AccountNotLiquidatable();
         _liquidate(account);
@@ -270,6 +273,7 @@ contract AccountManager is Pausable, IAccountManager {
         uint amt
     )
         external
+        nonReentrant
         onlyOwner(account)
     {
         if(address(controller.controllerFor(spender)) == address(0))
@@ -294,6 +298,7 @@ contract AccountManager is Pausable, IAccountManager {
         bytes calldata data
     )
         external
+        nonReentrant
         onlyOwner(account)
     {
         bool isAllowed;
@@ -315,7 +320,7 @@ contract AccountManager is Pausable, IAccountManager {
         @notice Settles an account by repaying all the loans
         @param account Address of account
     */
-    function settle(address account) external onlyOwner(account) {
+    function settle(address account) external nonReentrant onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i; i < borrows.length; i++) {
             repay(account, borrows[i], type(uint).max);
