@@ -31,6 +31,8 @@ abstract contract ERC20 {
 
     uint256 public totalSupply;
 
+    uint256 public maxSupply;
+
     mapping(address => uint256) public balanceOf;
 
     mapping(address => mapping(address => uint256)) public allowance;
@@ -52,11 +54,13 @@ abstract contract ERC20 {
     function initERC20(
         string memory _name,
         string memory _symbol,
-        uint8 _decimals
+        uint8 _decimals,
+        uint256 _maxSupply
     ) internal {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
+        maxSupply = _maxSupply;
 
         INITIAL_CHAIN_ID = block.chainid;
         INITIAL_DOMAIN_SEPARATOR = computeDomainSeparator();
@@ -182,6 +186,8 @@ abstract contract ERC20 {
 
     function _mint(address to, uint256 amount) internal virtual {
         totalSupply += amount;
+
+        if (totalSupply > maxSupply) revert Errors.MaxSupply();
 
         // Cannot overflow because the sum of all user
         // balances can't exceed the max uint256 value.

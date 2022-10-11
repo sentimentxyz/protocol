@@ -40,11 +40,12 @@ abstract contract ERC4626 is CustomERC20 {
         ERC20 _asset,
         string memory _name,
         string memory _symbol,
-        uint _reserveShares
+        uint _reserveShares,
+        uint _maxSupply
     ) internal {
         asset = _asset;
         reserveShares = _reserveShares;
-        initERC20(_name, _symbol, asset.decimals());
+        initERC20(_name, _symbol, asset.decimals(), _maxSupply);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -178,11 +179,12 @@ abstract contract ERC4626 is CustomERC20 {
     //////////////////////////////////////////////////////////////*/
 
     function maxDeposit(address) public view virtual returns (uint256) {
-        return type(uint256).max;
+        return convertToAssets(maxMint(address(0)));
     }
 
     function maxMint(address) public view virtual returns (uint256) {
-        return type(uint256).max;
+        if (totalSupply >= maxSupply) return 0;
+        return maxSupply - totalSupply;
     }
 
     function maxWithdraw(address owner) public view virtual returns (uint256) {

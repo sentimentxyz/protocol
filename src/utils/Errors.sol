@@ -3,6 +3,7 @@ pragma solidity ^0.8.17;
 
 library Errors {
     error AdminOnly();
+    error MaxSupply();
     error ZeroShares();
     error ZeroAssets();
     error ZeroAddress();
