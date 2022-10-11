@@ -236,17 +236,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         nonReentrant
         onlyOwner(account)
     {
-        ILToken LToken = ILToken(registry.LTokenFor(token));
-        if (address(LToken) == address(0))
-            revert Errors.LTokenUnavailable();
-        LToken.updateState();
-        if (amt == type(uint256).max) amt = LToken.getBorrowBalance(account);
-        account.withdraw(address(LToken), token, amt);
-        if (LToken.collectFrom(account, amt))
-            IAccount(account).removeBorrow(token);
-        if (IERC20(token).balanceOf(account) == 0)
-            IAccount(account).removeAsset(token);
-        emit Repay(account, msg.sender, token, amt);
+        _repay(account, token, amt);
     }
 
     /**
@@ -328,7 +318,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     function settle(address account) external nonReentrant onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
         for (uint i; i < borrows.length; i++) {
-            repay(account, borrows[i], type(uint).max);
+            _repay(account, borrows[i], type(uint).max);
         }
     }
 
@@ -389,6 +379,22 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
             account.removeBorrow(token);
         }
         account.sweepTo(msg.sender);
+    }
+
+    function _repay(address account, address token, uint amt)
+        internal
+    {
+        ILToken LToken = ILToken(registry.LTokenFor(token));
+        if (address(LToken) == address(0))
+            revert Errors.LTokenUnavailable();
+        LToken.updateState();
+        if (amt == type(uint256).max) amt = LToken.getBorrowBalance(account);
+        account.withdraw(address(LToken), token, amt);
+        if (LToken.collectFrom(account, amt))
+            IAccount(account).removeBorrow(token);
+        if (IERC20(token).balanceOf(account) == 0)
+            IAccount(account).removeAsset(token);
+        emit Repay(account, msg.sender, token, amt);
     }
 
     /* -------------------------------------------------------------------------- */
