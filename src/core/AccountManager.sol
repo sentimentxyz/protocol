@@ -220,6 +220,8 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
             IAccount(account).addAsset(token);
         if (ILToken(registry.LTokenFor(token)).lendTo(account, amt))
             IAccount(account).addBorrow(token);
+        if (!riskEngine.isAccountHealthy(account))
+            revert Errors.RiskThresholdBreached();
         emit Borrow(account, msg.sender, token, amt);
     }
 

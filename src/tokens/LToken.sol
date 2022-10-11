@@ -44,11 +44,8 @@ contract LToken is Pausable, ERC4626, ILToken {
     /// @notice Timestamp of when the state of the LToken was last updated
     uint public lastUpdated;
 
-    /// @notice Protocol reserves
-    uint public reserves;
-
-    /// @notice Reserve factor
-    uint public reserveFactor;
+    /// @notice Origination Fee
+    uint public originationFee;
 
     /// @notice Total borrow shares minted
     uint public totalBorrowShares;
@@ -82,7 +79,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         @param _name Name of LToken
         @param _symbol Symbol of LToken
         @param _registry Address of Registry
-        @param _reserveFactor Borrow Fee
+        @param _originationFee origination fee
         @param _treasury Protocol treasury
         @param _reserveShares Minimum amount of shares minted to zero address
     */
@@ -91,7 +88,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         string calldata _name,
         string calldata _symbol,
         IRegistry _registry,
-        uint _reserveFactor,
+        uint _originationFee,
         address _treasury,
         uint _reserveShares,
         uint _maxSupply
@@ -108,7 +105,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         initPausable(msg.sender);
         initERC4626(_asset, _name, _symbol, _reserveShares, _maxSupply);
         registry = _registry;
-        reserveFactor = _reserveFactor;
+        originationFee = _originationFee;
         treasury = _treasury;
     }
 
@@ -143,7 +140,11 @@ contract LToken is Pausable, ERC4626, ILToken {
         borrowsOf[account] += borrowShares;
 
         borrows += amt;
-        asset.safeTransfer(account, amt);
+
+        uint fee = amt.mulDivDown(originationFee, 10 ** decimals);
+        asset.safeTransfer(treasury, fee);
+        asset.safeTransfer(account, amt - fee);
+        
         return isFirstBorrow;
     }
 
@@ -176,11 +177,6 @@ contract LToken is Pausable, ERC4626, ILToken {
         return convertBorrowSharesToAsset(borrowsOf[account]);
     }
 
-    function getReserves() public view returns (uint) {
-        return reserves + borrows.mulWadUp(getRateFactor())
-        .mulWadUp(reserveFactor);
-    }
-
     /* -------------------------------------------------------------------------- */
     /*                              PUBLIC FUNCTIONS                              */
     /* -------------------------------------------------------------------------- */
@@ -192,7 +188,7 @@ contract LToken is Pausable, ERC4626, ILToken {
         @return totalAssets Total amount of underlying assets
     */
     function totalAssets() public view override returns (uint) {
-        return asset.balanceOf(address(this)) + getBorrows() - getReserves();
+        return asset.balanceOf(address(this)) + getBorrows();
     }
 
     function getBorrows() public view returns (uint) {
@@ -205,7 +201,6 @@ contract LToken is Pausable, ERC4626, ILToken {
         uint rateFactor = getRateFactor();
         uint interestAccrued = borrows.mulWadUp(rateFactor);
         borrows += interestAccrued;
-        reserves += interestAccrued.mulWadUp(reserveFactor);
         lastUpdated = block.timestamp;
     }
 
@@ -246,11 +241,8 @@ contract LToken is Pausable, ERC4626, ILToken {
     /*                               ADMIN FUNCTIONS                              */
     /* -------------------------------------------------------------------------- */
 
-    function redeemReserves(uint amt) external adminOnly {
-        updateState();
-        reserves -= amt;
-        emit ReservesRedeemed(treasury, amt);
-        asset.safeTransfer(treasury, amt);
+    function updateOriginationFee(uint _originationFee) external adminOnly {
+        originationFee = _originationFee;
     }
 
     function updateMaxSupply(uint _maxSupply) external adminOnly {
