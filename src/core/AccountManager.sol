@@ -89,7 +89,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
             Emits AccountAssigned(account, owner) event
         @param owner Owner of the newly opened account
     */
-    function openAccount(address owner) external whenNotPaused {
+    function openAccount(address owner) external nonReentrant whenNotPaused {
         if (owner == address(0)) revert Errors.ZeroAddress();
         address account;
         uint length = inactiveAccountsOf[owner].length;
@@ -131,6 +131,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     function depositEth(address account)
         external
         payable
+        nonReentrant
         whenNotPaused
         onlyOwner(account)
     {
@@ -146,6 +147,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     */
     function withdrawEth(address account, uint amt)
         external
+        nonReentrant
         onlyOwner(account)
     {
         if(!riskEngine.isWithdrawAllowed(account, address(0), amt))
@@ -206,6 +208,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     */
     function borrow(address account, address token, uint amt)
         external
+        nonReentrant
         whenNotPaused
         onlyOwner(account)
     {
@@ -230,6 +233,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     */
     function repay(address account, address token, uint amt)
         public
+        nonReentrant
         onlyOwner(account)
     {
         ILToken LToken = ILToken(registry.LTokenFor(token));
