@@ -12,7 +12,7 @@ import {IRiskEngine} from "../interface/core/IRiskEngine.sol";
 import {IAccountFactory} from "../interface/core/IAccountFactory.sol";
 import {IAccountManager} from "../interface/core/IAccountManager.sol";
 import {IControllerFacade} from "controller/core/IControllerFacade.sol";
-import {ReentrancyGuard} from "solmate/utils/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "../utils/ReentrancyGuard.sol";
 
 /**
     @title Account Manager
@@ -68,6 +68,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     */
     function init(IRegistry _registry) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
+        locked = 1;
         initialized = true;
         initPausable(msg.sender);
         registry = _registry;
