@@ -23,10 +23,10 @@ contract OriginationFeeTests is TestBase {
     function setUp() public {
         setupContracts();
         lEth = LEther(payable(address(new Proxy(address(lEthImplementation)))));
-        lEth.init(weth, "LEther", "LEth", registry, fee, treasury, 0);
+        lEth.init(weth, "LEther", "LEth", registry, fee, treasury, 0, type(uint).max);
 
         lErc20 = LToken(address(new Proxy(address(lErc20Implementation))));
-        lErc20.init(erc20, "LTestERC20", "LERC20", registry, fee, treasury, 0);
+        lErc20.init(erc20, "LTestERC20", "LERC20", registry, fee, treasury, 0, type(uint).max);
 
         registry.setLToken(address(weth), address(lEth));
         registry.setLToken(address(erc20), address(lErc20));
