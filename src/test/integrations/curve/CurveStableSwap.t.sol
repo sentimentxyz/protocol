@@ -22,7 +22,6 @@ contract CurveStableSwapIntegrationTest is IntegrationTestBase {
     function setupStableSwapController() private {
         stableSwapController = new StableSwap3PoolController();
         controller.updateController(pool, stableSwapController);
-        controller.toggleTokenAllowance(DAI);
     }
 
     function setUp() public {

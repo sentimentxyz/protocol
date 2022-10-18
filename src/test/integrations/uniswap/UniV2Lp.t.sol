@@ -19,7 +19,7 @@ contract UniV2LpIntegrationTest is IntegrationTestBase {
     UniV2LpOracle uniLPOracle;
 
     function setupUniV2Controller() private {
-        uniV2Controller = new UniV2Controller(WETH, IUniV2Factory(FACTORY), controller);
+        uniV2Controller = new UniV2Controller(WETH, IUniV2Factory(FACTORY));
         controller.updateController(UNIV2_ROUTER, uniV2Controller);
         controller.toggleTokenAllowance(WETH_USDT_LP);
 

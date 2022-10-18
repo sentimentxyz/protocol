@@ -20,9 +20,8 @@ contract UniV2SwapIntegrationTest is IntegrationTestBase {
     UniV2Controller uniV2Controller;
 
     function setupUniV2Controller() private {
-        uniV2Controller = new UniV2Controller(WETH, IUniV2Factory(FACTORY), controller);
+        uniV2Controller = new UniV2Controller(WETH, IUniV2Factory(FACTORY));
         controller.updateController(UNIV2_ROUTER, uniV2Controller);
-        controller.toggleTokenAllowance(WETH);
     }
 
     function setUp() public {

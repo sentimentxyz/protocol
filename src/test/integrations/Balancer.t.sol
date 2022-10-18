@@ -33,16 +33,15 @@ contract BalancerIntegrationTest is IntegrationTestBase {
     WeightedBalancerLPOracle weightedBalancerOracle;
 
     function setupBalancerController() internal {
-        balancerController = new BalancerController(controller);
+        balancerController = new BalancerController();
         controller.updateController(balancerVault, balancerController);
-        controller.toggleTokenAllowance(balancerStablePool);
-        controller.toggleTokenAllowance(balancerWeightedPool);
-        controller.toggleTokenAllowance(USDC);
 
         stableBalancerOracle = new StableBalancerLPOracle(oracle, IVaultOracle(balancerVault));
         weightedBalancerOracle = new WeightedBalancerLPOracle(oracle, IVaultOracle(balancerVault));
         oracle.setOracle(balancerStablePool, stableBalancerOracle);
         oracle.setOracle(balancerWeightedPool, weightedBalancerOracle);
+        controller.toggleTokenAllowance(balancerStablePool);
+        controller.toggleTokenAllowance(balancerWeightedPool);
     }
 
     function setUp() public {
@@ -171,7 +170,7 @@ contract BalancerIntegrationTest is IntegrationTestBase {
         // Assert
         assertEq(IERC20(balancerWeightedPool).balanceOf(account), 0);
         assertGt(account.balance, 0);
-        assertEq(IAccount(account).getAssets().length, 0);
+        assertEq(IAccount(account).getAssets().length, 1);
     }
 
     function testVaultExitStablePool() public {
