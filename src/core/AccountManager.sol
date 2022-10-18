@@ -214,12 +214,12 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     {
         if (registry.LTokenFor(token) == address(0))
             revert Errors.LTokenUnavailable();
-        if (!riskEngine.isBorrowAllowed(account, token, amt))
-            revert Errors.RiskThresholdBreached();
         if (IAccount(account).hasAsset(token) == false)
             IAccount(account).addAsset(token);
         if (ILToken(registry.LTokenFor(token)).lendTo(account, amt))
             IAccount(account).addBorrow(token);
+        if (!riskEngine.isAccountHealthy(account))
+            revert Errors.RiskThresholdBreached();
         emit Borrow(account, msg.sender, token, amt);
     }
 
