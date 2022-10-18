@@ -93,7 +93,8 @@ contract LToken is Pausable, ERC4626, ILToken {
         IRegistry _registry,
         uint _reserveFactor,
         address _treasury,
-        uint _reserveShares
+        uint _reserveShares,
+        uint _maxSupply
     ) external {
         if (initialized) revert Errors.ContractAlreadyInitialized();
 
@@ -105,7 +106,7 @@ contract LToken is Pausable, ERC4626, ILToken {
 
         initialized = true;
         initPausable(msg.sender);
-        initERC4626(_asset, _name, _symbol, _reserveShares);
+        initERC4626(_asset, _name, _symbol, _reserveShares, _maxSupply);
         registry = _registry;
         reserveFactor = _reserveFactor;
         treasury = _treasury;
@@ -250,5 +251,9 @@ contract LToken is Pausable, ERC4626, ILToken {
         reserves -= amt;
         emit ReservesRedeemed(treasury, amt);
         asset.safeTransfer(treasury, amt);
+    }
+
+    function updateMaxSupply(uint _maxSupply) external adminOnly {
+        maxSupply = _maxSupply;
     }
 }
