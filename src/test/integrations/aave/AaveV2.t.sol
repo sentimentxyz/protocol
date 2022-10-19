@@ -30,7 +30,6 @@ contract AaveV2IntegrationTest is IntegrationTestBase {
         oracle.setOracle(aWeth, aTokenOracle);
 
         aaveController = new AaveV2Controller(
-            controller,
             IProtocolDataProvider(aaveDataProvider)
         );
         controller.updateController(lendingPool, aaveController);

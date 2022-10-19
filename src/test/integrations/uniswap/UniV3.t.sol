@@ -19,7 +19,6 @@ contract UniV3IntegrationTest is IntegrationTestBase {
     function setupUniV3Controller() private {
         uniV3Controller = new UniV3Controller(controller);
         controller.updateController(uniV3Router, uniV3Controller);
-        controller.toggleTokenAllowance(WETH);
     }
 
     function setUp() public {

@@ -30,6 +30,8 @@ contract CompoundIntegrationTest is IntegrationTestBase {
         cTokenOracle = new CTokenOracle(oracle, cEth);
         oracle.setOracle(cEth, cTokenOracle);
         oracle.setOracle(cUSDT, cTokenOracle);
+        controller.toggleTokenAllowance(cEth);
+        controller.toggleTokenAllowance(cUSDT);
     }
 
     function setUp() public {

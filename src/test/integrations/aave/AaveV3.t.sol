@@ -28,7 +28,7 @@ contract AaveV3ArbiIntegrationTest is ArbiIntegrationTestBase {
         oracle.setOracle(aWeth, aTokenOracle);
         oracle.setOracle(aDai, aTokenOracle);
 
-        aaveController = new AaveV3Controller(controller);
+        aaveController = new AaveV3Controller();
         controller.updateController(pool, aaveController);
         controller.updateController(pool, aaveController);
         controller.toggleTokenAllowance(aWeth);
