@@ -13,10 +13,19 @@ import {IRateModel} from "../interface/core/IRateModel.sol";
 contract LinearRateModel is IRateModel {
     using FixedPointMathLib for uint;
 
+    /// @notice Base rate
     uint public immutable baseRate;
+
+    /// @notice Slope of the variable interest curve when usage ratio > 0 and <= OPTIMAL_USAGE_RATIO
     uint public immutable slope1;
+
+    /// @notice Slope of the variable interest curve when usage ratio > OPTIMAL_USAGE_RATIO
     uint public immutable slope2;
+
+    /// @notice This constant represents the usage ratio at which the pool aims to obtain most competitive borrow rates
     uint public immutable OPTIMAL_USAGE_RATIO;
+
+    /// @notice This constant represents the excess usage ratio above the optimal. It's always equal to 1-optimal usage ratio.
     uint public immutable MAX_EXCESS_USAGE_RATIO;
 
     /// @notice Number of seconds per year
@@ -26,9 +35,9 @@ contract LinearRateModel is IRateModel {
         @notice Contract constructor
         @param _baseRate default value = 0
         @param _slope1 default value = 40000000000000000
-        @param _slope2 default value = 600000000000000000
-        @param _optimalUsageRatio default value = 900000000000000000
-        @param _maxExcessUsageRatio default value = 100000000000000000
+        @param _slope2 default value = 750000000000000000
+        @param _optimalUsageRatio default value = 850000000000000000
+        @param _maxExcessUsageRatio default value = 150000000000000000
         @param _secsPerYear secs in a year, default value = 31556952 * 1e18
     */
     constructor(
