@@ -50,6 +50,7 @@ contract ArbiIntegrationTestBase is TestBase {
             AggregatorV3Interface(0x639Fe6ab55C921f74e7fac1ee960C0B6293ba612)
         );
         oracle.setOracle(WSTETH, wstethOracle);
+        controller.toggleTokenAllowance(WSTETH);
     }
 
     function setupOracles() internal {

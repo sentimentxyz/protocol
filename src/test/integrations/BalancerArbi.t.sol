@@ -269,4 +269,47 @@ contract BalancerArbiIntegrationTest is ArbiIntegrationTestBase {
         assertGt(IERC20(BPTWSTETHWETH).balanceOf(account), 0);
         assertEq(IAccount(account).assets(0), BPTWSTETHWETH);
     }
+
+    function testVaultExitBPTWSTETHWETHPool(uint64 amt) public {
+        // Setup
+        testVaultJoinBPTWSTETHWETHPool(amt);
+
+        IAsset[] memory assets = new IAsset[](3);
+        assets[0] = IAsset(WSTETH);
+        assets[1] = IAsset(WETH);
+        assets[2] = IAsset(BPTWSTETHWETH);
+
+        uint256[] memory amounts = new uint256[](3);
+        amounts[0] = 0;
+        amounts[1] = 1;
+        amounts[2] = 0;
+
+        uint256[] memory amountsIn = new uint256[](2);
+        amountsIn[0] = amt;
+        amountsIn[1] = amt;
+
+        // Encode calldata
+        bytes memory data = abi.encodeWithSelector(
+            0x8bdb3913,
+            BPTWSTETHWETHPoolID,
+            account,
+            account,
+            IVault.ExitPoolRequest(
+                assets,
+                amounts,
+                abi.encode(ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,IERC20(BPTWSTETHWETH).balanceOf(account),1),
+                false
+            )
+        );
+
+        // Test
+        accountManager.approve(account, BPTWSTETHWETH, balancerVault, type(uint).max);
+        accountManager.exec(account, balancerVault, 0, data);
+
+        // Assert
+        assertGt(IERC20(WETH).balanceOf(account), 0);
+        assertEq(IERC20(WSTETH).balanceOf(account), 0);
+        assertEq(IERC20(BPTWSTETHWETH).balanceOf(account), 0);
+        assertEq(IAccount(account).assets(0), WETH);
+    }
 }
