@@ -219,11 +219,16 @@ contract BalancerArbiIntegrationTest is ArbiIntegrationTestBase {
 
     function testVaultJoinBPTWSTETHWETHPool(uint64 amt) public {
         // Setup
-        cheats.assume(amt > 1e18);
+        accountManager.toggleCollateralStatus(WSTETH);
+        cheats.assume(amt > 1e8);
         deal(WETH, user, amt, true);
+        deal(WSTETH, user, amt, true);
         startHoax(user);
         IERC20(WETH).approve(address(accountManager), type(uint).max);
         accountManager.deposit(account, WETH, amt);
+
+        IERC20(WSTETH).approve(address(accountManager), type(uint).max);
+        accountManager.deposit(account, WSTETH, amt);
 
         IAsset[] memory assets = new IAsset[](3);
         assets[0] = IAsset(WSTETH);
@@ -231,9 +236,13 @@ contract BalancerArbiIntegrationTest is ArbiIntegrationTestBase {
         assets[2] = IAsset(BPTWSTETHWETH);
 
         uint256[] memory amounts = new uint256[](3);
-        amounts[0] = 0;
+        amounts[0] = amt;
         amounts[1] = amt;
         amounts[2] = 0;
+
+        uint256[] memory amountsIn = new uint256[](2);
+        amountsIn[0] = amt;
+        amountsIn[1] = amt;
 
         // Encode calldata
         bytes memory data = abi.encodeWithSelector(
@@ -244,18 +253,20 @@ contract BalancerArbiIntegrationTest is ArbiIntegrationTestBase {
             IVault.JoinPoolRequest(
                 assets,
                 amounts,
-                abi.encode(JoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT, amounts, 0),
+                abi.encode(JoinKind.EXACT_TOKENS_IN_FOR_BPT_OUT, amountsIn, 0),
                 false
             )
         );
 
         // Test
         accountManager.approve(account, WETH, balancerVault, type(uint).max);
+        accountManager.approve(account, WSTETH, balancerVault, type(uint).max);
         accountManager.exec(account, balancerVault, 0, data);
 
         // Assert
         assertEq(IERC20(WETH).balanceOf(account), 0);
-        assertGt(IERC20(BPTWBTCWETHUSDC).balanceOf(account), 0);
-        assertEq(IAccount(account).assets(0), BPTWBTCWETHUSDC);
+        assertEq(IERC20(WSTETH).balanceOf(account), 0);
+        assertGt(IERC20(BPTWSTETHWETH).balanceOf(account), 0);
+        assertEq(IAccount(account).assets(0), BPTWSTETHWETH);
     }
 }
