@@ -297,7 +297,7 @@ contract BalancerArbiIntegrationTest is ArbiIntegrationTestBase {
             IVault.ExitPoolRequest(
                 assets,
                 amounts,
-                abi.encode(ExitKind.EXACT_BPT_IN_FOR_ONE_TOKEN_OUT,IERC20(BPTWSTETHWETH).balanceOf(account),1),
+                abi.encode(ExitKind.BPT_IN_FOR_EXACT_TOKENS_OUT, amountsIn, IERC20(BPTWSTETHWETH).balanceOf(account),1),
                 false
             )
         );
@@ -311,5 +311,46 @@ contract BalancerArbiIntegrationTest is ArbiIntegrationTestBase {
         assertEq(IERC20(WSTETH).balanceOf(account), 0);
         assertEq(IERC20(BPTWSTETHWETH).balanceOf(account), 0);
         assertEq(IAccount(account).assets(0), WETH);
+    }
+
+    function testSwapEthUSDC(uint64 amt) public {
+        // Setup
+        cheats.assume(amt > 1e8 gwei);
+        deposit(user, account, address(0), amt);
+
+        IVault.SingleSwap memory swap = IVault.SingleSwap(
+            0x64541216bafffeec8ea535bb71fbc927831d0595000100000000000000000002,
+            uint8(SwapKind.GIVEN_IN),
+            IAsset(address(0)),
+            IAsset(USDC),
+            amt,
+            "0"
+        );
+
+        IVault.FundManagement memory fund = IVault.FundManagement(
+            account,
+            false,
+            payable(account),
+            false
+        );
+
+        // Encode calldata
+        bytes memory data = abi.encodeWithSelector(
+            0x52bbbe29,
+            swap,
+            fund,
+            1,
+            type(uint).max
+        );
+
+        // Test
+        cheats.startPrank(user);
+        accountManager.exec(account, balancerVault, amt, data);
+        cheats.stopPrank();
+
+        // Assert
+        assertEq(account.balance, 0);
+        assertGt(IERC20(USDC).balanceOf(account), 0);
+        assertEq(IAccount(account).assets(0), USDC);
     }
 }
