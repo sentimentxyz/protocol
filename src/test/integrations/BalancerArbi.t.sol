@@ -297,7 +297,7 @@ contract BalancerArbiIntegrationTest is ArbiIntegrationTestBase {
             IVault.ExitPoolRequest(
                 assets,
                 amounts,
-                abi.encode(ExitKind.BPT_IN_FOR_EXACT_TOKENS_OUT, amountsIn, IERC20(BPTWSTETHWETH).balanceOf(account),1),
+                abi.encode(ExitKind.EXACT_BPT_IN_FOR_TOKENS_OUT, IERC20(BPTWSTETHWETH).balanceOf(account)),
                 false
             )
         );
