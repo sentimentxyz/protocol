@@ -23,7 +23,7 @@ import {DefaultRateModel} from "../../core/DefaultRateModel.sol";
 import {IAccountManager} from "../../interface/core/IAccountManager.sol";
 import {ControllerFacade} from "controller/core/ControllerFacade.sol";
 
-contract TestBase is Test {
+contract BaseTest is Test {
     CheatCodes cheats = CheatCodes(HEVM_ADDRESS);
 
     uint lenderID = 5;
@@ -78,7 +78,7 @@ contract TestBase is Test {
 
         deploy();
         register();
-        initialize();
+        initializeDep();
         mock();
     }
 
@@ -131,7 +131,7 @@ contract TestBase is Test {
         registry.setLToken(address(erc20), address(lErc20));
     }
 
-    function initialize() private {
+    function initializeDep() private {
         riskEngine.initDep();
         accountManager.initDep();
         lEth.initDep('RATE_MODEL');

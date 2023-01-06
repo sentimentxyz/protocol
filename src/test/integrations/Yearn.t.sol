@@ -4,10 +4,10 @@ pragma solidity ^0.8.17;
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {YTokenOracle} from "oracle/yearn/YTokenOracle.sol";
-import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
+import {IntegrationBaseTest} from "./utils/IntegrationBaseTest.sol";
 import {YearnVaultController} from "controller/yearn/YearnController.sol";
 
-contract YearnIntegrationTest is IntegrationTestBase {
+contract YearnIntegrationTest is IntegrationBaseTest {
     address account;
     address user = cheats.addr(1);
 

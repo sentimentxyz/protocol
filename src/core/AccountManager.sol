@@ -47,6 +47,8 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     /// @notice Mapping of collateral enabled tokens
     mapping(address => bool) public isCollateralAllowed;
 
+    uint public assetCap;
+
     /* -------------------------------------------------------------------------- */
     /*                              CUSTOM MODIFIERS                              */
     /* -------------------------------------------------------------------------- */
@@ -171,8 +173,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     {
         if (!isCollateralAllowed[token])
             revert Errors.CollateralTypeRestricted();
-        if (IAccount(account).hasAsset(token) == false)
+        if (IAccount(account).hasAsset(token) == false) {
+            if (IAccount(account).getAssets().length + 1 > assetCap)
+                revert Errors.MaxAssetCap();
             IAccount(account).addAsset(token);
+        }
         token.safeTransferFrom(msg.sender, account, amt);
     }
 
@@ -214,8 +219,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     {
         if (registry.LTokenFor(token) == address(0))
             revert Errors.LTokenUnavailable();
-        if (IAccount(account).hasAsset(token) == false)
+        if (IAccount(account).hasAsset(token) == false) {
+            if (IAccount(account).getAssets().length + 1 > assetCap)
+                revert Errors.MaxAssetCap();
             IAccount(account).addAsset(token);
+        }
         if (ILToken(registry.LTokenFor(token)).lendTo(account, amt))
             IAccount(account).addBorrow(token);
         if (!riskEngine.isAccountHealthy(account))
@@ -307,6 +315,8 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         if (!success)
             revert Errors.AccountInteractionFailure(account, target, amt, data);
         _updateTokensOut(account, tokensOut);
+        if (IAccount(account).getAssets().length > assetCap)
+            revert Errors.MaxAssetCap();
         if (!riskEngine.isAccountHealthy(account))
             revert Errors.RiskThresholdBreached();
     }
@@ -407,5 +417,9 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     */
     function toggleCollateralStatus(address token) external adminOnly {
         isCollateralAllowed[token] = !isCollateralAllowed[token];
+    }
+
+    function setAssetCap(uint cap) external adminOnly {
+        assetCap = cap;
     }
 }

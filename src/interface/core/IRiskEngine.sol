@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
+import {IOracle} from "oracle/core/IOracle.sol";
 
 interface IRiskEngine {
     function initDep() external;
@@ -10,4 +11,5 @@ interface IRiskEngine {
         external view returns (bool);
     function isWithdrawAllowed(address account, address token, uint amt)
         external view returns (bool);
+    function oracle() external view returns (IOracle);
 }

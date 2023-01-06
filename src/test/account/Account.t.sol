@@ -2,10 +2,10 @@
 pragma solidity ^0.8.17;
 
 import {Errors} from "../../utils/Errors.sol";
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 
-contract AccountTest is TestBase {
+contract AccountTest is BaseTest {
 
     IAccount public account;
     address public owner = cheats.addr(1);

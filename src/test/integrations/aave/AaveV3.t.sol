@@ -5,12 +5,12 @@ import {Errors} from "../../../utils/Errors.sol";
 import {ATokenOracle} from "oracle/aave/ATokenOracle.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
-import {ArbiIntegrationTestBase} from "../utils/ArbiIntegrationTestBase.sol";
+import {ArbiIntegrationBaseTest} from "../utils/ArbiIntegrationBaseTest.sol";
 import {AaveV3Controller} from "controller/aave/AaveV3Controller.sol";
 import {IPoolAddressProvider} from "./interface/IPoolAddressProvider.sol";
 
 /// @notice runs only on arbitrum
-contract AaveV3ArbiIntegrationTest is ArbiIntegrationTestBase {
+contract AaveV3ArbiIntegrationTest is ArbiIntegrationBaseTest {
     address account;
     address user = cheats.addr(1);
 

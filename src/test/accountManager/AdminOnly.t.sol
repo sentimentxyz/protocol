@@ -2,11 +2,11 @@
 pragma solidity ^0.8.17;
 
 import {Errors} from "../../utils/Errors.sol";
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {console} from "../utils/console.sol";
 import {IOwnable} from "../../interface/utils/IOwnable.sol";
 
-contract AccountManagerAdminOnlyTest is TestBase {
+contract AccountManagerAdminOnlyTest is BaseTest {
     function setUp() public {
         setupContracts();
     }

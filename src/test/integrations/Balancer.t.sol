@@ -5,7 +5,7 @@ import {console} from "forge-std/console.sol";
 import {IVault, IAsset} from "controller/balancer/IVault.sol";
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
-import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
+import {IntegrationBaseTest} from "./utils/IntegrationBaseTest.sol";
 import {StableBalancerLPOracle} from "oracle/balancer/StableBalancerLPOracle.sol";
 import {WeightedBalancerLPOracle} from "oracle/balancer/WeightedBalancerLPOracle.sol";
 import {IVault as IVaultOracle} from "oracle/balancer/IVault.sol";
@@ -20,7 +20,7 @@ enum ExitKind {
 }
 enum SwapKind { GIVEN_IN, GIVEN_OUT }
 
-contract BalancerIntegrationTest is IntegrationTestBase {
+contract BalancerIntegrationTest is IntegrationBaseTest {
     address account;
     address user = cheats.addr(1);
 

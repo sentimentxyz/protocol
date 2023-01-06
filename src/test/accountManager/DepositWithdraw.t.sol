@@ -2,10 +2,10 @@
 pragma solidity ^0.8.17;
 
 import {Errors} from "../../utils/Errors.sol";
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
-contract AccountManagerDepositWithdrawTest is TestBase {
+contract AccountManagerDepositWithdrawTest is BaseTest {
     using FixedPointMathLib for uint;
     address account;
     address public owner = cheats.addr(1);

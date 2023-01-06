@@ -4,10 +4,10 @@ pragma solidity ^0.8.17;
 import {TestERC20} from "../utils/TestERC20.sol";
 import {console} from "../utils/console.sol";
 import {Errors} from "../../utils/Errors.sol";
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
-contract RiskEngineTest is TestBase {
+contract RiskEngineTest is BaseTest {
     using FixedPointMathLib for uint;
 
     address account;

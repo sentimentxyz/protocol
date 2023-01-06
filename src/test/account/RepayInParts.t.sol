@@ -2,11 +2,11 @@
 pragma solidity ^0.8.17;
 
 import {ERC20} from "solmate/tokens/ERC20.sol";
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
-contract RepayInParts is TestBase {
+contract RepayInParts is BaseTest {
     using FixedPointMathLib for uint;
 
     address public account;

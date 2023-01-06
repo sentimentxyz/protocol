@@ -23,4 +23,5 @@ interface IRegistry {
     function accountsOwnedBy(address user)
         external view returns (address[] memory);
     function getAddress(string calldata) external view returns (address);
+    function accounts(uint i) external view returns (address);
 }

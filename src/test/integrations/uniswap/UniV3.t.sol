@@ -3,11 +3,11 @@ pragma solidity ^0.8.17;
 
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
-import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
+import {IntegrationBaseTest} from "../utils/IntegrationBaseTest.sol";
 import {ISwapRouterV3} from "controller/uniswap/ISwapRouterV3.sol";
 import {UniV3Controller} from "controller/uniswap/UniV3Controller.sol";
 
-contract UniV3IntegrationTest is IntegrationTestBase {
+contract UniV3IntegrationTest is IntegrationBaseTest {
     address account;
     address user = cheats.addr(1);
 
