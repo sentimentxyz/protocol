@@ -52,6 +52,7 @@ interface IAccountManager {
         uint amt
     ) external;
     function toggleCollateralStatus(address token) external;
+    function setAssetCap(uint) external;
     function getInactiveAccountsOf(
         address owner
     ) external view returns (address[] memory);

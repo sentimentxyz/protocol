@@ -138,6 +138,7 @@ contract BaseTest is Test {
         lErc20.initDep('RATE_MODEL');
 
         accountManager.toggleCollateralStatus(address(erc20));
+        accountManager.setAssetCap(16);
     }
 
     function mock() private {
