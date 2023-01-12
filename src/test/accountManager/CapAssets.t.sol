@@ -7,7 +7,7 @@ import {Proxy} from "../../proxy/Proxy.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {ISwapRouterV3} from "controller/uniswap/ISwapRouterV3.sol";
 
-contract CapAssetsArbiTest is Test {
+contract CapAssetsArbiIntegrationTest is Test {
 
     address uniV3Router = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
 

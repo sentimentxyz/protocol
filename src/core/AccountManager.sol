@@ -47,6 +47,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     /// @notice Mapping of collateral enabled tokens
     mapping(address => bool) public isCollateralAllowed;
 
+    /// @notice Number of assets a sentiment account can hold - 1
     uint public assetCap;
 
     /* -------------------------------------------------------------------------- */
@@ -174,7 +175,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         if (!isCollateralAllowed[token])
             revert Errors.CollateralTypeRestricted();
         if (IAccount(account).hasAsset(token) == false) {
-            if (IAccount(account).getAssets().length + 1 > assetCap)
+            if (IAccount(account).getAssets().length > assetCap)
                 revert Errors.MaxAssetCap();
             IAccount(account).addAsset(token);
         }
@@ -220,7 +221,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         if (registry.LTokenFor(token) == address(0))
             revert Errors.LTokenUnavailable();
         if (IAccount(account).hasAsset(token) == false) {
-            if (IAccount(account).getAssets().length + 1 > assetCap)
+            if (IAccount(account).getAssets().length > assetCap)
                 revert Errors.MaxAssetCap();
             IAccount(account).addAsset(token);
         }
@@ -315,7 +316,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         if (!success)
             revert Errors.AccountInteractionFailure(account, target, amt, data);
         _updateTokensOut(account, tokensOut);
-        if (IAccount(account).getAssets().length > assetCap)
+        if (IAccount(account).getAssets().length > assetCap + 1)
             revert Errors.MaxAssetCap();
         if (!riskEngine.isAccountHealthy(account))
             revert Errors.RiskThresholdBreached();
@@ -419,7 +420,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         isCollateralAllowed[token] = !isCollateralAllowed[token];
     }
 
+    /**
+        @notice Set asset cap
+        @param cap Number of assets
+    */
     function setAssetCap(uint cap) external adminOnly {
-        assetCap = cap;
+        assetCap = cap - 1;
     }
 }
