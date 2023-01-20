@@ -5,10 +5,10 @@ import {Test} from "forge-std/Test.sol";
 import {IERC20} from "forge-std/interfaces/IERC20.sol";
 import {Proxy} from "../../proxy/Proxy.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
+import {Registry} from "../../core/Registry.sol";
 import {ISwapRouterV3} from "controller/uniswap/ISwapRouterV3.sol";
 
 contract CapAssetsArbiIntegrationTest is Test {
-
     address uniV3Router = 0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45;
 
     IERC20 WETH = IERC20(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1);
@@ -18,8 +18,11 @@ contract CapAssetsArbiIntegrationTest is Test {
     IERC20 WSTETH = IERC20(0x5979D7b546E38E414F7E9822514be443A4800529);
     IERC20 DAI = IERC20(0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1);
 
-    Proxy accountManagerProxy = Proxy(payable(0x62c5AA8277E49B3EAd43dC67453ec91DC6826403));
-    AccountManager accountManager = AccountManager(payable(0x62c5AA8277E49B3EAd43dC67453ec91DC6826403));
+    Proxy accountManagerProxy =
+        Proxy(payable(0x62c5AA8277E49B3EAd43dC67453ec91DC6826403));
+    AccountManager accountManager =
+        AccountManager(payable(0x62c5AA8277E49B3EAd43dC67453ec91DC6826403));
+    Registry registry = Registry(0x17B07cfBAB33C0024040e7C299f8048F4a49679B);
 
     AccountManager newAccountManager;
 
@@ -34,7 +37,8 @@ contract CapAssetsArbiIntegrationTest is Test {
     }
 
     function testOpenAccount() public {
-        accountManager.openAccount(address(this));
+        address _account = accountManager.openAccount(address(this));
+        assertEq(address(this), registry.ownerFor(_account));
     }
 
     function testCloseAccount() public {
@@ -84,15 +88,14 @@ contract CapAssetsArbiIntegrationTest is Test {
         testDepositOneAsset();
         bytes memory data = abi.encodeWithSignature(
             "exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))",
-            getExactInputParams(
-                address(WETH),
-                address(USDC),
-                account,
-                0,
-                1e17
-            )
+            getExactInputParams(address(WETH), address(USDC), account, 0, 1e17)
         );
-        accountManager.approve(account, address(WETH), uniV3Router, type(uint).max);
+        accountManager.approve(
+            account,
+            address(WETH),
+            uniV3Router,
+            type(uint256).max
+        );
         accountManager.exec(account, uniV3Router, 0, data);
     }
 
@@ -115,13 +118,7 @@ contract CapAssetsArbiIntegrationTest is Test {
         testSwapWETHUSDC();
         bytes memory data = abi.encodeWithSignature(
             "exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))",
-            getExactInputParams(
-                address(WETH),
-                address(USDT),
-                account,
-                0,
-                1e17
-            )
+            getExactInputParams(address(WETH), address(USDT), account, 0, 1e17)
         );
         accountManager.exec(account, uniV3Router, 0, data);
     }
@@ -140,11 +137,7 @@ contract CapAssetsArbiIntegrationTest is Test {
         address recipient,
         uint256 amountOut,
         uint256 amountIn
-    )
-        private
-        pure
-        returns (ISwapRouterV3.ExactInputSingleParams memory data)
-    {
+    ) private pure returns (ISwapRouterV3.ExactInputSingleParams memory data) {
         data = ISwapRouterV3.ExactInputSingleParams(
             tokenIn,
             tokenOut,
