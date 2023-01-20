@@ -48,7 +48,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     mapping(address => bool) public isCollateralAllowed;
 
     /// @notice Number of assets a sentiment account can hold - 1
-    uint public assetCap;
+    uint256 public assetCap;
 
     /* -------------------------------------------------------------------------- */
     /*                              CUSTOM MODIFIERS                              */
@@ -79,10 +79,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
 
     /// @notice Initializes external dependencies
     function initDep() external adminOnly {
-        riskEngine = IRiskEngine(registry.getAddress('RISK_ENGINE'));
-        controller = IControllerFacade(registry.getAddress('CONTROLLER'));
-        accountFactory =
-            IAccountFactory(registry.getAddress('ACCOUNT_FACTORY'));
+        riskEngine = IRiskEngine(registry.getAddress("RISK_ENGINE"));
+        controller = IControllerFacade(registry.getAddress("CONTROLLER"));
+        accountFactory = IAccountFactory(
+            registry.getAddress("ACCOUNT_FACTORY")
+        );
     }
 
     /**
@@ -92,10 +93,15 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
             Emits AccountAssigned(account, owner) event
         @param owner Owner of the newly opened account
     */
-    function openAccount(address owner) external nonReentrant whenNotPaused {
+    function openAccount(address owner)
+        external
+        nonReentrant
+        whenNotPaused
+        returns (address)
+    {
         if (owner == address(0)) revert Errors.ZeroAddress();
         address account;
-        uint length = inactiveAccountsOf[owner].length;
+        uint256 length = inactiveAccountsOf[owner].length;
         if (length == 0) {
             account = accountFactory.create(address(this));
             IAccount(account).init(address(this));
@@ -107,6 +113,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         }
         IAccount(account).activate();
         emit AccountAssigned(account, owner);
+        return account;
     }
 
     /**
@@ -115,7 +122,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
             Emits AccountClosed(account, owner) event
         @param _account Address of account to be closed
     */
-    function closeAccount(address _account) public nonReentrant onlyOwner(_account) {
+    function closeAccount(address _account)
+        public
+        nonReentrant
+        onlyOwner(_account)
+    {
         IAccount account = IAccount(_account);
         if (account.activationBlock() == block.number)
             revert Errors.AccountDeactivationFailure();
@@ -148,12 +159,12 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         @param account Address of account
         @param amt Amount of Eth to withdraw
     */
-    function withdrawEth(address account, uint amt)
+    function withdrawEth(address account, uint256 amt)
         external
         nonReentrant
         onlyOwner(account)
     {
-        if(!riskEngine.isWithdrawAllowed(account, address(0), amt))
+        if (!riskEngine.isWithdrawAllowed(account, address(0), amt))
             revert Errors.RiskThresholdBreached();
         account.withdrawEth(msg.sender, amt);
     }
@@ -166,12 +177,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         @param token Address of token
         @param amt Amount of token to deposit
     */
-    function deposit(address account, address token, uint amt)
-        external
-        nonReentrant
-        whenNotPaused
-        onlyOwner(account)
-    {
+    function deposit(
+        address account,
+        address token,
+        uint256 amt
+    ) external nonReentrant whenNotPaused onlyOwner(account) {
         if (!isCollateralAllowed[token])
             revert Errors.CollateralTypeRestricted();
         if (IAccount(account).hasAsset(token) == false) {
@@ -191,16 +201,15 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         @param token Address of token
         @param amt Amount of token to withdraw
     */
-    function withdraw(address account, address token, uint amt)
-        external
-        nonReentrant
-        onlyOwner(account)
-    {
+    function withdraw(
+        address account,
+        address token,
+        uint256 amt
+    ) external nonReentrant onlyOwner(account) {
         if (!riskEngine.isWithdrawAllowed(account, token, amt))
             revert Errors.RiskThresholdBreached();
         account.withdraw(msg.sender, token, amt);
-        if (token.balanceOf(account) == 0)
-            IAccount(account).removeAsset(token);
+        if (token.balanceOf(account) == 0) IAccount(account).removeAsset(token);
     }
 
     /**
@@ -212,12 +221,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         @param token Address of token
         @param amt Amount of token to borrow
     */
-    function borrow(address account, address token, uint amt)
-        external
-        nonReentrant
-        whenNotPaused
-        onlyOwner(account)
-    {
+    function borrow(
+        address account,
+        address token,
+        uint256 amt
+    ) external nonReentrant whenNotPaused onlyOwner(account) {
         if (registry.LTokenFor(token) == address(0))
             revert Errors.LTokenUnavailable();
         if (IAccount(account).hasAsset(token) == false) {
@@ -240,11 +248,11 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         @param token Address of token
         @param amt Amount of token to borrow
     */
-    function repay(address account, address token, uint amt)
-        public
-        nonReentrant
-        onlyOwner(account)
-    {
+    function repay(
+        address account,
+        address token,
+        uint256 amt
+    ) public nonReentrant onlyOwner(account) {
         _repay(account, token, amt);
     }
 
@@ -274,13 +282,9 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         address account,
         address token,
         address spender,
-        uint amt
-    )
-        external
-        nonReentrant
-        onlyOwner(account)
-    {
-        if(address(controller.controllerFor(spender)) == address(0))
+        uint256 amt
+    ) external nonReentrant onlyOwner(account) {
+        if (address(controller.controllerFor(spender)) == address(0))
             revert Errors.FunctionCallRestricted();
         account.safeApprove(token, spender, amt);
     }
@@ -298,21 +302,20 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     function exec(
         address account,
         address target,
-        uint amt,
+        uint256 amt,
         bytes calldata data
-    )
-        external
-        nonReentrant
-        onlyOwner(account)
-    {
+    ) external nonReentrant onlyOwner(account) {
         bool isAllowed;
         address[] memory tokensIn;
         address[] memory tokensOut;
-        (isAllowed, tokensIn, tokensOut) =
-            controller.canCall(target, (amt > 0), data);
+        (isAllowed, tokensIn, tokensOut) = controller.canCall(
+            target,
+            (amt > 0),
+            data
+        );
         if (!isAllowed) revert Errors.FunctionCallRestricted();
         _updateTokensIn(account, tokensIn);
-        (bool success,) = IAccount(account).exec(target, amt, data);
+        (bool success, ) = IAccount(account).exec(target, amt, data);
         if (!success)
             revert Errors.AccountInteractionFailure(account, target, amt, data);
         _updateTokensOut(account, tokensOut);
@@ -328,8 +331,8 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     */
     function settle(address account) external nonReentrant onlyOwner(account) {
         address[] memory borrows = IAccount(account).getBorrows();
-        for (uint i; i < borrows.length; i++) {
-            _repay(account, borrows[i], type(uint).max);
+        for (uint256 i; i < borrows.length; i++) {
+            _repay(account, borrows[i], type(uint256).max);
         }
     }
 
@@ -338,9 +341,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         @param user Address of user
         @return address[] List of inactive accounts
     */
-    function getInactiveAccountsOf(
-        address user
-    )
+    function getInactiveAccountsOf(address user)
         external
         view
         returns (address[] memory)
@@ -355,8 +356,8 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     function _updateTokensIn(address account, address[] memory tokensIn)
         internal
     {
-        uint tokensInLen = tokensIn.length;
-        for(uint i; i < tokensInLen; ++i) {
+        uint256 tokensInLen = tokensIn.length;
+        for (uint256 i; i < tokensInLen; ++i) {
             if (IAccount(account).hasAsset(tokensIn[i]) == false)
                 IAccount(account).addAsset(tokensIn[i]);
         }
@@ -365,8 +366,8 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     function _updateTokensOut(address account, address[] memory tokensOut)
         internal
     {
-        uint tokensOutLen = tokensOut.length;
-        for(uint i; i < tokensOutLen; ++i) {
+        uint256 tokensOutLen = tokensOut.length;
+        for (uint256 i; i < tokensOutLen; ++i) {
             if (tokensOut[i].balanceOf(account) == 0)
                 IAccount(account).removeAsset(tokensOut[i]);
         }
@@ -375,12 +376,12 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     function _liquidate(address _account) internal {
         IAccount account = IAccount(_account);
         address[] memory accountBorrows = account.getBorrows();
-        uint borrowLen = accountBorrows.length;
+        uint256 borrowLen = accountBorrows.length;
 
         ILToken LToken;
-        uint amt;
+        uint256 amt;
 
-        for(uint i; i < borrowLen; ++i) {
+        for (uint256 i; i < borrowLen; ++i) {
             address token = accountBorrows[i];
             LToken = ILToken(registry.LTokenFor(token));
             LToken.updateState();
@@ -388,16 +389,18 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
             token.safeTransferFrom(msg.sender, address(LToken), amt);
             LToken.collectFrom(_account, amt);
             account.removeBorrow(token);
+            emit Repay(_account, msg.sender, token, amt);
         }
         account.sweepTo(msg.sender);
     }
 
-    function _repay(address account, address token, uint amt)
-        internal
-    {
+    function _repay(
+        address account,
+        address token,
+        uint256 amt
+    ) internal {
         ILToken LToken = ILToken(registry.LTokenFor(token));
-        if (address(LToken) == address(0))
-            revert Errors.LTokenUnavailable();
+        if (address(LToken) == address(0)) revert Errors.LTokenUnavailable();
         LToken.updateState();
         if (amt == type(uint256).max) amt = LToken.getBorrowBalance(account);
         account.withdraw(address(LToken), token, amt);
@@ -424,7 +427,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
         @notice Set asset cap
         @param cap Number of assets
     */
-    function setAssetCap(uint cap) external adminOnly {
+    function setAssetCap(uint256 cap) external adminOnly {
         assetCap = cap - 1;
     }
 }
