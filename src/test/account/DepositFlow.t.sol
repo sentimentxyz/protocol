@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 
-contract DepositFlow is TestBase {
+contract DepositFlow is BaseTest {
     address public account;
     address public borrower = cheats.addr(1);
 

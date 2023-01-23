@@ -2,10 +2,10 @@
 pragma solidity ^0.8.17;
 
 import {Errors} from "../../utils/Errors.sol";
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {console} from "../utils/console.sol";
 
-contract LTokenTest is TestBase {
+contract LTokenTest is BaseTest {
 
     address account;
     address owner = cheats.addr(1);

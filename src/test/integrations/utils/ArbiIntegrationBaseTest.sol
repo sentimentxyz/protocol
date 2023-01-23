@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {TestBase} from "../../utils/TestBase.sol";
+import {BaseTest} from "../../utils/BaseTest.sol";
 import {WETHOracle} from "oracle/weth/WETHOracle.sol";
 import {WETHController} from "controller/weth/WETHController.sol";
 
-contract ArbiIntegrationTestBase is TestBase {
+contract ArbiIntegrationBaseTest is BaseTest {
 
     // Controller Contracts
     WETHController wEthController;

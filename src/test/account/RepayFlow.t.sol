@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {LToken} from "../../tokens/LToken.sol";
 import {Registry} from "../../core/Registry.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {AccountManager} from "../../core/AccountManager.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 
-contract RepayFlowTest is TestBase {
+contract RepayFlowTest is BaseTest {
     using FixedPointMathLib for uint;
     address public account;
     address public borrower = cheats.addr(1);

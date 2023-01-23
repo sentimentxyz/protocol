@@ -6,6 +6,7 @@ library Errors {
     error MaxSupply();
     error ZeroShares();
     error ZeroAssets();
+    error MaxAssetCap();
     error ZeroAddress();
     error MinimumShares();
     error ContractPaused();

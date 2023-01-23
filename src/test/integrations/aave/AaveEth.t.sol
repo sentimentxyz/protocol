@@ -5,11 +5,11 @@ import {Errors} from "../../../utils/Errors.sol";
 import {ATokenOracle} from "oracle/aave/ATokenOracle.sol";
 import {IERC20} from "../../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../../interface/core/IAccount.sol";
-import {IntegrationTestBase} from "../utils/IntegrationTestBase.sol";
+import {IntegrationBaseTest} from "../utils/IntegrationBaseTest.sol";
 import {AaveEthController} from "controller/aave/AaveEthController.sol";
 import {ILendingPoolAddressProvider} from "./interface/ILendingPoolAddressProvider.sol";
 
-contract AaveEthIntegrationTest is IntegrationTestBase {
+contract AaveEthIntegrationTest is IntegrationBaseTest {
     address account;
     address user = cheats.addr(1);
 

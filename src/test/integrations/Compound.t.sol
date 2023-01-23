@@ -5,14 +5,14 @@ import {Errors} from "../../utils/Errors.sol";
 import {IERC20} from "../../interface/tokens/IERC20.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 import {CTokenOracle} from "oracle/compound/CTokenOracle.sol";
-import {IntegrationTestBase} from "./utils/IntegrationTestBase.sol";
+import {IntegrationBaseTest} from "./utils/IntegrationBaseTest.sol";
 import {CompoundController} from "controller/compound/CompoundController.sol";
 
 interface ICERC20 {
     function exchangeRateCurrent() external returns (uint);
 }
 
-contract CompoundIntegrationTest is IntegrationTestBase {
+contract CompoundIntegrationTest is IntegrationBaseTest {
     address account;
     address user = cheats.addr(1);
 

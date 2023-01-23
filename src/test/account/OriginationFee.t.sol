@@ -2,7 +2,7 @@
 pragma solidity ^0.8.17;
 
 import "forge-std/Test.sol";
-import {TestBase} from "../utils/TestBase.sol";
+import {BaseTest} from "../utils/BaseTest.sol";
 import {FixedPointMathLib} from "solmate/utils/FixedPointMathLib.sol";
 import {IAccount} from "../../interface/core/IAccount.sol";
 
@@ -10,7 +10,7 @@ import {LEther} from "../../tokens/LEther.sol";
 import {LToken} from "../../tokens/LToken.sol";
 import {Proxy} from "../../proxy/Proxy.sol";
 
-contract OriginationFeeTests is TestBase {
+contract OriginationFeeTests is BaseTest {
     using FixedPointMathLib for uint96;
     using FixedPointMathLib for uint;
 
