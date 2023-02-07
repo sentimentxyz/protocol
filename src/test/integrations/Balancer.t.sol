@@ -170,7 +170,7 @@ contract BalancerIntegrationTest is IntegrationBaseTest {
         // Assert
         assertEq(IERC20(balancerWeightedPool).balanceOf(account), 0);
         assertGt(account.balance, 0);
-        assertEq(IAccount(account).getAssets().length, 1);
+        assertEq(IAccount(account).getAssets().length, 0);
     }
 
     function testVaultExitStablePool() public {

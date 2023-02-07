@@ -65,6 +65,16 @@ contract AccountTest is BaseTest {
         assertFalse(account.hasAsset(token));
     }
 
+    function testRemoveNonExistingAsset(address token) public {
+        // Test
+        cheats.prank(address(accountManager));
+        account.removeAsset(token);
+
+        // Assert
+        assertEq(0, account.getAssets().length);
+        assertFalse(account.hasAsset(token));
+    }
+
     function testRemoveAssetError(address token) public {
         // Test
         cheats.expectRevert(Errors.AccountManagerOnly.selector);

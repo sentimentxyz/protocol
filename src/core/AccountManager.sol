@@ -314,10 +314,10 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
             data
         );
         if (!isAllowed) revert Errors.FunctionCallRestricted();
-        _updateTokensIn(account, tokensIn);
         (bool success, ) = IAccount(account).exec(target, amt, data);
         if (!success)
             revert Errors.AccountInteractionFailure(account, target, amt, data);
+        _updateTokensIn(account, tokensIn);
         _updateTokensOut(account, tokensOut);
         if (IAccount(account).getAssets().length > assetCap + 1)
             revert Errors.MaxAssetCap();
@@ -358,8 +358,9 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     {
         uint256 tokensInLen = tokensIn.length;
         for (uint256 i; i < tokensInLen; ++i) {
-            if (IAccount(account).hasAsset(tokensIn[i]) == false)
-                IAccount(account).addAsset(tokensIn[i]);
+            address token = tokensIn[i];
+            if (IAccount(account).hasAsset(token) == false && IERC20(token).balanceOf(account) > 0)
+                IAccount(account).addAsset(token);
         }
     }
 
@@ -368,7 +369,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     {
         uint256 tokensOutLen = tokensOut.length;
         for (uint256 i; i < tokensOutLen; ++i) {
-            if (tokensOut[i].balanceOf(account) == 0)
+            if (IAccount(account).hasAsset(tokensOut[i]) == true && tokensOut[i].balanceOf(account) == 0)
                 IAccount(account).removeAsset(tokensOut[i]);
         }
     }
