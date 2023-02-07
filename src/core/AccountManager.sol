@@ -369,7 +369,7 @@ contract AccountManager is ReentrancyGuard, Pausable, IAccountManager {
     {
         uint256 tokensOutLen = tokensOut.length;
         for (uint256 i; i < tokensOutLen; ++i) {
-            if (tokensOut[i].balanceOf(account) == 0)
+            if (IAccount(account).hasAsset(tokensOut[i]) == true && tokensOut[i].balanceOf(account) == 0)
                 IAccount(account).removeAsset(tokensOut[i]);
         }
     }
