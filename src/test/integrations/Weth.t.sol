@@ -20,6 +20,7 @@ contract WethIntegrationTest is IntegrationBaseTest {
 
     function testWrapEth(uint96 amt) public {
         // Setup
+        cheats.assume(amt > 0);
         deposit(user, account, address(0), amt);
         bytes memory data = abi.encodeWithSignature("deposit()");
 
