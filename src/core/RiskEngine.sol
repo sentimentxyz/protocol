@@ -75,7 +75,6 @@ contract RiskEngine is Ownable, IRiskEngine {
         uint amt
     )
         external
-        view
         returns (bool)
     {
         uint borrowValue = _valueInWei(token, amt);
@@ -101,7 +100,6 @@ contract RiskEngine is Ownable, IRiskEngine {
         uint amt
     )
         external
-        view
         returns (bool)
     {
         if (IAccount(account).hasNoDebt()) return true;
@@ -118,7 +116,7 @@ contract RiskEngine is Ownable, IRiskEngine {
          @param account Address of account
         @return isAccountHealthy Returns whether an account is healthy or not.
     */
-    function isAccountHealthy(address account) external view returns (bool) {
+    function isAccountHealthy(address account) external returns (bool) {
         return _isAccountHealthy(
             _getBalance(account),
             _getBorrows(account)
@@ -130,7 +128,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         @param account Address of account
         @return balance Total account balance
     */
-    function getBalance(address account) external view returns (uint) {
+    function getBalance(address account) external returns (uint) {
         return _getBalance(account);
     }
 
@@ -139,7 +137,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         @param account Address of account
         @return borrows Total account borrows
     */
-    function getBorrows(address account) external view returns (uint) {
+    function getBorrows(address account) external returns (uint) {
         return _getBorrows(account);
     }
 
@@ -147,7 +145,7 @@ contract RiskEngine is Ownable, IRiskEngine {
     /*                             Internal Functions                             */
     /* -------------------------------------------------------------------------- */
 
-    function _getBalance(address account) internal view returns (uint) {
+    function _getBalance(address account) internal returns (uint) {
         address[] memory assets = IAccount(account).getAssets();
         uint assetsLen = assets.length;
         uint totalBalance;
@@ -160,7 +158,7 @@ contract RiskEngine is Ownable, IRiskEngine {
         return totalBalance + account.balance;
     }
 
-    function _getBorrows(address account) internal view returns (uint) {
+    function _getBorrows(address account) internal returns (uint) {
         if (IAccount(account).hasNoDebt()) return 0;
         address[] memory borrows = IAccount(account).getBorrows();
         uint borrowsLen = borrows.length;
@@ -177,7 +175,6 @@ contract RiskEngine is Ownable, IRiskEngine {
 
     function _valueInWei(address token, uint amt)
         internal
-        view
         returns (uint)
     {
         return oracle.getPrice(token)
