@@ -31,7 +31,7 @@ contract CapAssetsArbiIntegrationTest is Test {
 
     function setUp() public {
         newAccountManager = new AccountManager();
-        changePrank(0x92f473Ef0Cd07080824F5e6B0859ac49b3AEb215);
+        startHoax(0x92f473Ef0Cd07080824F5e6B0859ac49b3AEb215);
         accountManagerProxy.changeImplementation(address(newAccountManager));
         accountManager.setAssetCap(2);
     }
