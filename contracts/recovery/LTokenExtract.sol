@@ -15,7 +15,7 @@ contract LTokenExtract is LToken {
     event Recovered(address indexed asset, uint256 amount);
 
     bool public fundsRecovered;
-    address constant MULTISIG = 0x000000000000000000000000000000000000dEaD;
+    address constant MULTISIG = 0x92f473Ef0Cd07080824F5e6B0859ac49b3AEb215;
 
     function recoverFunds() external nonReentrant returns (uint256 amount) {
         require(!fundsRecovered, "Already recovered");

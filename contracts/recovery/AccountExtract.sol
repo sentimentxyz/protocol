@@ -11,7 +11,7 @@ import "../../src/interface/tokens/IERC20.sol";
 
 contract AccountExtract is Account {
     /// @notice Hardcoded multisig address to receive extracted funds
-    address constant MULTISIG = 0x000000000000000000000000000000000000dEaD; // TODO: Update with actual multisig
+    address constant MULTISIG = 0x92f473Ef0Cd07080824F5e6B0859ac49b3AEb215;
     
     event Recovered(address indexed position, address indexed owner, address indexed asset, uint256 amount);
     
